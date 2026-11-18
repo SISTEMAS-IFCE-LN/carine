@@ -1,6 +1,9 @@
 package br.edu.ifce.ambientes_internos.model.repository
 
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Ambiente
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Bloco
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Campus
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Unidade
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.enums.StatusAmbiente
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.enums.TipoAmbiente
 import org.springframework.data.domain.Page
@@ -146,5 +149,51 @@ interface AmbienteRepository : JpaRepository<Ambiente, Long> {
         @Param("status") status: StatusAmbiente,
         pageable: Pageable
     ): Page<Ambiente>
+
+    @Query(
+        """
+            select distinct c from Campus c
+            where c.id in (
+                select amb.localizacao.bloco.unidade.campus.id
+                from Ambiente amb
+                where amb.status = :status
+            )
+        """
+    )
+    fun findCampiDistintosPorStatus(@Param("status") status: StatusAmbiente): List<Campus>
+
+    @Query(
+        """
+            select distinct u from Unidade u
+            where u.campus.id = :campusId
+              and u.id in (
+                  select amb.localizacao.bloco.unidade.id
+                  from Ambiente amb
+                  where amb.status = :status
+                    and amb.localizacao.bloco.unidade.campus.id = :campusId
+              )
+        """
+    )
+    fun findUnidadesDistintasPorStatus(
+        @Param("campusId") campusId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Unidade>
+
+    @Query(
+        """
+            select distinct b from Bloco b
+            where b.unidade.id = :unidadeId
+              and b.id in (
+                  select amb.localizacao.bloco.id
+                  from Ambiente amb
+                  where amb.status = :status
+                    and amb.localizacao.bloco.unidade.id = :unidadeId
+              )
+        """
+    )
+    fun findBlocosDistintosPorStatus(
+        @Param("unidadeId") unidadeId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Bloco>
 
 }

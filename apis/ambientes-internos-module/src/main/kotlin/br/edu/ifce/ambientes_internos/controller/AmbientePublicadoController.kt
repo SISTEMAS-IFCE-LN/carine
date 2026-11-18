@@ -1,7 +1,11 @@
 package br.edu.ifce.ambientes_internos.controller
 
 import br.edu.ifce.ambientes_internos.model.application.interfaces.IAmbientePublicadoUseCases
+import br.edu.ifce.ambientes_internos.model.application.interfaces.ICatalogoPublicadoUseCases
 import br.edu.ifce.ambientes_internos.model.dto.ambiente.AmbienteRes
+import br.edu.ifce.ambientes_internos.model.dto.ambiente.BlocoRes
+import br.edu.ifce.ambientes_internos.model.dto.ambiente.CampusRes
+import br.edu.ifce.ambientes_internos.model.dto.ambiente.UnidadeRes
 import br.edu.ifce.ambientes_internos.model.dto.esquadria.EsquadriasAmbientesPaginadosRes
 import br.edu.ifce.common.config.ApiPaths.AMBIENTES_PUBLICADOS_PATH
 import br.edu.ifce.common.config.MsgsSpringValidation.MSG_LISTA_VAZIA
@@ -20,8 +24,25 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(AMBIENTES_PUBLICADOS_PATH)
 class AmbientePublicadoController(
-    private val useCasesPublicado: IAmbientePublicadoUseCases
+    private val useCasesPublicado: IAmbientePublicadoUseCases,
+    private val catalogoPublicadoUseCases: ICatalogoPublicadoUseCases,
 ) : BaseController<AmbienteRes>(useCasesPublicado) {
+
+    @GetMapping("/campus")
+    fun listarCampusPublicado(): ResponseEntity<List<CampusRes>> =
+        ResponseEntity.ok(catalogoPublicadoUseCases.listarCampusPublicado())
+
+    @GetMapping("/unidades")
+    fun listarUnidadesPublicado(
+        @RequestParam @Positive(message = MSG_POSITIVO) campusId: Long,
+    ): ResponseEntity<List<UnidadeRes>> =
+        ResponseEntity.ok(catalogoPublicadoUseCases.listarUnidadesPublicado(campusId))
+
+    @GetMapping("/blocos")
+    fun listarBlocosPublicado(
+        @RequestParam @Positive(message = MSG_POSITIVO) unidadeId: Long,
+    ): ResponseEntity<List<BlocoRes>> =
+        ResponseEntity.ok(catalogoPublicadoUseCases.listarBlocosPublicado(unidadeId))
 
     @GetMapping("/esquadrias")
     fun listarEsquadriasAmbientes(

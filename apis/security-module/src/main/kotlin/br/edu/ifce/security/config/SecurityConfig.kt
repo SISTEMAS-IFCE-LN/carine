@@ -131,7 +131,10 @@ class SecurityConfig(
                     AMBIENTES_PUBLICADOS_PATH,
                     "${AMBIENTES_PUBLICADOS_PATH}/tipo",
                     "${AMBIENTES_PUBLICADOS_PATH}/nome",
-                    "${AMBIENTES_PUBLICADOS_PATH}/localizacao"
+                    "${AMBIENTES_PUBLICADOS_PATH}/localizacao",
+                    "${AMBIENTES_PUBLICADOS_PATH}/campus",
+                    "${AMBIENTES_PUBLICADOS_PATH}/unidades",
+                    "${AMBIENTES_PUBLICADOS_PATH}/blocos"
                 ).permitAll()
                 auth.requestMatchers(
                     HttpMethod.GET,

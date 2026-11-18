@@ -34,7 +34,20 @@ class TestSecurityConfig {
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
-                auth.requestMatchers("/api/ambientes/publicados/**").permitAll()
+                auth.requestMatchers(
+                    HttpMethod.GET,
+                    "/api/ambientes/publicados",
+                    "/api/ambientes/publicados/tipo",
+                    "/api/ambientes/publicados/nome",
+                    "/api/ambientes/publicados/localizacao",
+                    "/api/ambientes/publicados/campus",
+                    "/api/ambientes/publicados/unidades",
+                    "/api/ambientes/publicados/blocos"
+                ).permitAll()
+                auth.requestMatchers(
+                    HttpMethod.GET,
+                    "/api/ambientes/publicados/**"
+                ).hasAuthority("ROLE_COLABORADOR")
                 auth.requestMatchers("/api/ambientes/nao-publicados/**").hasAuthority("ROLE_GESTOR_SISTEMA")
                 auth.requestMatchers("/api/ambientes/validacao/**").hasAuthority("ROLE_VALIDADOR")
                 auth.requestMatchers(
