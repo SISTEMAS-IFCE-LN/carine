@@ -42,7 +42,8 @@ class TestSecurityConfig {
                     "/api/ambientes/publicados/localizacao",
                     "/api/ambientes/publicados/campus",
                     "/api/ambientes/publicados/unidades",
-                    "/api/ambientes/publicados/blocos"
+                    "/api/ambientes/publicados/blocos",
+                    "/api/ambientes/publicados/blocos/*/resumo"
                 ).permitAll()
                 auth.requestMatchers(
                     HttpMethod.GET,

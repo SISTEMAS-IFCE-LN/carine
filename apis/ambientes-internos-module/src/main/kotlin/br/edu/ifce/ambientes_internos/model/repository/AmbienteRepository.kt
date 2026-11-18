@@ -196,4 +196,18 @@ interface AmbienteRepository : JpaRepository<Ambiente, Long> {
         @Param("status") status: StatusAmbiente,
     ): List<Bloco>
 
+    @Query(
+        """
+            select distinct a from Ambiente a
+            join fetch a.localizacao l
+            join fetch l.bloco b
+            left join fetch a.geometrias
+            where a.status = :status and b.id = :blocoId
+        """
+    )
+    fun findAllByBlocoAndStatus(
+        @Param("blocoId") blocoId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Ambiente>
+
 }

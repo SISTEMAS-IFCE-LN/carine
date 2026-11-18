@@ -4,6 +4,7 @@ import br.edu.ifce.ambientes_internos.model.application.interfaces.IAmbientePubl
 import br.edu.ifce.ambientes_internos.model.application.interfaces.ICatalogoPublicadoUseCases
 import br.edu.ifce.ambientes_internos.model.dto.ambiente.AmbienteRes
 import br.edu.ifce.ambientes_internos.model.dto.ambiente.BlocoRes
+import br.edu.ifce.ambientes_internos.model.dto.ambiente.BlocoResumoRes
 import br.edu.ifce.ambientes_internos.model.dto.ambiente.CampusRes
 import br.edu.ifce.ambientes_internos.model.dto.ambiente.UnidadeRes
 import br.edu.ifce.ambientes_internos.model.dto.esquadria.EsquadriasAmbientesPaginadosRes
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -43,6 +45,12 @@ class AmbientePublicadoController(
         @RequestParam @Positive(message = MSG_POSITIVO) unidadeId: Long,
     ): ResponseEntity<List<BlocoRes>> =
         ResponseEntity.ok(catalogoPublicadoUseCases.listarBlocosPublicado(unidadeId))
+
+    @GetMapping("/blocos/{blocoId}/resumo")
+    fun obterResumoBloco(
+        @PathVariable @Positive(message = MSG_POSITIVO) blocoId: Long,
+    ): ResponseEntity<BlocoResumoRes> =
+        ResponseEntity.ok(catalogoPublicadoUseCases.obterResumoBloco(blocoId))
 
     @GetMapping("/esquadrias")
     fun listarEsquadriasAmbientes(
