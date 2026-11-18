@@ -141,6 +141,38 @@ interface AmbienteRepository : JpaRepository<Ambiente, Long> {
         """
             select a from Ambiente a
             where a.status = :status
+            and (:filtrarCampus = false or a.localizacao.bloco.unidade.campus.id = :campusId)
+            and (:filtrarUnidade = false or a.localizacao.bloco.unidade.id = :unidadeId)
+            and (:filtrarBloco = false or a.localizacao.bloco.id = :blocoId)
+            and (:andar is null or a.localizacao.andar = :andar)
+            and a.tipo in :tipos
+        """
+    )
+    fun findByLocalizacaoAndTiposAndStatus(
+        @Param("campusId") campusId: Long?,
+        @Param("unidadeId") unidadeId: Long?,
+        @Param("blocoId") blocoId: Long?,
+        @Param("filtrarCampus") filtrarCampus: Boolean,
+        @Param("filtrarUnidade") filtrarUnidade: Boolean,
+        @Param("filtrarBloco") filtrarBloco: Boolean,
+        @Param("andar") andar: Int?,
+        @Param("tipos") tipos: Set<TipoAmbiente>,
+        @Param("status") status: StatusAmbiente,
+        pageable: Pageable,
+    ): Page<Ambiente>
+
+    @EntityGraph(
+        attributePaths = [
+            "localizacao",
+            "localizacao.bloco",
+            "localizacao.bloco.unidade",
+            "localizacao.bloco.unidade.campus"
+        ]
+    )
+    @Query(
+        """
+            select a from Ambiente a
+            where a.status = :status
             and a.tipo in :tipos
         """
     )

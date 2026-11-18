@@ -4,5 +4,6 @@ data class LocalizacaoPesquisaReq(
     val campusId: Long?,
     val unidadeId: Long?,
     val blocoId: Long?,
-    val andar: Int?
+    val andar: Int?,
+    val tipo: String? = null,
 )

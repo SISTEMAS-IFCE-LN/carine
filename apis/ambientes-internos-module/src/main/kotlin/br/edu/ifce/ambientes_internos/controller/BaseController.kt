@@ -69,9 +69,15 @@ abstract class BaseController<RES : Any>(protected val useCases: IAmbienteUseCas
             message = "O andar deve ser maior ou igual a 0."
         )
         andar: Int?,
+        @RequestParam(required = false)
+        @Size(
+            max = 50,
+            message = MSG_MAX_CARACTERES
+        )
+        tipo: String?,
         pageable: Pageable
     ): ResponseEntity<AmbientesBasicosPaginadosRes> {
-        val localizacao = LocalizacaoPesquisaReq(campusId, unidadeId, blocoId, andar)
+        val localizacao = LocalizacaoPesquisaReq(campusId, unidadeId, blocoId, andar, tipo)
         return ResponseEntity.ok(useCases.listarAmbientesPorLocalizacao(localizacao, pageable))
     }
 
