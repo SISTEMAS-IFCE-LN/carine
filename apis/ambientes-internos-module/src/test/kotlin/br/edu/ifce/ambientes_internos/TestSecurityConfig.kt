@@ -55,7 +55,7 @@ class TestSecurityConfig {
                     "/api/campus",
                     "/api/unidades",
                     "/api/blocos"
-                ).permitAll()
+                ).hasAnyAuthority("ROLE_GESTOR_SISTEMA", "ROLE_VALIDADOR")
                 auth.requestMatchers("/auth/**").permitAll()
                 auth.requestMatchers("/actuator/health").permitAll()
                 auth.anyRequest().denyAll()

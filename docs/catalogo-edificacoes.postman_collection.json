@@ -8,11 +8,21 @@
   },
   "item": [
     {
-      "name": "publico",
+      "name": "referencias",
       "item": [
         {
-          "name": "listarCampus (publico)",
+          "name": "listarCampus",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -29,8 +39,18 @@
           "response": []
         },
         {
-          "name": "listarUnidadesPorCampus (publico)",
+          "name": "listarUnidadesPorCampus",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -53,8 +73,18 @@
           "response": []
         },
         {
-          "name": "listarBlocosPorUnidade (publico)",
+          "name": "listarBlocosPorUnidade",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -76,7 +106,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Referências administrativas de localização: exigem ROLE_GESTOR_SISTEMA ou ROLE_VALIDADOR."
     },
     {
       "name": "nao-publicados",

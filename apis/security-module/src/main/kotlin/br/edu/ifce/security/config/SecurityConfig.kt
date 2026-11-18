@@ -144,11 +144,23 @@ class SecurityConfig(
                     HttpMethod.GET,
                     "/callback.html",
                     "/failure.html",
-                    "/actuator/health",
-                    CAMPUS_PATH,
-                    UNIDADES_PATH,
-                    BLOCOS_PATH
+                    "/actuator/health"
                 ).permitAll()
+                auth.customRequestMatchers(
+                    listOf(HttpMethod.GET),
+                    CAMPUS_PATH,
+                    listOf(Perfil.ROLE_GESTOR_SISTEMA.name, Perfil.ROLE_VALIDADOR.name)
+                )
+                auth.customRequestMatchers(
+                    listOf(HttpMethod.GET),
+                    UNIDADES_PATH,
+                    listOf(Perfil.ROLE_GESTOR_SISTEMA.name, Perfil.ROLE_VALIDADOR.name)
+                )
+                auth.customRequestMatchers(
+                    listOf(HttpMethod.GET),
+                    BLOCOS_PATH,
+                    listOf(Perfil.ROLE_GESTOR_SISTEMA.name, Perfil.ROLE_VALIDADOR.name)
+                )
                 auth.anyRequest().denyAll()
             }
             .oauth2ResourceServer { rs ->
@@ -197,5 +209,15 @@ fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMat
 ) {
     methods.forEach { method ->
         this.requestMatchers(method, pattern).hasAuthority(authority)
+    }
+}
+
+fun AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry.customRequestMatchers(
+    methods: List<HttpMethod>,
+    pattern: String,
+    authorities: List<String>
+) {
+    methods.forEach { method ->
+        this.requestMatchers(method, pattern).hasAnyAuthority(*authorities.toTypedArray())
     }
 }

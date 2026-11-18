@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -35,9 +36,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestSecurityConfig::class)
+@WithMockUser(authorities = ["ROLE_GESTOR_SISTEMA"])
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-// sem @WithMockUser de propósito: o endpoint é público
-@DisplayName("Testes de integração do endpoint público de campus")
+@DisplayName("Testes de integração do endpoint administrativo de campus")
 class CampusControllerIntegrationTest {
 
     @Autowired
@@ -48,14 +49,6 @@ class CampusControllerIntegrationTest {
 
     @Test
     @Order(1)
-    fun `deve responder sem Authorization`() {
-        mockMvc.perform(get("/api/campus"))
-            .andExpect(status().isOk)
-            .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-    }
-
-    @Test
-    @Order(2)
     fun `deve retornar lista vazia quando nao houver campi`() {
         mockMvc.perform(get("/api/campus"))
             .andExpect(status().isOk)
@@ -63,7 +56,7 @@ class CampusControllerIntegrationTest {
     }
 
     @Test
-    @Order(3)
+    @Order(2)
     fun `deve listar campi em ordem natural sem campos extras`() {
         repoCampus.saveAllAndFlush(listOf(Campus("UEPE"), Campus("Cidade Alta")))
 
