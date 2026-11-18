@@ -47,7 +47,7 @@ describe('UnidadePage', () => {
 
         expect(screen.getByRole('link', {name: 'Abrir bloco BLOCO 2'})).toHaveAttribute('href', '/bloco/12')
         expect(screen.getByRole('link', {name: 'Ver todos os ambientes da unidade'}))
-            .toHaveAttribute('href', '/ambientes/publicados?unidadeId=3')
+            .toHaveAttribute('href', '/ambientes/publicados?campusId=7&unidadeId=3')
         expect(screen.getByRole('link', {name: 'LIMOEIRO DO NORTE'})).toHaveAttribute('href', '/campus/7')
         const breadcrumb = screen.getByRole('navigation', {name: 'breadcrumb'})
         expect(within(breadcrumb).getByText('CIDADE ALTA')).toHaveAttribute('aria-current', 'page')

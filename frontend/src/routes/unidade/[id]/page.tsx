@@ -54,7 +54,7 @@ export function UnidadePage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <h1 className="text-2xl font-bold">{estado.unidade?.nome ?? 'Unidade'}</h1>
                 <Link
-                    to={rotaListagemPublicados({unidadeId: id})}
+                    to={rotaListagemPublicados({campusId: estado.campus?.id, unidadeId: id})}
                     className={buttonVariants({variant: 'outline'})}
                 >
                     Ver todos os ambientes da unidade
