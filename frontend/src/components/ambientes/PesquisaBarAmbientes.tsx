@@ -123,7 +123,7 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
     initial.tipo !== ''
 
   const camposLocalizacao = (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
       <CampoReferencia
         label="Campus"
         value={{ id: local.campusId, nome: null }}
@@ -247,11 +247,12 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
           variant="outline"
           onClick={handleAplicar}
           disabled={tipoFiltro === TipoFiltro.NENHUM}
+          className="min-h-11 md:min-h-0"
         >
           Aplicar
         </Button>
         {temFiltros && (
-          <Button variant="ghost" onClick={handleLimpar}>
+          <Button variant="ghost" onClick={handleLimpar} className="min-h-11 md:min-h-0">
             Limpar
           </Button>
         )}

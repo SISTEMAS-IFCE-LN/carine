@@ -8,6 +8,105 @@
   },
   "item": [
     {
+      "name": "publico",
+      "item": [
+        {
+          "name": "listarCampusPublicados (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/campus",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "campus"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listarUnidadesPublicadas (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/unidades?campusId=1",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "unidades"
+              ],
+              "query": [
+                {
+                  "key": "campusId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listarBlocosPublicados (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/blocos?unidadeId=1",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "blocos"
+              ],
+              "query": [
+                {
+                  "key": "unidadeId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "obterResumoBlocoPublicado (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/blocos/1/resumo",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "blocos",
+                "1",
+                "resumo"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "referencias",
       "item": [
         {

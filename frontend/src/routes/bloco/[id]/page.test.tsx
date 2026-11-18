@@ -80,11 +80,11 @@ describe('BlocoPage', () => {
     it('linka os tipos com a contagem e o rótulo exato', () => {
         renderPage()
 
-        const urlSala = hrefDoLink('Ver 8 ambiente(s) do tipo Sala de Aula')
+        const urlSala = hrefDoLink('Ver 8 ambientes do tipo Sala de Aula')
         expect(urlSala.searchParams.get('blocoId')).toBe('12')
         expect(urlSala.searchParams.get('tipo')).toBe('Sala de Aula')
 
-        const urlLab = hrefDoLink('Ver 2 ambiente(s) do tipo Laboratório')
+        const urlLab = hrefDoLink('Ver 2 ambientes do tipo Laboratório')
         expect(urlLab.searchParams.get('tipo')).toBe('Laboratório')
     })
 
@@ -100,6 +100,20 @@ describe('BlocoPage', () => {
 
         const urlSegundo = hrefDoLink('Ver ambientes do andar 2')
         expect(urlSegundo.searchParams.get('andar')).toBe('2')
+    })
+
+    it('usa singular quando o total é 1', () => {
+        vi.mocked(useBlocoResumo).mockReturnValue(resultado({
+            ...RESUMO,
+            tipos: [{tipo: 'Auditório', total: 1}],
+            andares: [{andar: 1, total: 1}],
+        }))
+
+        renderPage()
+
+        expect(hrefDoLink('Ver 1 ambiente do tipo Auditório').searchParams.get('tipo')).toBe('Auditório')
+        expect(screen.getByRole('link', {name: 'Ver ambientes do andar 1'})).toBeInTheDocument()
+        expect(screen.getAllByText('1 ambiente')).toHaveLength(2)
     })
 
     it('exibe estado de bloco não encontrado no 404', () => {

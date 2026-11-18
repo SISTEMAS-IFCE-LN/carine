@@ -92,7 +92,7 @@ export function BlocoPage() {
                             <CardLink
                                 key={item.tipo}
                                 to={rotaListagemPublicados({blocoId: resumo.id, tipo: item.tipo})}
-                                ariaLabel={`Ver ${item.total} ambiente(s) do tipo ${item.tipo}`}
+                                ariaLabel={`Ver ${item.total} ambiente${item.total === 1 ? '' : 's'} do tipo ${item.tipo}`}
                                 titulo={item.tipo}
                                 descricao={`${item.total} ambiente${item.total === 1 ? '' : 's'}`}
                             />
