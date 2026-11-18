@@ -381,8 +381,13 @@ docker compose up -d --build api frontend
 | Objetos parciais após falha                   | Migration não transacional                | Limpar manualmente os objetos; corrigir a migration; reexecutar.                                             |
 | API falha com `Schema-validation`             | Entidades divergem do schema              | Ajustar migration/entidades; validar em PostgreSQL 17.                                                       |
 | `backup` falha com permissão                  | `db/backup/` sem escrita para o container | Ajustar permissões do diretório; verificar usuário do container.                                             |
+| `backup` falha com `$'\r'`/`not found`        | `db/backup.sh` com CRLF (Windows/WSL)     | Converter para LF (`sed -i 's/\r$//' db/*.sh`) ou refazer o checkout respeitando `.gitattributes`.           |
 | `migrate` não reexecutou                      | Container one-shot já concluído           | Usar `rm -f` antes do `up` ou `docker compose run --rm --no-deps migrate`.                                   |
 | Volume apagado                                | `docker compose down -v`                  | Restaurar o último dump; recriar o volume.                                                                   |
+
+> Em WSL/Windows, o repositório fixa `*.sh`, `Dockerfile`, `docker-compose.yml`, `*.conf`, `*.yml`/`*.yaml` e `*.sql`
+> em LF via `.gitattributes`. Se um script já estiver com CRLF na working tree, converta-o antes de subir a stack:
+> `sed -i 's/\r$//' db/backup.sh db/verify.sh`.
 
 ---
 

@@ -1,0 +1,13 @@
+# Scripts e arquivos consumidos por containers Linux devem permanecer em LF,
+# mesmo em checkouts Windows com core.autocrlf=true. CRLF em *.sh quebra o
+# /bin/sh (ex.: "$'\r': not found") e impede backup/migrations.
+*.sh text eol=lf
+mvnw text eol=lf
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.conf text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sql text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
