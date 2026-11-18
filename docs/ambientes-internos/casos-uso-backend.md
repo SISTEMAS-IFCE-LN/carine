@@ -20,12 +20,16 @@ A seguir estão descritos os principais casos de uso relacionados ao gerenciamen
         2. O Sistema recupera a lista de ambientes que correspondem ao nome fornecido.
         3. Repete os passos 3 e 4 do FP1.
     * **FP3 - Filtrar por Localização:**
-        1. O Validador realiza uma requisição `GET` ao endpoint `/api/ambientes/validacao/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}`.
+        1. O Validador realiza uma requisição `GET` ao endpoint `/api/ambientes/validacao/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}&tipo={tipo}`; o `tipo` é opcional e combinável com os campos de localização (detalhado no FP5).
         2. O Sistema recupera a lista de ambientes que correspondem aos IDs fornecidos. Os IDs são opcionais, mas pelo menos um campo de localização deve ser enviado; se nenhum campo for enviado, o Sistema retorna `400 Bad Request`. ID inexistente, ou unidade/bloco fora do pai informado, resulta em página vazia — a consulta filtra por IDs através de `bloco.unidade.campus`, pois `Localizacao` não tem colunas `campus`/`unidade`.
         3. Repete os passos 3 e 4 do FP1.
     * **FP4 - Filtrar por Tipo:**
         1. O Validador realiza uma requisição `GET` ao endpoint `/api/ambientes/validacao/tipo?tipo={tipo}`.
-        2. O Sistema recupera a lista de ambientes que correspondem ao tipo fornecido.
+        2. O Sistema recupera a lista de ambientes cujo tipo corresponde ao informado por **igualdade normalizada** com o nome técnico do enum **ou** o rótulo exibido (ex.: `SALA_AULA` ou `Sala de Aula`), sem correspondência parcial. O parâmetro é obrigatório e não pode ser em branco (`400 Bad Request`); tipo sem correspondência resulta em página vazia. No `/localizacao` (FP5), `tipo` em branco equivale a omitido.
+        3. Repete os passos 3 e 4 do FP1.
+    * **FP5 - Filtrar por Localização e Tipo (combinado):**
+        1. O Validador realiza uma requisição `GET` ao endpoint `/api/ambientes/validacao/localizacao?blocoId={blocoId}&tipo={tipo}`.
+        2. O Sistema recupera os ambientes que atendem simultaneamente aos campos de localização e ao tipo, com o mesmo match exato normalizado do FP4. Continua obrigatório enviar ao menos um campo de localização; `tipo` sozinho em `/localizacao` retorna `400 Bad Request` (o filtro só por tipo usa o FP4).
         3. Repete os passos 3 e 4 do FP1.
 * **Fluxos Alternativos:**
     * **FA01 - Nenhum ambiente encontrado:** Se não houver ambientes aguardando validação, o Sistema exibe uma mensagem indicando que a lista está vazia.
@@ -103,12 +107,16 @@ A seguir estão descritos os principais casos de uso relacionados ao gerenciamen
         2. O Sistema recupera a lista de ambientes que correspondem ao nome fornecido.
         3. Repete os passos 3 e 4 do FP1.
     * **FP3 - Filtrar por Localização:**
-        1. O Gestor realiza uma requisição `GET` ao endpoint `/api/ambientes/nao-publicados/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}`.
+        1. O Gestor realiza uma requisição `GET` ao endpoint `/api/ambientes/nao-publicados/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}&tipo={tipo}`; o `tipo` é opcional e combinável com os campos de localização (detalhado no FP5).
         2. O Sistema recupera a lista de ambientes que correspondem aos IDs fornecidos. Os IDs são opcionais, mas pelo menos um campo de localização deve ser enviado; se nenhum campo for enviado, o Sistema retorna `400 Bad Request`. ID inexistente, ou unidade/bloco fora do pai informado, resulta em página vazia — a consulta filtra por IDs através de `bloco.unidade.campus`, pois `Localizacao` não tem colunas `campus`/`unidade`.
         3. Repete os passos 3 e 4 do FP1.
     * **FP4 - Filtrar por Tipo:**
         1. O Gestor realiza uma requisição `GET` ao endpoint `/api/ambientes/nao-publicados/tipo?tipo={tipo}`.
-        2. O Sistema recupera a lista de ambientes que correspondem ao tipo fornecido.
+        2. O Sistema recupera a lista de ambientes cujo tipo corresponde ao informado por **igualdade normalizada** com o nome técnico do enum **ou** o rótulo exibido (ex.: `SALA_AULA` ou `Sala de Aula`), sem correspondência parcial. O parâmetro é obrigatório e não pode ser em branco (`400 Bad Request`); tipo sem correspondência resulta em página vazia. No `/localizacao` (FP5), `tipo` em branco equivale a omitido.
+        3. Repete os passos 3 e 4 do FP1.
+    * **FP5 - Filtrar por Localização e Tipo (combinado):**
+        1. O Gestor realiza uma requisição `GET` ao endpoint `/api/ambientes/nao-publicados/localizacao?blocoId={blocoId}&tipo={tipo}`.
+        2. O Sistema recupera os ambientes que atendem simultaneamente aos campos de localização e ao tipo, com o mesmo match exato normalizado do FP4. Continua obrigatório enviar ao menos um campo de localização; `tipo` sozinho em `/localizacao` retorna `400 Bad Request` (o filtro só por tipo usa o FP4).
         3. Repete os passos 3 e 4 do FP1.
 * **Fluxos Alternativos:**
     * **FA01 - Nenhum ambiente encontrado:** Se não houver ambientes não publicados, o Sistema exibe uma mensagem indicando que a lista está vazia.
@@ -469,12 +477,16 @@ A seguir estão descritos os principais casos de uso relacionados ao gerenciamen
         2. O Sistema recupera a lista de ambientes que correspondem ao nome fornecido.
         3. Repete os passos 3 e 4 do FP1.
     * **FP3 - Filtrar por Localização:**
-        1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}`.
+        1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/localizacao?campusId={campusId}&unidadeId={unidadeId}&blocoId={blocoId}&andar={andar}&tipo={tipo}`; o `tipo` é opcional e combinável com os campos de localização (detalhado no FP5).
         2. O Sistema recupera a lista de ambientes que correspondem aos IDs fornecidos. Os IDs são opcionais, mas pelo menos um campo de localização deve ser enviado; se nenhum campo for enviado, o Sistema retorna `400 Bad Request`. ID inexistente, ou unidade/bloco fora do pai informado, resulta em página vazia — a consulta filtra por IDs através de `bloco.unidade.campus`, pois `Localizacao` não tem colunas `campus`/`unidade`.
         3. Repete os passos 3 e 4 do FP1.
     * **FP4 - Filtrar por Tipo:**
         1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/tipo?tipo={tipo}`.
-        2. O Sistema recupera a lista de ambientes que correspondem ao tipo fornecido.
+        2. O Sistema recupera a lista de ambientes cujo tipo corresponde ao informado por **igualdade normalizada** com o nome técnico do enum **ou** o rótulo exibido (ex.: `SALA_AULA` ou `Sala de Aula`), sem correspondência parcial. O parâmetro é obrigatório e não pode ser em branco (`400 Bad Request`); tipo sem correspondência resulta em página vazia. No `/localizacao` (FP5), `tipo` em branco equivale a omitido.
+        3. Repete os passos 3 e 4 do FP1.
+    * **FP5 - Filtrar por Localização e Tipo (combinado):**
+        1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/localizacao?blocoId={blocoId}&tipo={tipo}`.
+        2. O Sistema recupera os ambientes que atendem simultaneamente aos campos de localização e ao tipo, com o mesmo match exato normalizado do FP4. Continua obrigatório enviar ao menos um campo de localização; `tipo` sozinho em `/localizacao` retorna `400 Bad Request` (o filtro só por tipo usa o FP4).
         3. Repete os passos 3 e 4 do FP1.
 * **Fluxos Alternativos:**
     * **FA01 - Nenhum ambiente encontrado:** Se não houver ambientes publicados, o Sistema exibe uma mensagem indicando que a lista está vazia.
@@ -482,9 +494,9 @@ A seguir estão descritos os principais casos de uso relacionados ao gerenciamen
 
 ### **UC31: Consultar Referências de Localização**
 
-* **Descrição:** Permite a qualquer ator (inclusive o não autenticado) listar os níveis da hierarquia de localização (`Campus → Unidade → Bloco`), usados para popular selects e filtros de qualquer tela. Os endpoints são públicos e não exigem autenticação.
-* **Ator Primário:** Qualquer usuário (autenticado ou não autenticado).
-* **Pré-condições:** Nenhuma.
+* **Descrição:** Permite ao Gestor do Sistema ou ao Validador listar os níveis da hierarquia de localização (`Campus → Unidade → Bloco`), usados para popular selects e filtros das telas administrativas (gestão e validação). O catálogo público usa a projeção publicada (UC32).
+* **Ator Primário:** Gestor do Sistema ou Validador.
+* **Pré-condições:** O ator está autenticado com `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`.
 * **Fluxo Principal:**
     1. O ator realiza uma requisição `GET` ao endpoint `/api/campus`. O Sistema retorna a lista de campi como `[{id, nome}]`.
     2. O ator realiza uma requisição `GET` ao endpoint `/api/unidades?campusId={id}`. O Sistema retorna as unidades do campus como `[{id, nome}]`.
@@ -492,8 +504,51 @@ A seguir estão descritos os principais casos de uso relacionados ao gerenciamen
 * **Regras:**
     * Sem paginação; os nomes são retornados na forma normalizada (RN-1.17) e em ordem natural (`BLOCO 2` < `BLOCO 2A` < `BLOCO 10`).
     * Não há `POST` de campus/unidade/bloco: a criação ocorre no fluxo de escrita do ambiente (UC06/UC07/UC16/UC17, RN-1.18).
+    * Os endpoints são administrativos: sem autenticação → `401`; autenticado sem `ROLE_GESTOR_SISTEMA`/`ROLE_VALIDADOR` (ex.: apenas `ROLE_COLABORADOR`) → `403`.
 * **Fluxos Alternativos:**
     * **FA01 - Parâmetro inválido:** `campusId` ou `unidadeId` não positivo ou inexistente resulta em `400 Bad Request`.
+    * **FA02 - Acesso negado:** requisição anônima ou com authority insuficiente não retorna dados (`401`/`403`).
+* **Pós-condições:** Nenhuma alteração no estado do sistema.
+
+### **UC32: Consultar a Hierarquia do Catálogo Publicado**
+
+* **Descrição:** Permite ao Público Externo navegar a hierarquia de localização do catálogo público (`Campus → Unidade → Bloco`), considerando somente níveis com ao menos um ambiente `PUBLICADO` (RN-1.21).
+* **Ator Primário:** Público Externo.
+* **Pré-condições:** Nenhuma — os endpoints são públicos e não exigem autenticação.
+* **Fluxo Principal:**
+    1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/campus`. O Sistema retorna os campi com ao menos um ambiente publicado como `[{id, nome}]`.
+    2. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/unidades?campusId={id}`. O Sistema retorna as unidades do campus com ao menos um publicado como `[{id, nome}]`.
+    3. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/blocos?unidadeId={id}`. O Sistema retorna os blocos da unidade com ao menos um publicado como `[{id, nome}]`.
+* **Regras:**
+    * Somente níveis com ao menos um ambiente `PUBLICADO`; campus/unidade inexistente ou sem publicado retorna lista vazia (`200 []`), não `404`.
+    * Sem paginação; nomes na forma normalizada (RN-1.17) e em ordem natural (`BLOCO 2` < `BLOCO 2A` < `BLOCO 10`).
+    * `campusId` e `unidadeId` são obrigatórios e `@Positive`.
+* **Fluxos Alternativos:**
+    * **FA01 - Parâmetro inválido:** id não positivo → `400 Bad Request`.
+    * **FA02 - Nenhum nível publicado:** listas vazias em todos os níveis.
+* **Pós-condições:** Nenhuma alteração no estado do sistema.
+
+### **UC33: Consultar o Resumo do Bloco no Catálogo Publicado**
+
+* **Descrição:** Permite ao Público Externo visualizar um resumo derivado de um bloco do catálogo público, calculado exclusivamente a partir dos ambientes publicados.
+* **Ator Primário:** Público Externo.
+* **Pré-condições:** O bloco existe e possui ao menos um ambiente `PUBLICADO`.
+* **Fluxo Principal:**
+    1. O Público Externo realiza uma requisição `GET` ao endpoint `/api/ambientes/publicados/blocos/{blocoId}/resumo`.
+    2. O Sistema calcula, somente com os ambientes publicados do bloco:
+        * `areaTotal` — soma das áreas dos ambientes, com duas casas e `HALF_UP`;
+        * `pavimentos` — quantidade de pavimentos até o andar mais alto (`max(andar) + 1`, RN-1.20; `andar = 0` representa o térreo), não a contagem de andares distintos ocupados;
+        * `capacidadeTotal` — soma das capacidades;
+        * `tipos` — `[{tipo, total}]` com o rótulo do tipo e contagem, em ordem natural;
+        * `andares` — `[{andar, total}]` com contagem, em ordem crescente.
+    3. O Sistema retorna `{id, nome, areaTotal, pavimentos, capacidadeTotal, tipos, andares}`.
+* **Regras:**
+    * Considera somente `status = PUBLICADO` (RN-1.21); ambientes não publicados do mesmo bloco não entram em nenhum cálculo.
+    * A área é derivada no domínio Kotlin (`Ambiente.calcularAreaAmbienteM2()`), sem SQL `CASE`.
+    * O resumo não inclui campus/unidade nem metadados de edificação (responsável, ano de construção, última vistoria, descrição, situação).
+* **Fluxos Alternativos:**
+    * **FA01 - Bloco inexistente ou sem publicado:** `404 Not Found`.
+    * **FA02 - Parâmetro inválido:** `blocoId` não positivo → `400 Bad Request`.
 * **Pós-condições:** Nenhuma alteração no estado do sistema.
 
 ---

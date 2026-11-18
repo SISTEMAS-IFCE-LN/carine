@@ -25,6 +25,8 @@ As regras a seguir detalham os invariantes e comportamentos do subdomínio de Am
 * **RN-1.17:** Nomes de campus, unidade e bloco são normalizados (trim, remoção de acentos, separadores colapsados, caixa alta, dígitos sem zeros à esquerda) antes da comparação e da persistência; o valor armazenado e exibido é sempre a forma normalizada.
 * **RN-1.18:** Um campus, unidade ou bloco pode ser criado no fluxo de cadastro/edição de ambiente (find-or-create) quando o nome ainda não existir no escopo do pai; a criação implícita de referência é uma decisão de produto e não há endpoint próprio de cadastro desses níveis.
 * **RN-1.19:** Referências de localização (campus, unidade, bloco) criadas implicitamente que ficarem sem ambientes vinculados são removidas automaticamente quando o último ambiente que as referencia é movido ou excluído.
+* **RN-1.20:** O andar é um inteiro maior ou igual a zero; o andar `0` representa o térreo. No catálogo público, os pavimentos de um bloco são calculados como `max(andar dos ambientes publicados) + 1`.
+* **RN-1.21:** A projeção pública da hierarquia (campus, unidade, bloco) e o resumo do bloco consideram **somente** ambientes com `status = PUBLICADO`. Níveis de localização sem ambiente publicado não aparecem no catálogo público; bloco sem ambiente publicado não possui resumo (`404`).
 
 ### 2. Regras sobre Elementos Construtivos e Esquadrias
 

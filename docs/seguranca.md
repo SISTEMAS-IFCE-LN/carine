@@ -203,26 +203,40 @@ Definido em `SecurityConfig.apiFilterChain` (chain 3, com `@Order(3)`).
 
 ### 7.1. Endpoints públicos (`permitAll`)
 
-| Path                           | Método | Observação                                                                                           |
-|--------------------------------|--------|------------------------------------------------------------------------------------------------------|
-| `/api/ambientes/publicados/**` | todos  | Listagens de ambientes publicados; o detalhe `{id}` e `esquadrias` exigem `ROLE_COLABORADOR` (§7.2). |
-| `/api/campus`                  | GET    | Lista de campi (selects e filtros de localização).                                                   |
-| `/api/unidades`                | GET    | Unidades por campus (`?campusId=`).                                                                  |
-| `/api/blocos`                  | GET    | Blocos por unidade (`?unidadeId=`).                                                                  |
-| `/auth/**`                     | todos  | Refresh, logout.                                                                                     |
-| `/actuator/health`             | todos  | Health check (endpoint do Actuator).                                                                 |
-| `/oauth2/**`                   | todos  | Handshake OAuth2 (chain 1, com `IF_REQUIRED`).                                                       |
-| `/login/**`                    | todos  | Handshake OAuth2.                                                                                    |
+| Path                                                | Método | Observação                                                   |
+|-----------------------------------------------------|--------|--------------------------------------------------------------|
+| `/api/ambientes/publicados`                         | GET    | Listagem de ambientes publicados.                            |
+| `/api/ambientes/publicados/tipo`                    | GET    | Filtro por tipo.                                             |
+| `/api/ambientes/publicados/nome`                    | GET    | Filtro por nome.                                             |
+| `/api/ambientes/publicados/localizacao`             | GET    | Filtro por localização (aceita `tipo` opcional combinado).   |
+| `/api/ambientes/publicados/campus`                  | GET    | Campi com ao menos um ambiente publicado.                    |
+| `/api/ambientes/publicados/unidades`                | GET    | Unidades do campus com ao menos um publicado (`?campusId=`). |
+| `/api/ambientes/publicados/blocos`                  | GET    | Blocos da unidade com ao menos um publicado (`?unidadeId=`). |
+| `/api/ambientes/publicados/blocos/{blocoId}/resumo` | GET    | Resumo derivado do bloco (`404` se não houver publicado).    |
+| `/callback.html`, `/failure.html`                   | GET    | Páginas de teste do backend.                                 |
+| `/auth/**`                                          | todos  | Refresh, logout.                                             |
+| `/actuator/health`                                  | todos  | Health check (endpoint do Actuator).                         |
+| `/oauth2/**`                                        | todos  | Handshake OAuth2 (chain 1, com `IF_REQUIRED`).               |
+| `/login/**`                                         | todos  | Handshake OAuth2.                                            |
+
+Os literais públicos de `/api/ambientes/publicados/**` são declarados **antes** do matcher geral
+`/api/ambientes/publicados/** → ROLE_COLABORADOR` (o primeiro match vence). O detalhe `{id}` e `esquadrias` continuam
+exigindo `ROLE_COLABORADOR` (§7.2).
 
 ### 7.2. Endpoints protegidos por `SecurityConfig`
 
-| Path                                                          | Authority exigida     |
-|---------------------------------------------------------------|-----------------------|
-| `/api/ambientes/nao-publicados/**` (GET, POST, PATCH, DELETE) | `ROLE_GESTOR_SISTEMA` |
-| `/api/ambientes/validacao/**` (GET, PATCH)                    | `ROLE_VALIDADOR`      |
-| `/api/ambientes/publicados/{id}` (GET)                        | `ROLE_COLABORADOR`    |
-| `/api/ambientes/publicados/esquadrias` (GET)                  | `ROLE_COLABORADOR`    |
-| `/api/usuarios/**` (GET, PATCH)                               | `ROLE_ADMINISTRADOR`  |
+| Path                                                          | Authority                                             |
+|---------------------------------------------------------------|-------------------------------------------------------|
+| `/api/ambientes/nao-publicados/**` (GET, POST, PATCH, DELETE) | `ROLE_GESTOR_SISTEMA`                                 |
+| `/api/ambientes/validacao/**` (GET, PATCH)                    | `ROLE_VALIDADOR`                                      |
+| `/api/ambientes/publicados/{id}` (GET)                        | `ROLE_COLABORADOR`                                    |
+| `/api/ambientes/publicados/esquadrias` (GET)                  | `ROLE_COLABORADOR`                                    |
+| `/api/campus` (GET)                                           | `ROLE_GESTOR_SISTEMA` **ou** `ROLE_VALIDADOR`         |
+| `/api/unidades` (GET, `?campusId=`)                           | `ROLE_GESTOR_SISTEMA` **ou** `ROLE_VALIDADOR`         |
+| `/api/blocos` (GET, `?unidadeId=`)                            | `ROLE_GESTOR_SISTEMA` **ou** `ROLE_VALIDADOR`         |
+| `/api/usuarios/**` (GET, PATCH)                               | `ROLE_ADMINISTRADOR`                                  |
+
+As referências gerais são implementadas com `hasAnyAuthority`; as demais usam `hasAuthority`.
 
 ### 7.3. Resposta a acessos não autorizados
 

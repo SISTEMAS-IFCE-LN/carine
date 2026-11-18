@@ -20,8 +20,9 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 - AguardandoValidacao - tela específica para listar ambientes aguardando validação.
 - NaoPublicados - tela específica para listar ambientes não publicados.
 - Publicados - tela específica para listar ambientes publicados.
-- PesquisaBarAmbientes — inputs para filtrar ambientes por `nome`, `tipo` e localização em cascata `Campus → Unidade → Bloco → Andar` (selects por ID, sem cadastro de novas referências) e botão para limpar filtros.
-- CampoReferencia — campo genérico de referência de localização (campus/unidade/bloco): select com opções vindas dos endpoints públicos e alternativa `+ Cadastrar novo` para criar por nome. No filtro o cadastro é desabilitado; nos formulários, quando o pai é novo o filho é criação obrigatória (sem lista de opções).
+- PesquisaBarAmbientes — inputs para filtrar ambientes por `nome`, `tipo` e localização em cascata `Campus → Unidade → Bloco → Andar` (selects por ID, sem cadastro de novas referências) e botão para limpar filtros. A prop `fonte` define a origem das referências: `publicados` (projeção pública, usada na tela `/ambientes/publicados`) ou `gerais` (refs administrativas, usada nas telas de gestão e validação).
+- Breadcrumb — trilho `Campus > Unidade > Bloco` das telas públicas; em deep link da tela de bloco, exibe apenas o bloco.
+- CampoReferencia — campo genérico de referência de localização (campus/unidade/bloco): select com opções vindas dos endpoints administrativos de referência (UC31, exigem `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`) e alternativa `+ Cadastrar novo` para criar por nome. No filtro o cadastro é desabilitado; nos formulários, quando o pai é novo o filho é criação obrigatória (sem lista de opções).
 - DetalheAmbiente — visão detalhada com geometrias, pés-direitos, lista de esquadrias (portas/janelas) e áreas; a localização é exibida como `campus • unidade • bloco • andar` (nomes normalizados).
 - FormAmbiente (multistep) — criação/atualização de ambiente: dados básicos, geometrias, pés-direitos, esquadrias, informação adicional.
 - ModalConfirmacao — confirmações para deletar, publicar/privar, duplicar.
@@ -40,15 +41,26 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 
 ## Rotas
 
+Públicas (sem autenticação, no layout comum):
+
+- `/` — home pública de campi (UC32-FE).
+- `/campus/{campusId}` — unidades do campus (UC33-FE).
+- `/unidade/{unidadeId}` — blocos da unidade (UC34-FE).
+- `/bloco/{blocoId}` — resumo do bloco e atalhos de tipo/andar (UC35-FE).
+- `/ambientes/publicados` — lista de ambientes publicados (UC21-FE).
 - `/login` — página de login com botão Google OAuth2 (UC28-FE).
+
+Protegidas:
+
 - `/ambientes/validacao` — lista de ambientes aguardando validação (UC01-FE).
 - `/ambientes/validacao/{id}` — detalhes de um ambiente aguardando validação (UC02-FE).
 - `/ambientes/nao-publicados` — lista de ambientes não publicados (UC04-FE).
 - `/ambientes/nao-publicados/novo` — criação de novo ambiente não publicado (UC06-FE).
 - `/ambientes/nao-publicados/{id}` — detalhes de um ambiente não publicado (UC05-FE).
-- `/ambientes/publicados` — lista de ambientes publicados (UC21-FE).
 - `/ambientes/publicados/{id}` — detalhes de um ambiente publicado (UC19-FE).
 - `/usuarios` — lista de usuários (UC22-FE).
+
+> A hierarquia pública do backend (UC32) é detalhada nas telas UC32-FE a UC34-FE; o resumo do bloco (UC33) na UC35-FE.
 
 ---
 
@@ -60,7 +72,7 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 - Pré-condições: Usuário logado com role `validador`.
 - Fluxo principal (UI):
   1. O usuário acessa a rota `/ambientes/validacao`, é exibido o componente `TabelaPadrao` com os ambientes cujo `status = AGUARDANDO_VALIDACAO` (chamada GET `/api/ambientes/validacao`).
-  2. Uma barra de pesquisa (`PesquisaBarAmbientes`) também é exibida para filtrar os ambientes por `nome`, `tipo` e localização. Cada filtro utiliza endpoints específicos do backend: `/api/ambientes/validacao/nome?nome={nome}`, `/api/ambientes/validacao/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}` e `/api/ambientes/validacao/tipo?tipo={tipo}` — filtro aplicado via botão "Aplicar", sem debounce, estado na URL. A localização é uma cascata `Campus → Unidade → Bloco → Andar` em selects por ID (as opções vêm dos endpoints de referência — UC31 do backend): unidade só aparece com campus selecionado, bloco só com unidade selecionada; não há cadastro de novas referências no filtro. IDs opcionais, mas pelo menos um campo de localização é necessário para acionar o filtro (sem campos, a API responde `400 Bad Request`, então o frontend não dispara a query nesse estado); ID inexistente ou fora do pai resulta em lista vazia.
+  2. Uma barra de pesquisa (`PesquisaBarAmbientes`) também é exibida para filtrar os ambientes por `nome`, `tipo` e localização. Cada filtro utiliza endpoints específicos do backend: `/api/ambientes/validacao/nome?nome={nome}`, `/api/ambientes/validacao/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}&tipo={tipo}` e `/api/ambientes/validacao/tipo?tipo={tipo}` — filtro aplicado via botão "Aplicar", sem debounce, estado na URL. O `tipo` é opcional no filtro de localização e pode ser combinado com os campos de localização (match exato normalizado, sem correspondência parcial); sem localização a API responde `400 Bad Request`, então o frontend não dispara a query nesse estado. A localização é uma cascata `Campus → Unidade → Bloco → Andar` em selects por ID (as opções vêm dos endpoints de referência — UC31 do backend): unidade só aparece com campus selecionado, bloco só com unidade selecionada; não há cadastro de novas referências no filtro. IDs opcionais, mas pelo menos um campo de localização é necessário para acionar o filtro; ID inexistente ou fora do pai resulta em lista vazia.
   3. A Tabela exibida possui paginação e o usuário pode definir quantos registros serão exibidos até o máximo de 100. 
   4. Cada item tem um botão para visualizar seus detalhes (`DetalheAmbiente`).
 - Estados e erros:
@@ -108,7 +120,7 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 
 - Tela: `Ambientes > NãoPublicados` (rota `/ambientes/nao-publicados`) (semelhante ao UC01-FE). Filtragem, paginação e seleção múltipla.
 - Pré-condições: Usuário logado com role `gestor`.
-- Fluxo principal (UI): Similar ao UC01-FE, mas chamando GET `/api/ambientes/nao-publicados` e possuindo um botão `Criar Novo` para criação de novos ambientes. Os filtros utilizam endpoints específicos: `/api/ambientes/nao-publicados/nome?nome={nome}`, `/api/ambientes/nao-publicados/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}` e `/api/ambientes/nao-publicados/tipo?tipo={tipo}`, com a mesma cascata e regras de IDs do UC01-FE.
+- Fluxo principal (UI): Similar ao UC01-FE, mas chamando GET `/api/ambientes/nao-publicados` e possuindo um botão `Criar Novo` para criação de novos ambientes. Os filtros utilizam endpoints específicos: `/api/ambientes/nao-publicados/nome?nome={nome}`, `/api/ambientes/nao-publicados/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}&tipo={tipo}` e `/api/ambientes/nao-publicados/tipo?tipo={tipo}`, com a mesma cascata, regras de IDs e filtro combinado do UC01-FE.
   1. Cada item tem um checkbox para seleção múltipla, além do botão para visualizar seus detalhes (`DetalheAmbiente`).
   2. Um botão de seleção também está disponível para execução de ações em lote (`AcoesLote`): `Deletar` (UC15-FE) e `Enviar p/ Validação` (UC18-FE).
 - Estados e erros: Os mesmos do UC01-FE.
@@ -128,7 +140,7 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 - Pré-condições: Usuário logado com role `gestor`.
 - Fluxo principal (UI):
   - Multistep (formulário dividido em etapas):
-    1. Dados básicos: `nome`, `localizacao`, `tipo`, `capacidade`. A localização usa a cascata `Campus → Unidade → Bloco → Andar` com o campo genérico `CampoReferencia` em cada nível: as opções vêm dos endpoints públicos `GET /api/campus`, `GET /api/unidades?campusId={id}` e `GET /api/blocos?unidadeId={id}` (UC31 do backend); a alternativa `+ Cadastrar novo` cria por nome (find-or-create sob o pai, RN-1.18). Quando o pai é novo, o filho é criação obrigatória — não há lista de opções.
+    1. Dados básicos: `nome`, `localizacao`, `tipo`, `capacidade`. A localização usa a cascata `Campus → Unidade → Bloco → Andar` com o campo genérico `CampoReferencia` em cada nível: as opções vêm dos endpoints administrativos de referência `GET /api/campus`, `GET /api/unidades?campusId={id}` e `GET /api/blocos?unidadeId={id}` (UC31 do backend, exigem `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`); a alternativa `+ Cadastrar novo` cria por nome (find-or-create sob o pai, RN-1.18). Quando o pai é novo, o filho é criação obrigatória — não há lista de opções.
     2. Geometrias: lista editável com `tipo`, `repetição`, `comprimento` e `largura` ou `base` e `altura`.
     3. Pés-direitos: lista editável com alturas.
     4. Esquadrias: lista com `tipo`, `repetição`, `largura`, `altura`, `material`, `peitoril`, `info adicional`.
@@ -381,11 +393,79 @@ Este documento traduz os casos de uso do backend (ver `docs/ambientes-internos/c
 
 ### UC21-FE: Listar Ambientes Publicados
 
-- Tela: `Ambientes > Publicados` (semelhante ao UC01-FE). Filtragem e paginação.
+- Tela: `Ambientes > Publicados` (rota `/ambientes/publicados`, semelhante ao UC01-FE). Filtragem e paginação.
 - Pré-condições: Acesso público (não autenticado).
-- Fluxo principal (UI): Similar ao UC01-FE, mas chamando GET `/api/ambientes/publicados` e não possuindo botões de ação ou seleção. Os filtros utilizam endpoints específicos: `/api/ambientes/publicados/nome?nome={nome}`, `/api/ambientes/publicados/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}` e `/api/ambientes/publicados/tipo?tipo={tipo}`, com a mesma cascata e regras de IDs do UC01-FE.
+- Fluxo principal (UI): Similar ao UC01-FE, mas chamando GET `/api/ambientes/publicados` e não possuindo botões de ação ou seleção. Os filtros utilizam endpoints específicos: `/api/ambientes/publicados/nome?nome={nome}`, `/api/ambientes/publicados/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}&tipo={tipo}` e `/api/ambientes/publicados/tipo?tipo={tipo}`.
+- Filtros combinados: `tipo` é opcional no `/localizacao` e pode ser combinado com qualquer campo de localização, com a mesma regra de filtro do UC01-FE. A URL é compartilhável e preservada em deep link, inclusive com apenas `blocoId` e `tipo` (ex.: `?blocoId=12&tipo=Sala%20de%20Aula`). `tipo` sozinho continua usando `/tipo`.
+- Fonte das referências: a cascata `Campus → Unidade → Bloco → Andar` usa a **projeção publicada** (`/api/ambientes/publicados/campus|unidades|blocos`), então um anônimo não chama as refs administrativas e só vê níveis com ambiente publicado. Gestão e validação continuam usando as refs gerais.
+- Filtro por tipo: **match exato** normalizado (nome técnico do enum ou rótulo, ex.: `LABORATORIO` ou `Laboratório`), sem correspondência parcial; a URL de um card de tipo (`?tipo=Laboratório`) é canonicalizada para a chave técnica na leitura, sem alterar o contrato do backend.
 - Estados e erros: Os mesmos do UC01-FE.
-- Critérios de aceitação: Os mesmos do UC01-FE, mas para `status = PUBLICADO`.
+- Critérios de aceitação: Os mesmos do UC01-FE, mas para `status = PUBLICADO` e considerando filtros combinados e referências publicadas.
+
+### UC32-FE: Home Pública de Campi (T1)
+
+- Tela: `Home` (rota `/`, dentro do layout comum; sem `RequireAuth`).
+- Pré-condições: Acesso público (não autenticado).
+- Fluxo principal (UI):
+  1. A página chama `GET /api/ambientes/publicados/campus`.
+  2. Exibe título, descrição e o CTA `Ver todos os ambientes` para `/ambientes/publicados`.
+  3. Exibe um card-link por campus com o nome e a descrição `Ver unidades`, navegando para `/campus/{campusId}`.
+- Estados e erros:
+  - Loading: componente `Loading`.
+  - Erro: `ErrorLista` com `Tentar novamente` (refetch).
+  - Sem campi publicados: `EstadoVazio` com "Nenhum ambiente publicado no momento.".
+- Critérios de aceitação:
+  - `/` renderiza a home pública de campi, sem redirect para a listagem.
+  - Somente campi com ao menos um ambiente publicado aparecem.
+
+### UC33-FE: Unidades do Campus (T2)
+
+- Tela: `Campus` (rota `/campus/{campusId}`).
+- Pré-condições: Acesso público.
+- Fluxo principal (UI):
+  1. A página chama `GET /api/ambientes/publicados/unidades?campusId={id}`.
+  2. Exibe `Breadcrumb` (`Início > <campus>`) e o CTA `Ver todos os ambientes do campus` → `/ambientes/publicados?campusId={id}`.
+  3. Exibe um card-link por unidade (`Ver blocos`) → `/unidade/{unidadeId}`, enviando o campus em `location.state`.
+- Estados e erros:
+  - ID inválido na URL: `Breadcrumb` + `EstadoVazio` "Campus não encontrado." com ação de volta à home.
+  - Loading: `Loading`; erro: `ErrorLista` com retry.
+  - Campus sem unidade publicada: `EstadoVazio` "Nenhuma unidade com ambientes publicados neste campus." com ação de volta à home.
+- Critérios de aceitação:
+  - O nome do campus vem de `location.state` ou do cache de campi; se não houver correspondência, o trilho degrada para `Campus`.
+  - O CTA usa o builder de URL da listagem e preserva o filtro por campus.
+
+### UC34-FE: Blocos da Unidade (T3)
+
+- Tela: `Unidade` (rota `/unidade/{unidadeId}`).
+- Pré-condições: Acesso público.
+- Fluxo principal (UI):
+  1. A página chama `GET /api/ambientes/publicados/blocos?unidadeId={id}`.
+  2. Exibe `Breadcrumb` (`Início > Campus > <unidade>` quando há `location.state`; senão `Início > Unidade`) e o CTA `Ver todos os ambientes da unidade` → `/ambientes/publicados?unidadeId={id}`.
+  3. Exibe um card-link por bloco (`Ver resumo do bloco`) → `/bloco/{blocoId}`, repassando campus e unidade em `location.state`.
+- Estados e erros:
+  - ID inválido: `Breadcrumb` + `EstadoVazio` com ação de volta.
+  - Loading: `Loading`; erro: `ErrorLista` com retry.
+  - Unidade sem bloco publicado: `EstadoVazio` "Nenhum bloco com ambientes publicados nesta unidade." com ação para o campus (quando conhecido) ou home.
+- Critérios de aceitação:
+  - Em deep link, o nome da unidade não está disponível (a lista de blocos só traz `{id, nome}` dos blocos); o trilho mostra `Unidade`, mas os blocos são exibidos corretamente.
+  - O CTA preserva o filtro por unidade na listagem.
+
+### UC35-FE: Resumo do Bloco e Atalhos de Tipo/Andar (T4)
+
+- Tela: `Bloco` (rota `/bloco/{blocoId}`).
+- Pré-condições: Acesso público; bloco com ao menos um ambiente publicado.
+- Fluxo principal (UI):
+  1. A página chama `GET /api/ambientes/publicados/blocos/{blocoId}/resumo`.
+  2. Exibe `Breadcrumb` (`Início > Campus > Unidade > Bloco` quando veio da T3; em deep link, apenas o bloco) e o resumo: área total (`formatarMedida` + `m²`), pavimentos e capacidade total.
+  3. Exibe cards de tipo (nome + total) que navegam para `/ambientes/publicados?blocoId={id}&tipo={rótulo}`.
+  4. Exibe cards de andar (título por `formatarAndar`; `Térreo` para `0`) que navegam para `/ambientes/publicados?blocoId={id}&andar={andar}`.
+- Estados e erros:
+  - `404` do resumo (bloco inexistente ou sem publicado): `Breadcrumb` + `EstadoVazio` "Bloco não encontrado ou sem ambientes publicados", com link para a home; nunca crash.
+  - Loading: `Loading`; demais erros: `ErrorLista` com retry.
+- Critérios de aceitação:
+  - A contagem de cada card de tipo corresponde exatamente ao total retornado ao clicar no link (filtro por tipo em match exato).
+  - Os links de tipo/andar usam o builder de URL da listagem e são preservados em deep link.
+  - Em deep link sem `location.state`, o resumo continua funcional e o trilho mostra apenas o bloco.
 
 ---
 

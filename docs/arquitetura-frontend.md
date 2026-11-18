@@ -34,17 +34,18 @@ A arquitetura frontend é determinada, em grande parte, pelo contrato estabeleci
 - A API (chain 3, `STATELESS`) valida JWT via `Authorization: Bearer <jwt>` e não exige CSRF.
 - O JWT (RSA, 15 min) contém claims `iss`, `sub` (= `Usuario.id`), `roles` (com prefixo `ROLE_`), `jti`, `iat`, `exp`. O frontend não decodifica o JWT — apenas o transporta no header `Authorization: Bearer`. `User` completo (com `nome`, `email`, `ativo`, `criadoEm`, `perfis`) vem de `GET /api/usuarios/me`.
 - Perfis são **cumulativos** e `UsuarioService.atualizarPerfis` sempre adiciona `ROLE_COLABORADOR`. Logo, todo usuário autenticado tem ao menos esse perfil.
-- Endpoints públicos: `/api/ambientes/publicados/**` (listagens e detalhes, este último com `permitAll` mas autoridade interna exige `ROLE_COLABORADOR` — ver abaixo), `/auth/**`, `/actuator/health`, `/oauth2/**`, `/login/**`.
+- Endpoints públicos: `/api/ambientes/publicados/**` (listagens, pesquisas e projeção publicada da hierarquia; detalhe e esquadrias exigem `ROLE_COLABORADOR`), `/auth/**`, `/actuator/health`, `/oauth2/**`, `/login/**`.
 - Proteção por autoridade (chain 3):
 
-| Path | Authority exigida |
-|---|---|
-| `/api/ambientes/nao-publicados/**` | `ROLE_GESTOR_SISTEMA` |
-| `/api/ambientes/validacao/**` | `ROLE_VALIDADOR` |
-| `/api/ambientes/publicados/{id}` (GET) | `ROLE_COLABORADOR` |
-| `/api/ambientes/publicados/esquadrias` (GET) | `ROLE_COLABORADOR` |
-| `/api/usuarios/**` | `ROLE_ADMINISTRADOR` |
-| `/api/usuarios/me` (GET) | qualquer autenticado |
+| Path                                                | Authority exigida                             |
+|-----------------------------------------------------|-----------------------------------------------|
+| `/api/ambientes/nao-publicados/**`                  | `ROLE_GESTOR_SISTEMA`                         |
+| `/api/ambientes/validacao/**`                       | `ROLE_VALIDADOR`                              |
+| `/api/ambientes/publicados/{id}` (GET)              | `ROLE_COLABORADOR`                            |
+| `/api/ambientes/publicados/esquadrias` (GET)        | `ROLE_COLABORADOR`                            |
+| `/api/campus`, `/api/unidades`, `/api/blocos` (GET) | `ROLE_GESTOR_SISTEMA` **ou** `ROLE_VALIDADOR` |
+| `/api/usuarios/**`                                  | `ROLE_ADMINISTRADOR`                          |
+| `/api/usuarios/me` (GET)                            | qualquer autenticado                          |
 
 ---
 
@@ -151,20 +152,20 @@ Para popular `User` no `AuthContext`, o **backend implementa** `GET /api/usuario
 
 ## 4. Stack tecnológica
 
-| Camada | Tecnologia | Versão | Justificativa |
-|---|---|---|---|
-| Build/Dev | Vite | 8+ | Build estático otimizado, hot reload instantâneo, config TS-first |
-| Framework UI | React | 19+ | Ecossistema maduro, base das primitivas da Base UI e dos componentes locais |
-| Roteamento | React Router | 8+ (data routers) | Guards via `<RequireAuth>`/`<RequireRole>`, loaders, safe navigation |
-| Linguagem | TypeScript | 6+ | Type safety para permissões, contracts com backend |
-| HTTP Client | Axios | 1+ | Interceptores (auth, CSRF, refresh 401), retry transparente |
-| Estado servidor | TanStack Query | 5+ | Cache, refetch inteligente, optimistic updates, paginação |
-| Auth state | React Context | — | Simples, integrado ao React, suficiente para escopo |
-| Estilização | Tailwind CSS | 4+ | Utility-first, plugin Vite nativo (`@tailwindcss/vite`), tema via `@theme` em `globals.css`, tree-shaking automático |
-| Primitivas UI | Base UI (`@base-ui/react` 1.9+) | — | Headless, acessível, sem CLI/gerador; wrappers locais versionados em `src/components/ui`. |
-| Formulários | React Hook Form | 7+ | Performance, integração com Zod e componentes locais |
-| Validação | Zod | 4+ | Type inference, validação runtime, schemas próximos do backend |
-| Testes | Vitest + Testing Library | 4+ | Coerente com Vite, mesma API do Jest |
+| Camada          | Tecnologia                      | Versão            | Justificativa                                                                                                        |
+|-----------------|---------------------------------|-------------------|----------------------------------------------------------------------------------------------------------------------|
+| Build/Dev       | Vite                            | 8+                | Build estático otimizado, hot reload instantâneo, config TS-first                                                    |
+| Framework UI    | React                           | 19+               | Ecossistema maduro, base das primitivas da Base UI e dos componentes locais                                          |
+| Roteamento      | React Router                    | 8+ (data routers) | Guards via `<RequireAuth>`/`<RequireRole>`, loaders, safe navigation                                                 |
+| Linguagem       | TypeScript                      | 6+                | Type safety para permissões, contracts com backend                                                                   |
+| HTTP Client     | Axios                           | 1+                | Interceptores (auth, CSRF, refresh 401), retry transparente                                                          |
+| Estado servidor | TanStack Query                  | 5+                | Cache, refetch inteligente, optimistic updates, paginação                                                            |
+| Auth state      | React Context                   | —                 | Simples, integrado ao React, suficiente para escopo                                                                  |
+| Estilização     | Tailwind CSS                    | 4+                | Utility-first, plugin Vite nativo (`@tailwindcss/vite`), tema via `@theme` em `globals.css`, tree-shaking automático |
+| Primitivas UI   | Base UI (`@base-ui/react` 1.9+) | —                 | Headless, acessível, sem CLI/gerador; wrappers locais versionados em `src/components/ui`.                            |
+| Formulários     | React Hook Form                 | 7+                | Performance, integração com Zod e componentes locais                                                                 |
+| Validação       | Zod                             | 4+                | Type inference, validação runtime, schemas próximos do backend                                                       |
+| Testes          | Vitest + Testing Library        | 4+                | Coerente com Vite, mesma API do Jest                                                                                 |
 
 ### Justificativa da escolha Vite + React Router
 
@@ -173,7 +174,7 @@ A decisão pelo **CSR puro** decorre de:
 1. **Token em fragmento** (`#token=...`): o servidor nunca enxerga o fragmento; SSR de rotas autenticadas não teria como enviar o token para o renderizador server-side.
 2. **UCs interativos**: multistep `FormAmbiente` (UC06-FE), tabelas com paginação + filtros aplicados via botão (padrão `PesquisaBarAmbientes`) + seleção múltipla (UC01-FE, UC04-FE, UC22-FE) — trabalho essencialmente client-side.
 3. **Refresh transparente**: estado de sessão no cliente; SSR exigiria vazar o token para o servidor, quebrando o modelo de segurança.
-4. **SEO não é requisito**: a única rota pública indexável é `/ambientes/publicados` (lista). O modelo de negócio não exige indexação de nenhum dado.
+4. **SEO não é requisito**: as rotas públicas (`/`, `/campus/:campusId`, `/unidade/:unidadeId`, `/bloco/:blocoId`, `/ambientes/publicados`) não são necessariamente indexáveis. O modelo de negócio não exige indexação de nenhum dado.
 5. **Custo operacional**: SSR universal exigiria processo Node em produção (PM2/container), a mais uma peça para operar. Com CSR, o deploy é estático atrás de Nginx.
 
 ---
@@ -197,6 +198,17 @@ frontend/
 │   │   │   └── page.tsx
 │   │   ├── unauthorized/
 │   │   │   └── page.tsx
+│   │   ├── home/
+│   │   │   └── page.tsx             # home pública de campi (UC32-FE)
+│   │   ├── campus/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx         # unidades do campus (UC33-FE)
+│   │   ├── unidade/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx         # blocos da unidade (UC34-FE)
+│   │   ├── bloco/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx         # resumo do bloco e atalhos (UC35-FE)
 │   │   ├── ambientes/
 │   │   │   ├── publicados/          # público (lista) + autenticado (detalhe/esquadrias)
 │   │   │   │   ├── page.tsx         # lista (UC21-FE)
@@ -239,9 +251,13 @@ frontend/
 │   │   │                              # `permitirCadastro`/`somenteCadastro`), CampoEnum, CampoNumerico, BotaoRemover, ErroCampo,
 │   │   │                              # ModalGeometrias, ModalPesDireitos, ModalEsquadrias (genéricos de lista),
 │   │   │                              # ModalEditarDadosBasicos, ModalInfoAdicional, ModalAlterarTipo,
-│   │   │                              # ModalDuplicar, ModalConfirmacao, AcoesLote, AcoesAmbiente, PaginacaoFooter, ErrorLista
+│   │   │                              # ModalDuplicar, ModalConfirmacao, AcoesLote, AcoesAmbiente, PaginacaoFooter
 │   │   ├── usuarios/                 # TabelaUsuarios, ModalEditarPerfis, ModalConfirmacaoStatusUsuario
 │   │   └── common/
+│   │       ├── Breadcrumb.tsx        # trilho Início > Campus > Unidade > Bloco
+│   │       ├── CardLink.tsx          # card de navegação (Link > Card)
+│   │       ├── EstadoVazio.tsx       # estado vazio com ação opcional
+│   │       ├── ErrorLista.tsx        # erro de listagem (cross-domínio)
 │   │       └── ResponsiveModal.tsx   # wrapper: Dialog (desktop) | Drawer (mobile)
 │   │
 │   ├── lib/
@@ -252,15 +268,19 @@ frontend/
 │   │   ├── api/
 │   │   │   ├── api.ts                # instância Axios + interceptores (auth, CSRF, refresh 401)
 │   │   │   ├── api-ambientes.ts      # compartilhado: fetchAmbientes, fetchDetalheAmbiente, fetchEsquadriasAmbientes
-│   │   │   ├── api-publicados.ts     # wrappers UC21-FE → api-ambientes (fetchPublicados, fetchDetalhePublicados, fetchEsquadriasPublicados)
+│   │   │   ├── api-publicados.ts     # UC21-FE + catálogo público: fetchPublicados, fetchDetalhePublicados,
+│   │   │   │                         # fetchEsquadriasPublicados, fetchCampusPublicados, fetchUnidadesPublicados,
+│   │   │   │                         # fetchBlocosPublicados, fetchBlocoResumo
 │   │   │   ├── api-usuarios.ts       # UC22–UC26-FE
 │   │   │   ├── api-validacao.ts      # UC01–UC03-FE (fetchValidacao, fetchDetalheValidacao, publicarAmbiente, privarAmbiente)
 │   │   │   ├── api-naopublicados.ts  # UC05–UC18-FE
-│   │   │   └── api-referencia.ts     # GET públicos /api/campus, /api/unidades?campusId=, /api/blocos?unidadeId=
+│   │   │   └── api-referencia.ts     # refs administrativas /api/campus, /api/unidades?campusId=, /api/blocos?unidadeId=
 │   │   ├── ambientes/
 │   │   │   ├── esquadrias.ts         # filtro/resumo de esquadrias (lógica pura)
+│   │   │   ├── formatters.ts         # DECIMAIS_MEDIDA, formatarMedida, formatarAndar, formatarAndarCompacto
 │   │   │   └── mappers.ts            # conversão resposta→request (rótulos → nomes técnicos) UC07–UC17
-│   │   └── cn.ts                             # cn() e helpers de classes
+│   │   └── utils/
+│   │       └── cn.ts                 # cn() e helpers de classes
 │   │
 │   ├── hooks/
 │   │   ├── useAsyncAction.ts         # executar ação async (loading + fechar no sucesso + toast de erro)
@@ -268,7 +288,8 @@ frontend/
 │   │   ├── useFiltroLocal.ts         # rascunho local sincronizado com a URL (PesquisaBarAmbientes/Usuarios + hooks de search params)
 │   │   ├── usePaginationParams.ts    # núcleo genérico: page/size + handlePageChange/handleSizeChange/updateSearchParams
 │   │   ├── useAmbientesSearchParams.ts # adaptador fino: usePaginationParams + Zod (filtros) + tipoFiltro
-│   │   ├── useReferencias.ts         # useCampus/useUnidades(campusId)/useBlocos(unidadeId) — queries de referência
+│   │   ├── useReferencias.ts         # useCampus/useUnidades(campusId)/useBlocos(unidadeId) — refs administrativas
+│   │   ├── useReferenciasPublicadas.ts # REFERENCIAS_PUBLICADAS_QUERY_KEY + useCampusPublicados/useUnidadesPublicados/useBlocosPublicados/useBlocoResumo
 │   │   ├── useSelecaoAmbientes.ts    # seleção múltipla por página das listas de ambientes (publicados/nao-publicados)
 │   │   ├── usePermission.ts          # canDo(action), canAccess(route), hasRole(roles)
 │   │   └── useUsuariosSearchParams.ts # adaptador fino: usePaginationParams + nome/email + tipoFiltro
@@ -280,8 +301,10 @@ frontend/
 │   │   │   └── filtros.ts            # TipoFiltroUsuarios, FiltrosUsuarios, FILTROS_USUARIOS_VAZIOS
 │   │   └── ambientes/
 │   │       ├── enums.ts              # enums espelhados do backend (tipo/geometria/esquadria/status/filtro) + transforms de resposta de enum; localização não tem enum (usa referências)
-│   │       ├── filtros.ts            # Filtros (nome, tipo, campusId/unidadeId/blocoId/andar), FILTROS_VAZIOS, UrlFiltrosSchema
+│   │       ├── filtros.ts            # Filtros (nome, tipo, campusId/unidadeId/blocoId/andar), FILTROS_VAZIOS, UrlFiltrosSchema, derivarTipoFiltro
 │   │       ├── referencia.ts         # ReferenciaSchema/ReferenciaInputSchema, ReferenciaRes/ReferenciaInput, REFERENCIA_VAZIA
+│   │       ├── navegacao.ts          # CatalogoNavState (campus/unidade em location.state)
+│   │       ├── bloco.ts              # BlocoResumoSchema/BlocoResumo (resumo derivado do bloco)
 │   │       ├── localizacao.ts        # LocalizacaoSchema (resposta: campus/unidade/bloco aninhados via ReferenciaSchema; usado por response/esquadrias)
 │   │       ├── query.ts              # AmbientesQuery, EsquadriasQuery
 │   │       ├── request.ts            # schemas de request (AmbienteReq…) + keysOf/nomeTecnicoDeRotulo
@@ -290,7 +313,7 @@ frontend/
 │   │
 │   └── constants/
 │       ├── roles.ts                  # ROLE_LABELS (rótulos de perfis); Role vive em types/usuarios/user.ts
-│       └── routes.ts                 # PAGES_ROUTES, API_ROUTES, BACKEND_URL
+│       └── routes.ts                 # PAGES_ROUTES, API_ROUTES, BACKEND_URL, rotaCampus/rotaUnidade/rotaBloco, rotaListagemPublicados
 │
 ├── public/
 │   └── favicon.svg
@@ -446,6 +469,8 @@ export function matchRoute(pattern: string, pathname: string): boolean {
 ```
 
 > A separação entre `ROUTE_PERMISSIONS` (com `:id`) e `getRequiredRoles` com `matchRoute` permite que rotas dinâmicas sejam matched corretamente tanto no guard quanto no hook `usePermission.canAccess`.
+>
+> As rotas públicas do catálogo (`/`, `/campus/:campusId`, `/unidade/:unidadeId`, `/bloco/:blocoId` e `/ambientes/publicados`) **não** entram em `ROUTE_PERMISSIONS` — rotas não listadas são públicas, e o backend é quem decide o acesso a cada endpoint.
 
 ---
 
@@ -804,7 +829,7 @@ export function PublicOnly() {
 // router/index.tsx
 
 import { Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { RequireRole } from '@/components/auth/RequireRole'
 import { PublicOnly } from '@/components/auth/PublicOnly'
@@ -816,6 +841,10 @@ import {
   CallbackPage,
   UnauthorizedPage,
   ProtectedLayout,
+  HomePage,
+  CampusPage,
+  UnidadePage,
+  BlocoPage,
   PublicadosPage,
   PublicadoDetalhePage,
   EsquadriasPage,
@@ -842,6 +871,12 @@ export const router = createBrowserRouter([
   {
     element: <Suspense fallback={<Loading />}><ProtectedLayout /></Suspense>,
     children: [
+      // Home pública de campi — UC32-FE
+      { index: true, element: <Suspense fallback={<Loading />}><HomePage /></Suspense> },
+      { path: 'campus/:campusId', element: <Suspense fallback={<Loading />}><CampusPage /></Suspense> },
+      { path: 'unidade/:unidadeId', element: <Suspense fallback={<Loading />}><UnidadePage /></Suspense> },
+      { path: 'bloco/:blocoId', element: <Suspense fallback={<Loading />}><BlocoPage /></Suspense> },
+
       // Pública (lista de publicados) — UC21-FE, sem RequireAuth, mas com Header
       { path: '/ambientes/publicados', element: <Suspense fallback={<Loading />}><PublicadosPage /></Suspense> },
 
@@ -893,12 +928,11 @@ export const router = createBrowserRouter([
     ],
   },
 
-  { path: '/', element: <Navigate to={PAGES_ROUTES.PUBLICADOS} replace /> },
   { path: '*', element: <Suspense fallback={<Loading />}><UnauthorizedPage /></Suspense> },
 ])
 ```
 
-> **Nota**: a rota raiz `/` é apenas um `<Navigate to={PAGES_ROUTES.PUBLICADOS} replace />` — não existe página home dedicada; a porta de entrada pública é a lista de publicados (UC21-FE, `permitAll` no backend — `seguranca.md` §7.1). `PAGES_ROUTES.HOME` permanece `'/'` como entrada canônica: logo do `Header`, `PublicOnly`, callback pós-login e botão da `UnauthorizedPage` apontam para `/` e caem no redirect automaticamente. O `replace` é obrigatório para o botão "voltar" não prender o usuário no loop `/` → `/ambientes/publicados`.
+> **Nota**: `/` é a **home pública de campi** (UC32-FE, `permitAll` no backend — `seguranca.md` §7.1). As rotas de hierarquia `/campus/:campusId`, `/unidade/:unidadeId` e `/bloco/:blocoId` descem até a listagem `/ambientes/publicados`, todas dentro do layout comum e fora de `RequireAuth`. `PAGES_ROUTES.HOME` permanece `'/'` como entrada canônica: logo do `Header`, `PublicOnly`, callback pós-login e botão da `UnauthorizedPage` apontam para `/` e caem na home. O acesso à listagem geral é um CTA da home.
 
 ### 9.3. Navegação adaptativa (HeaderNav)
 
@@ -915,7 +949,7 @@ const menuItens: MenuItem[] = [
 ]
 ```
 
-> Sempre que `roles === null`, o item é mostrado a todo autenticado (ex.: **Listar**). Os itens são agrupados em "Ambientes" e "Usuários" num `<DropdownMenu>` aberto pelo hamburger à esquerda do título (ver §15.4/§15.5). A lista pública (`/ambientes/publicados`) é servida **dentro** do layout comum: o `Header` é **auth-aware** — para anônimos exibe logo + botão "Login"; para autenticados, `HeaderNav` + nome/email + "Sair". O `HeaderNav` só é renderizado com usuário logado.
+> Sempre que `roles === null`, o item é mostrado a todo autenticado (ex.: **Listar**). Os itens são agrupados em "Ambientes" e "Usuários" num `<DropdownMenu>` aberto pelo hamburger à esquerda do título (ver §15.4/§15.5). As telas públicas do catálogo (`/`, `/campus`, `/unidade`, `/bloco` e `/ambientes/publicados`) são servidas **dentro** do layout comum: o `Header` é **auth-aware** — para anônimos exibe logo + botão "Login"; para autenticados, `HeaderNav` + nome/email + "Sair". O `HeaderNav` só é renderizado com usuário logado.
 
 ---
 
@@ -1008,7 +1042,7 @@ O `Header` é **auth-aware** e renderiza internamente o `HeaderNav` (que filtra 
 - Anônimo: logo + botão "Login" (`PAGES_ROUTES.LOGIN`), sem `HeaderNav`.
 - Autenticado: `HeaderNav` (hamburger à esquerda) + logo + nome/email + botão "Sair" (`logout()` com navegação para `/login`).
 
-Como o layout envolve também a rota pública `/ambientes/publicados` (§9.2), o `ProtectedLayout` não é exclusivo de rotas autenticadas — o `Header` decide o que exibir conforme o estado de autenticação.
+Como o layout envolve também as rotas públicas do catálogo (`/`, `/campus/:campusId`, `/unidade/:unidadeId`, `/bloco/:blocoId` e `/ambientes/publicados` — §9.2), o `ProtectedLayout` não é exclusivo de rotas autenticadas — o `Header` decide o que exibir conforme o estado de autenticação.
 
 ---
 
@@ -1040,6 +1074,8 @@ Convenções:
 - `staleTime` 30s para listagens — evita refetch excessivo ao navegar entre detalhe/lista.
 - Mutações (`useMutation`) com `onSuccess`Invalidando queries relacionadas (`queryClient.invalidateQueries({ queryKey: ['ambientes'] })`).
 - Mutações de escrita de ambiente também invalidam `['referencias']`: o find-or-create pode criar novos campus/unidade/bloco, e os selects/filtros precisam ver as novas opções.
+- Catálogo público: `REFERENCIAS_PUBLICADAS_QUERY_KEY = ['referencias-publicados'] as const` é a fonte das keys; as derivadas usam spread — `[...REFERENCIAS_PUBLICADAS_QUERY_KEY, 'campus']`, `[..., 'unidades', campusId]`, `[..., 'blocos', unidadeId]` e `[..., 'bloco-resumo', blocoId]`. Nenhum literal dessa família é escrito fora de `hooks/useReferenciasPublicadas.ts`.
+- Publicar, privar, editar dados básicos e excluir ambiente invalidam a família `REFERENCIAS_PUBLICADAS_QUERY_KEY`: essas mutações mudam a composição publicada (campus/unidade/bloco) e o resumo do bloco.
 
 ---
 
@@ -1242,10 +1278,10 @@ services:
 
 ### 14.3. Variáveis de ambiente do frontend
 
-| Env var | Default | Descrição |
-|---|---|---|
+| Env var            | Default                           | Descrição                                                                                                                                                                              |
+|--------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `VITE_BACKEND_URL` | `''` (mesma origem — proxy Nginx) | Lida apenas em `constants/routes.ts` (`BACKEND_URL`). Usada como `baseURL` do Axios e nas chamadas de auth/CSRF com axios puro. Em dev, `http://localhost:8080` para contornar o proxy |
-| `VITE_FAKE_AUTH` | `'false'` | Quando `'true'`, ativa FakeAuth (usuário mockado) para dev sem backend. **Nunca em produção** — o build de produção deve omiti-la ou setá-la `'false'` |
+| `VITE_FAKE_AUTH`   | `'false'`                         | Quando `'true'`, ativa FakeAuth (usuário mockado) para dev sem backend. **Nunca em produção** — o build de produção deve omiti-la ou setá-la `'false'`                                 |
 
 > O entry do OAuth2 (`/oauth2/authorization/google`) é uma **constante** (`PAGES_ROUTES.GOOGLE_OAUTH_ENTRY` em `constants/routes.ts`); não é env var porque nunca varia entre ambientes.
 
@@ -1308,12 +1344,12 @@ O `Drawer` local usa a primitiva `@base-ui/react/drawer` como camada de comporta
 
 - **Estrutura do menu**:
 
-  | Grupo | Itens | Visibilidade |
-  |---|---|---|
-  | **Ambientes** | Listar (`/ambientes/publicados`) | Sempre visível |
-  | | Validar (`/ambientes/validacao`) | `ROLE_VALIDADOR` |
-  | | Gerir (`/ambientes/nao-publicados`) | `ROLE_GESTOR_SISTEMA` |
-  | **Usuários** | Gerir (`/usuarios`) | `ROLE_ADMINISTRADOR` |
+  | Grupo         | Itens                               | Visibilidade          |
+  |---------------|-------------------------------------|-----------------------|
+  | **Ambientes** | Listar (`/ambientes/publicados`)    | Sempre visível        |
+  |               | Validar (`/ambientes/validacao`)    | `ROLE_VALIDADOR`      |
+  |               | Gerir (`/ambientes/nao-publicados`) | `ROLE_GESTOR_SISTEMA` |
+  | **Usuários**  | Gerir (`/usuarios`)                 | `ROLE_ADMINISTRADOR`  |
 
   Um grupo inteiro some se nenhum de seus itens for visível para o usuário atual.
   O item ativo (pathname atual) é destacado com `bg-accent text-accent-foreground font-medium`.
@@ -1597,17 +1633,17 @@ Cobertura mínima recomendada: `lib/security/permissions.ts` 100%, `lib/security
 
 ## 19. Riscos
 
-| Risco | Mitigação |
-|---|---|
-| Backend não implementa `/api/usuarios/me` em tempo | Degradar: frontend mostra "Carregando..." e campos limitados (sem nome). Não é a arquitetura final — é gap. |
-| `SameSite=Lax` em redirect OAuth2 cross-site | Backend já configura `SameSite=Lax` para cookie de sessão (necessário no callback). Refresh cookie idem. Nginx mantém tudo na mesma origem em prod, eliminando cross-site. |
-| XSS injeta script | Token em memória → não há onde ler. CSP estrito (apenas `'self'`, `'unsafe-inline'` para styles, scripts none) restringe injeção. Em produção, habilitar Trusted Types se o navegador suportar. |
-| Token perdido depois de refresh concorrente | Lock via `refreshPromise` adquirido síncronamente em `lib/api/api.ts` (IIFE async atribuída antes de qualquer `await`); chamadas concorrentes compartilham a mesma promise. Teste unitário cobre rajada de 401 (ver `api.test.ts`). |
-| Backend rotaciona refresh token (vida restante < accessExpiration) | Interceptor de response não chama `setRefreshToken` (cookie gerido por `Set-Cookie` do backend, navegador atualiza automaticamente). Comportamento alinhado a `seguranca.md` §3. |
-| Adição de novo perfil | Adicionar ao enum `Role`; atualizar `ROUTE_PERMISSIONS`/`ACTION_PERMISSIONS`; sem refactor estrutural |
-| Drawer em iOS Safari mais antigo | `body { position: relative; }` em `globals.css` resolve overlay; Base UI cobre iOS 12+. Se necessário, fallback para `Dialog` em viewport mínima. |
-| Modais UC07–UC17 com listas longas (mobile e desktop) | `<ResponsiveModal>` mantém header/footer fixos e concentra o scroll no corpo em ambas as variantes (desktop: `grid-rows-[auto_minmax(0,1fr)_auto]` + `overflow-hidden`; mobile: `max-h-[85dvh]` com `flex-1 overflow-y-auto`). Em listas longas no `Drawer`, `snapPoints` habilitam drag-to-expand; a guarda global `max-h-[calc(100dvh-2rem)] overflow-y-auto` do `DialogContent` cobre modais que não usam o wrapper. |
-| Avatar sem foto real | Backend não provê `picture` do Google hoje; `<AvatarFallback>` com iniciais já cobre UX. Adicionar `picture` ao `Usuario` + endpoint é evolução futura. |
+| Risco                                                              | Mitigação                                                                                                                                                                                                                                                                                                                                                                                                               |
+|--------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Backend não implementa `/api/usuarios/me` em tempo                 | Degradar: frontend mostra "Carregando..." e campos limitados (sem nome). Não é a arquitetura final — é gap.                                                                                                                                                                                                                                                                                                             |
+| `SameSite=Lax` em redirect OAuth2 cross-site                       | Backend já configura `SameSite=Lax` para cookie de sessão (necessário no callback). Refresh cookie idem. Nginx mantém tudo na mesma origem em prod, eliminando cross-site.                                                                                                                                                                                                                                              |
+| XSS injeta script                                                  | Token em memória → não há onde ler. CSP estrito (apenas `'self'`, `'unsafe-inline'` para styles, scripts none) restringe injeção. Em produção, habilitar Trusted Types se o navegador suportar.                                                                                                                                                                                                                         |
+| Token perdido depois de refresh concorrente                        | Lock via `refreshPromise` adquirido síncronamente em `lib/api/api.ts` (IIFE async atribuída antes de qualquer `await`); chamadas concorrentes compartilham a mesma promise. Teste unitário cobre rajada de 401 (ver `api.test.ts`).                                                                                                                                                                                     |
+| Backend rotaciona refresh token (vida restante < accessExpiration) | Interceptor de response não chama `setRefreshToken` (cookie gerido por `Set-Cookie` do backend, navegador atualiza automaticamente). Comportamento alinhado a `seguranca.md` §3.                                                                                                                                                                                                                                        |
+| Adição de novo perfil                                              | Adicionar ao enum `Role`; atualizar `ROUTE_PERMISSIONS`/`ACTION_PERMISSIONS`; sem refactor estrutural                                                                                                                                                                                                                                                                                                                   |
+| Drawer em iOS Safari mais antigo                                   | `body { position: relative; }` em `globals.css` resolve overlay; Base UI cobre iOS 12+. Se necessário, fallback para `Dialog` em viewport mínima.                                                                                                                                                                                                                                                                       |
+| Modais UC07–UC17 com listas longas (mobile e desktop)              | `<ResponsiveModal>` mantém header/footer fixos e concentra o scroll no corpo em ambas as variantes (desktop: `grid-rows-[auto_minmax(0,1fr)_auto]` + `overflow-hidden`; mobile: `max-h-[85dvh]` com `flex-1 overflow-y-auto`). Em listas longas no `Drawer`, `snapPoints` habilitam drag-to-expand; a guarda global `max-h-[calc(100dvh-2rem)] overflow-y-auto` do `DialogContent` cobre modais que não usam o wrapper. |
+| Avatar sem foto real                                               | Backend não provê `picture` do Google hoje; `<AvatarFallback>` com iniciais já cobre UX. Adicionar `picture` ao `Usuario` + endpoint é evolução futura.                                                                                                                                                                                                                                                                 |
 
 ---
 
