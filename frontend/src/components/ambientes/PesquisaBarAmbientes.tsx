@@ -1,5 +1,6 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { useMemo, useState } from 'react'
 import { type Filtros, FILTROS_VAZIOS, derivarTipoFiltro } from '@/types/ambientes/filtros'
 import { chaveTipoAmbiente, TipoAmbiente, TipoFiltro } from '@/types/ambientes/enums'
@@ -162,24 +163,29 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
         onChange={(v) => setLocal({ ...local, blocoId: v.id })}
       />
 
-      <Input
-        type="number"
-        placeholder="Andar"
-        aria-label="Filtrar por andar"
-        value={local.andar ?? ''}
-        onChange={(e) => handleAndarChange(e.target.value)}
-        min={0}
-      />
+      <div className="space-y-1.5">
+        <Label htmlFor="filtro-andar">Andar</Label>
+        <Input
+          id="filtro-andar"
+          type="number"
+          placeholder="Ex.: 0"
+          aria-label="Filtrar por andar"
+          value={local.andar ?? ''}
+          onChange={(e) => handleAndarChange(e.target.value)}
+          min={0}
+        />
+      </div>
     </div>
   )
 
   const campoTipo = (
-    <div className="max-w-md">
+    <div className="max-w-md space-y-1.5">
+      <Label htmlFor="filtro-tipo-barra">Tipo</Label>
       <Select
         value={local.tipo}
         onValueChange={(value) => setLocal({ ...local, tipo: value ?? '' })}
       >
-        <SelectTrigger aria-label="Filtrar por tipo">
+        <SelectTrigger id="filtro-tipo-barra" aria-label="Filtrar por tipo">
           <SelectValue placeholder="Selecione o tipo">
             {local.tipo ? rotuloTipo(local.tipo) : undefined}
           </SelectValue>

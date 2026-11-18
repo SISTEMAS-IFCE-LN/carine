@@ -102,6 +102,26 @@ describe('BlocoPage', () => {
         expect(urlSegundo.searchParams.get('andar')).toBe('2')
     })
 
+    it('inclui campus e unidade da navegação nos links da listagem', () => {
+        renderPage('/bloco/12', NAV_STATE)
+
+        const urlTodos = hrefDoLink('Ver todos os ambientes do bloco')
+        expect(urlTodos.searchParams.get('campusId')).toBe('1')
+        expect(urlTodos.searchParams.get('unidadeId')).toBe('2')
+        expect(urlTodos.searchParams.get('blocoId')).toBe('12')
+
+        const urlTipo = hrefDoLink('Ver 8 ambientes do tipo Sala de Aula')
+        expect(urlTipo.searchParams.get('campusId')).toBe('1')
+        expect(urlTipo.searchParams.get('unidadeId')).toBe('2')
+        expect(urlTipo.searchParams.get('blocoId')).toBe('12')
+        expect(urlTipo.searchParams.get('tipo')).toBe('Sala de Aula')
+
+        const urlAndar = hrefDoLink('Ver ambientes do térreo')
+        expect(urlAndar.searchParams.get('campusId')).toBe('1')
+        expect(urlAndar.searchParams.get('unidadeId')).toBe('2')
+        expect(urlAndar.searchParams.get('andar')).toBe('0')
+    })
+
     it('usa singular quando o total é 1', () => {
         vi.mocked(useBlocoResumo).mockReturnValue(resultado({
             ...RESUMO,

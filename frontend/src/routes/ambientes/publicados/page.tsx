@@ -1,5 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {useEffect, useMemo} from 'react'
+import {useNavigate} from 'react-router'
 import {fetchPublicados} from '@/lib/api/api-publicados'
 import type {AmbientesQuery} from '@/types/ambientes/query'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
@@ -7,6 +8,7 @@ import {TabelaPadrao} from '@/components/ambientes/TabelaPadrao'
 import {AcoesLote} from '@/components/ambientes/AcoesLote'
 import {ErrorLista} from '@/components/common/ErrorLista'
 import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
+import {Button} from '@/components/ui/button'
 import {toast} from 'sonner'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
@@ -14,6 +16,7 @@ import {useAuth} from '@/hooks/useAuth'
 
 export function PublicadosPage() {
     const {user} = useAuth()
+    const navigate = useNavigate()
     const autenticado = user !== null
 
     const {
@@ -68,6 +71,11 @@ export function PublicadosPage() {
 
     return (
         <div className="space-y-4">
+            <div>
+                <Button variant="outline" onClick={() => navigate(-1)}>
+                    Voltar
+                </Button>
+            </div>
             <PesquisaBarAmbientes
                 initial={filtrosLocal}
                 onChange={(novosFiltros) => {

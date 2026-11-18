@@ -134,6 +134,24 @@ describe('PublicadosPage', () => {
         mockNavigate.mockClear()
     })
 
+    it('volta para a página anterior ao clicar em Voltar', () => {
+        vi.mocked(useAuth).mockReturnValue({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            login: vi.fn(),
+            logout: vi.fn(),
+            refreshUser: vi.fn(),
+        })
+        vi.mocked(fetchPublicados).mockResolvedValue(mockData)
+
+        renderPage()
+
+        fireEvent.click(screen.getByRole('button', {name: 'Voltar'}))
+
+        expect(mockNavigate).toHaveBeenCalledWith(-1)
+    })
+
     describe('usuário anônimo (UC21-FE)', () => {
         it('não renderiza checkbox nem AcoesLote', async () => {
             vi.mocked(useAuth).mockReturnValue({

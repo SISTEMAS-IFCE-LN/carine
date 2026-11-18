@@ -22,6 +22,9 @@ export function BlocoPage() {
     const {data: resumo, isLoading, error, refetch} =
         useBlocoResumo(idValido ? id : null)
 
+    const campusId = estado.campus?.id
+    const unidadeId = estado.unidade?.id
+
     const trilhos: TrilhoBreadcrumb[] = [
         ...(estado.campus
             ? [{nome: estado.campus.nome, href: rotaCampus(estado.campus.id)}]
@@ -60,7 +63,7 @@ export function BlocoPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <h1 className="text-2xl font-bold">{resumo.nome}</h1>
                 <Link
-                    to={rotaListagemPublicados({blocoId: resumo.id})}
+                    to={rotaListagemPublicados({campusId, unidadeId, blocoId: resumo.id})}
                     className={buttonVariants({variant: 'outline'})}
                 >
                     Ver todos os ambientes do bloco
@@ -91,7 +94,12 @@ export function BlocoPage() {
                         {resumo.tipos.map((item) => (
                             <CardLink
                                 key={item.tipo}
-                                to={rotaListagemPublicados({blocoId: resumo.id, tipo: item.tipo})}
+                                to={rotaListagemPublicados({
+                                    campusId,
+                                    unidadeId,
+                                    blocoId: resumo.id,
+                                    tipo: item.tipo,
+                                })}
                                 ariaLabel={`Ver ${item.total} ambiente${item.total === 1 ? '' : 's'} do tipo ${item.tipo}`}
                                 titulo={item.tipo}
                                 descricao={`${item.total} ambiente${item.total === 1 ? '' : 's'}`}
@@ -110,7 +118,12 @@ export function BlocoPage() {
                         {resumo.andares.map((item) => (
                             <CardLink
                                 key={item.andar}
-                                to={rotaListagemPublicados({blocoId: resumo.id, andar: item.andar})}
+                                to={rotaListagemPublicados({
+                                    campusId,
+                                    unidadeId,
+                                    blocoId: resumo.id,
+                                    andar: item.andar,
+                                })}
                                 ariaLabel={`Ver ambientes do ${item.andar === 0 ? 'térreo' : `andar ${item.andar}`}`}
                                 titulo={formatarAndar(item.andar)}
                                 descricao={`${item.total} ambiente${item.total === 1 ? '' : 's'}`}
