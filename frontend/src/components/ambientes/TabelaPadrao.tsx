@@ -9,6 +9,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import type { AmbienteBasico } from '@/types/ambientes/response'
 import { Link } from 'react-router'
+import { formatarAndarCompacto as formatarAndar } from '@/lib/ambientes/formatters'
 
 interface TabelaPadraoProps {
     itens: AmbienteBasico[]
@@ -20,10 +21,6 @@ interface TabelaPadraoProps {
     onToggleSelectAll?: () => void
     allSelected?: boolean
     someSelected?: boolean
-}
-
-function formatarAndar(andar: number): string {
-    return andar === 0 ? 'Térreo' : `${andar}º`
 }
 
 export function TabelaPadrao({

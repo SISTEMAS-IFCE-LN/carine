@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchPublicados, fetchDetalhePublicados, fetchEsquadriasPublicados } from './api-publicados'
+import { fetchPublicados, fetchDetalhePublicados, fetchEsquadriasPublicados, fetchCampusPublicados, fetchUnidadesPublicados, fetchBlocosPublicados } from './api-publicados'
 import { api } from '@/lib/api/api'
 import { TipoFiltro } from '@/types/ambientes/enums'
 
@@ -428,5 +428,46 @@ describe('fetchEsquadrias', () => {
       },
     })
     await expect(fetchEsquadriasPublicados({ ids: [1], page: 0, size: 100 })).rejects.toThrow()
+  })
+})
+
+describe('referências publicadas', () => {
+  beforeEach(() => {
+    vi.mocked(api.get).mockClear()
+  })
+
+  it('chama /api/ambientes/publicados/campus', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: [{ id: 1, nome: 'LIMOEIRO DO NORTE' }] })
+
+    await expect(fetchCampusPublicados()).resolves.toEqual([{ id: 1, nome: 'LIMOEIRO DO NORTE' }])
+    expect(api.get).toHaveBeenCalledWith('/api/ambientes/publicados/campus', { signal: undefined })
+  })
+
+  it('chama /api/ambientes/publicados/unidades com campusId', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: [{ id: 2, nome: 'CIDADE ALTA' }] })
+
+    await fetchUnidadesPublicados(1)
+
+    expect(api.get).toHaveBeenCalledWith('/api/ambientes/publicados/unidades', {
+      params: { campusId: 1 },
+      signal: undefined,
+    })
+  })
+
+  it('chama /api/ambientes/publicados/blocos com unidadeId', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: [{ id: 3, nome: 'BLOCO 2' }] })
+
+    await fetchBlocosPublicados(2)
+
+    expect(api.get).toHaveBeenCalledWith('/api/ambientes/publicados/blocos', {
+      params: { unidadeId: 2 },
+      signal: undefined,
+    })
+  })
+
+  it('valida a resposta com Zod', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: [{ id: 'invalid', nome: 'X' }] })
+
+    await expect(fetchCampusPublicados()).rejects.toThrow()
   })
 })

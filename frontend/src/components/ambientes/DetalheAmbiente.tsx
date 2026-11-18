@@ -7,16 +7,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import type {AmbienteDetalhe} from '@/types/ambientes/response'
-
-const DECIMAIS_MEDIDA = 2
-
-function formatarMedida(valor: number): string {
-    return valor.toFixed(DECIMAIS_MEDIDA)
-}
-
-function formatarAndar(andar: number): string {
-    return andar === 0 ? 'Térreo' : `${andar}º Andar`
-}
+import {formatarAndar, formatarMedida} from '@/lib/ambientes/formatters'
 
 function obterDimensoesAmbiente(base: number, altura: number): { comprimento: number; largura: number } {
     return {

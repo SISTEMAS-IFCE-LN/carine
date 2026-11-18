@@ -11,16 +11,7 @@ import type {
     EsquadriaTipoMaterial,
     EsquadriasResponse,
 } from '@/types/ambientes/esquadrias'
-
-const DECIMAIS_MEDIDA = 2
-
-function formatarMedida(valor: number): string {
-    return valor.toFixed(DECIMAIS_MEDIDA)
-}
-
-function formatarAndar(andar: number): string {
-    return andar === 0 ? 'Térreo' : `${andar}º Andar`
-}
+import {formatarAndar, formatarMedida} from '@/lib/ambientes/formatters'
 
 function ResumoTipoMaterial({ itens }: { itens: EsquadriaTipoMaterial[] }) {
     if (itens.length === 0) return null
