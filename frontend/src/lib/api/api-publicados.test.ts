@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchPublicados, fetchDetalhePublicados, fetchEsquadriasPublicados, fetchCampusPublicados, fetchUnidadesPublicados, fetchBlocosPublicados } from './api-publicados'
+import { fetchPublicados, fetchDetalhePublicados, fetchEsquadriasPublicados, fetchCampusPublicados, fetchUnidadesPublicados, fetchBlocosPublicados, fetchBlocoResumo } from './api-publicados'
 import { api } from '@/lib/api/api'
 import { TipoFiltro } from '@/types/ambientes/enums'
 
@@ -469,5 +469,25 @@ describe('referências publicadas', () => {
     vi.mocked(api.get).mockResolvedValueOnce({ data: [{ id: 'invalid', nome: 'X' }] })
 
     await expect(fetchCampusPublicados()).rejects.toThrow()
+  })
+
+  it('chama o resumo do bloco e valida o contrato', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({
+      data: {
+        id: 12,
+        nome: 'BLOCO 2',
+        areaTotal: 345.67,
+        pavimentos: 4,
+        capacidadeTotal: 210,
+        tipos: [{ tipo: 'Sala de Aula', total: 8 }],
+        andares: [{ andar: 0, total: 3 }],
+      },
+    })
+
+    const resultado = await fetchBlocoResumo(12)
+
+    expect(api.get).toHaveBeenCalledWith('/api/ambientes/publicados/blocos/12/resumo', { signal: undefined })
+    expect(resultado.id).toBe(12)
+    expect(resultado.tipos[0].tipo).toBe('Sala de Aula')
   })
 })

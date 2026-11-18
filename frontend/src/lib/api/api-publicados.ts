@@ -5,6 +5,7 @@ import {
 import type {AmbientesQuery, EsquadriasQuery} from '@/types/ambientes/query'
 import type {EsquadriasResponse} from '@/types/ambientes/esquadrias'
 import {ReferenciaListSchema, type ReferenciaRes} from '@/types/ambientes/referencia'
+import {BlocoResumoSchema, type BlocoResumo} from '@/types/ambientes/bloco'
 import {API_ROUTES} from '@/constants/routes'
 import {api} from '@/lib/api/api'
 import {fetchAmbientes, fetchDetalheAmbiente, fetchEsquadriasAmbientes} from '@/lib/api/api-ambientes'
@@ -55,4 +56,15 @@ export async function fetchBlocosPublicados(
         signal,
     })
     return ReferenciaListSchema.parse(data)
+}
+
+export async function fetchBlocoResumo(
+    blocoId: number,
+    signal?: AbortSignal,
+): Promise<BlocoResumo> {
+    const {data} = await api.get(
+        `${API_ROUTES.PUBLICADO_BLOCOS}/${blocoId}/resumo`,
+        {signal},
+    )
+    return BlocoResumoSchema.parse(data)
 }

@@ -1,5 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {
+    fetchBlocoResumo,
     fetchBlocosPublicados,
     fetchCampusPublicados,
     fetchUnidadesPublicados,
@@ -35,5 +36,14 @@ export function useBlocosPublicados(unidadeId: number | null, options: OpcoesQue
         queryFn: ({signal}) => fetchBlocosPublicados(unidadeId!, signal),
         staleTime: 30_000,
         enabled: (options.enabled ?? true) && unidadeId !== null,
+    })
+}
+
+export function useBlocoResumo(blocoId: number | null) {
+    return useQuery({
+        queryKey: [...REFERENCIAS_PUBLICADAS_QUERY_KEY, 'bloco-resumo', blocoId],
+        queryFn: ({signal}) => fetchBlocoResumo(blocoId!, signal),
+        staleTime: 30_000,
+        enabled: blocoId !== null,
     })
 }

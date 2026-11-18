@@ -8,6 +8,7 @@ export const ProtectedLayout = lazy(() => import('@/routes/_layout/protected-lay
 export const HomePage = lazy(() => import('@/routes/home/page').then(m => ({default: m.HomePage})))
 export const CampusPage = lazy(() => import('@/routes/campus/[id]/page').then(m => ({default: m.CampusPage})))
 export const UnidadePage = lazy(() => import('@/routes/unidade/[id]/page').then(m => ({default: m.UnidadePage})))
+export const BlocoPage = lazy(() => import('@/routes/bloco/[id]/page').then(m => ({default: m.BlocoPage})))
 export const PublicadosPage = lazy(() => import('@/routes/ambientes/publicados/page').then(m => ({default: m.PublicadosPage})))
 export const PublicadoDetalhePage = lazy(() => import('@/routes/ambientes/publicados/[id]/page').then(m => ({default: m.PublicadoDetalhePage})))
 export const EsquadriasPage = lazy(() => import('@/routes/ambientes/publicados/esquadrias/page').then(m => ({default: m.EsquadriasPage})))
