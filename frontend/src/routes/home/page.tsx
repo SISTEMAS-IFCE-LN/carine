@@ -15,15 +15,20 @@ export function HomePage() {
 
     return (
         <section className="space-y-6">
-            <header className="space-y-2">
-                <h1 className="text-2xl font-bold">Catálogo de Edificações</h1>
-                <p className="text-muted-foreground">
-                    Explore os ambientes por campus, unidade e bloco.
-                </p>
-                <Link to={PAGES_ROUTES.PUBLICADOS} className={buttonVariants()}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="space-y-2">
+                    <h1 className="text-2xl font-bold">Campus disponíveis</h1>
+                    <p className="text-muted-foreground">
+                        Explore os ambientes de cada campus.
+                    </p>
+                </div>
+                <Link
+                    to={PAGES_ROUTES.PUBLICADOS}
+                    className={buttonVariants({variant: 'outline'})}
+                >
                     Ver todos os ambientes
                 </Link>
-            </header>
+            </div>
 
             {campi.length === 0 ? (
                 <EstadoVazio mensagem="Nenhum ambiente publicado no momento."/>
