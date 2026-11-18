@@ -15,6 +15,7 @@ import {Role} from '@/types/usuarios/user'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
 import {toast} from 'sonner'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 export function NaoPublicadosPage() {
     const navigate = useNavigate()
@@ -61,7 +62,11 @@ export function NaoPublicadosPage() {
     async function confirmarLote() {
         const ids = selecao.selectedIds
         if (modalLote === 'validar') await enviarParaValidacao(ids)
-        else if (modalLote === 'deletar') await deletarAmbientes(ids)
+        else if (modalLote === 'deletar') {
+            await deletarAmbientes(ids)
+            // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19).
+            invalidarReferenciasPublicadas(queryClient)
+        }
         toast.success('Operação concluída.')
         selecao.limparSelecao()
         void queryClient.invalidateQueries({queryKey: ['ambientes', 'nao-publicados']})
@@ -91,6 +96,7 @@ export function NaoPublicadosPage() {
                     selecao.limparSelecao()
                     handleFiltrosChange(novosFiltros)
                 }}
+                fonte="gerais"
             />
             {isLoading ? (
                 <p>Carregando…</p>

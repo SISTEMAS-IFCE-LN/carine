@@ -60,6 +60,7 @@ export function ValidacaoPage() {
             <PesquisaBarAmbientes
                 initial={filtrosLocal}
                 onChange={handleFiltrosChange}
+                fonte="gerais"
             />
             {isLoading ? (
                 <p>Carregando…</p>

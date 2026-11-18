@@ -44,6 +44,21 @@ vi.mock('@/hooks/useReferencias', () => ({
     }),
 }))
 
+vi.mock('@/hooks/useReferenciasPublicadas', () => ({
+    useCampusPublicados: () => ({
+        data: [{ id: 1, nome: 'LIMOEIRO DO NORTE' }],
+        isLoading: false,
+    }),
+    useUnidadesPublicados: () => ({
+        data: [{ id: 1, nome: 'SEDE' }],
+        isLoading: false,
+    }),
+    useBlocosPublicados: () => ({
+        data: [{ id: 1, nome: 'BLOCO 1' }],
+        isLoading: false,
+    }),
+}))
+
 const mockNavigate = vi.fn()
 vi.mock('react-router', async (importOriginal) => {
     const actual = await importOriginal<typeof import('react-router')>()
@@ -292,20 +307,20 @@ describe('PublicadosPage', () => {
             })
         })
 
-        it('ignora blocoId sem unidade e inicia sem filtro', async () => {
+        it('preserva blocoId sem unidade e usa filtro de localização', async () => {
             mockAnonimo()
             vi.mocked(fetchPublicados).mockResolvedValue(mockData)
             renderPage(['/ambientes/publicados?blocoId=1'])
             await waitFor(() => {
                 expect(fetchPublicados).toHaveBeenCalledWith(
-                    expect.objectContaining({ tipoFiltro: TipoFiltro.NENHUM }),
+                    expect.objectContaining({ tipoFiltro: TipoFiltro.LOCALIZACAO }),
                     expect.anything(),
                 )
             })
             const [query] = vi.mocked(fetchPublicados).mock.calls[0]
             expect(query.campusId).toBeUndefined()
             expect(query.unidadeId).toBeUndefined()
-            expect(query.blocoId).toBeUndefined()
+            expect(query.blocoId).toBe(1)
         })
     })
 })

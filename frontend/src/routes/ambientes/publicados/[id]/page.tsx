@@ -11,6 +11,7 @@ import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
 import {Role} from '@/types/usuarios/user'
 import {toast} from 'sonner'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 export function PublicadoDetalhePage() {
     const {id} = useParams<{ id: string }>()
@@ -36,6 +37,7 @@ export function PublicadoDetalhePage() {
         await privarAmbiente(ambiente.id)
         toast.success('Ambiente privado.')
         void queryClient.invalidateQueries({queryKey: ['ambientes', 'publicados']})
+        invalidarReferenciasPublicadas(queryClient)
         navigate(PAGES_ROUTES.PUBLICADOS)
     }
 

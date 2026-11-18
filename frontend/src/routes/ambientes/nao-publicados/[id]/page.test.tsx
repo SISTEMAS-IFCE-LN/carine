@@ -7,6 +7,7 @@ import {NaoPublicadoDetalhePage} from './page'
 import type {AmbienteDetalhe} from '@/types/ambientes/response'
 import type {User} from '@/types/usuarios/user'
 import {Role} from '@/types/usuarios/user'
+import {REFERENCIAS_PUBLICADAS_QUERY_KEY} from '@/hooks/useReferenciasPublicadas'
 import {
     MaterialEsquadria,
     StatusAmbiente,
@@ -233,6 +234,7 @@ describe('NaoPublicadoDetalhePage', () => {
             expect(toast.success).toHaveBeenCalledWith('Operação concluída.')
             // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19)
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['referencias']})
+            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
             expect(await screen.findByText('lista')).toBeInTheDocument()
         })
 
@@ -315,6 +317,7 @@ describe('NaoPublicadoDetalhePage', () => {
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['ambientes', 'nao-publicados']})
             // UC17: a duplicação pode criar campus/unidade/bloco novos
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['referencias']})
+            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
             expect(await screen.findByText('detalhe-duplicado')).toBeInTheDocument()
         })
 
@@ -394,6 +397,7 @@ describe('NaoPublicadoDetalhePage', () => {
             })
             // UC07 altera a localização → referências também precisam ser revalidadas
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['referencias']})
+            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
         })
 
         it('mantém o modal aberto em erro do backend (mensagem corrigível)', async () => {
@@ -595,6 +599,7 @@ describe('NaoPublicadoDetalhePage', () => {
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['ambientes', 'nao-publicados']})
             // UC16 pode criar campus/unidade/bloco novos
             expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['referencias']})
+            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
             expect(await screen.findByText('detalhe-duplicado')).toBeInTheDocument()
         })
     })

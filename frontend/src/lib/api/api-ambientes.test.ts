@@ -96,6 +96,21 @@ describe('fetchAmbientes', () => {
     const params = vi.mocked(api.get).mock.calls[0][1]?.params
     expect(params).not.toHaveProperty('bloco')
     expect(params).not.toHaveProperty('unidade')
+    expect(params).not.toHaveProperty('tipo')
+  })
+
+  it('envia tipo junto da localizacao em LOCALIZACAO_TIPO', async () => {
+    vi.mocked(api.get).mockResolvedValueOnce({ data: paginadoVazio })
+    await fetchAmbientes({
+      page: 0,
+      size: 20,
+      blocoId: 12,
+      tipo: 'SALA_AULA',
+      tipoFiltro: TipoFiltro.LOCALIZACAO_TIPO,
+    }, ROTA)
+    expect(api.get).toHaveBeenCalledWith(`${ROTA}/localizacao`, expect.objectContaining({
+      params: expect.objectContaining({ page: 0, size: 20, blocoId: 12, tipo: 'SALA_AULA' }),
+    }))
   })
 
   it('repassa signal ao axios', async () => {

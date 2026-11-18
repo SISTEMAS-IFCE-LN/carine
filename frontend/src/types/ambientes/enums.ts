@@ -29,6 +29,7 @@ export enum TipoFiltro {
     NOME = 'nome',
     TIPO = 'tipo',
     LOCALIZACAO = 'localizacao',
+    LOCALIZACAO_TIPO = 'localizacao-tipo',
 }
 
 export enum TipoEsquadria {
@@ -66,6 +67,26 @@ export enum StatusAmbiente {
     PUBLICADO = "Publicado",
     NAO_PUBLICADO = "Não Publicado",
     AGUARDANDO_VALIDACAO = "Aguardando Validação"
+}
+
+function normalizarTipoAmbiente(valor: string): string {
+    return valor
+        .normalize('NFD')
+        .replace(/\p{Mn}+/gu, '')
+        .toLowerCase()
+        .replace(/[^\p{L}\p{Nd}]/gu, '')
+}
+
+/** Converte rótulo/variação de `TipoAmbiente` na chave técnica; desconhecido/vazio fica inalterado. */
+export function chaveTipoAmbiente(valor: string): string {
+    const alvo = normalizarTipoAmbiente(valor)
+    if (!alvo) return valor
+    for (const [chave, rotulo] of Object.entries(TipoAmbiente)) {
+        if (normalizarTipoAmbiente(chave) === alvo || normalizarTipoAmbiente(rotulo) === alvo) {
+            return chave
+        }
+    }
+    return valor
 }
 
 // Os DTOs de detalhe retornam os nomes dos enums Kotlin (por exemplo,

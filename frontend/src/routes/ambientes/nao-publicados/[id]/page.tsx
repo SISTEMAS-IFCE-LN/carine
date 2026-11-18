@@ -29,6 +29,7 @@ import {Role} from '@/types/usuarios/user'
 import {Button} from '@/components/ui/button'
 import {PAGES_ROUTES} from '@/constants/routes'
 import {toast} from 'sonner'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 type ModalEstado =
     | null
@@ -73,6 +74,7 @@ export function NaoPublicadoDetalhePage() {
     function aoDuplicar(novoId: number) {
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
+        invalidarReferenciasPublicadas(queryCliente)
         navigate(`/ambientes/nao-publicados/${novoId}`)
     }
 
@@ -81,6 +83,7 @@ export function NaoPublicadoDetalhePage() {
     function aoAlterarTipo(novoId: number) {
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
+        invalidarReferenciasPublicadas(queryCliente)
         navigate(`/ambientes/nao-publicados/${novoId}`)
     }
 
@@ -89,6 +92,7 @@ export function NaoPublicadoDetalhePage() {
     function aoSalvarDadosBasicos() {
         invalidarDetalhe()
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
+        invalidarReferenciasPublicadas(queryCliente)
     }
 
     async function confirmar() {
@@ -99,6 +103,7 @@ export function NaoPublicadoDetalhePage() {
             await deletarAmbientes([ambiente.id])
             // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19).
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
+            invalidarReferenciasPublicadas(queryCliente)
             navigate(PAGES_ROUTES.NAO_PUBLICADOS)
         } else if (modal === 'enviar-validacao') {
             await enviarParaValidacao([ambiente.id])

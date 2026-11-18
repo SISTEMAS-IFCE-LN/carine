@@ -5,25 +5,30 @@ import {
     fetchUnidades,
 } from '@/lib/api/api-referencia'
 
-export function useCampus() {
+interface OpcoesQuery {
+    enabled?: boolean
+}
+
+export function useCampus(options: OpcoesQuery = {}) {
     return useQuery({
         queryKey: ['referencias', 'campus'],
         queryFn: ({signal}) => fetchCampus(signal),
+        enabled: options.enabled ?? true,
     })
 }
 
-export function useUnidades(campusId: number | null) {
+export function useUnidades(campusId: number | null, options: OpcoesQuery = {}) {
     return useQuery({
         queryKey: ['referencias', 'unidades', campusId],
         queryFn: ({signal}) => fetchUnidades(campusId!, signal),
-        enabled: campusId !== null,
+        enabled: (options.enabled ?? true) && campusId !== null,
     })
 }
 
-export function useBlocos(unidadeId: number | null) {
+export function useBlocos(unidadeId: number | null, options: OpcoesQuery = {}) {
     return useQuery({
         queryKey: ['referencias', 'blocos', unidadeId],
         queryFn: ({signal}) => fetchBlocos(unidadeId!, signal),
-        enabled: unidadeId !== null,
+        enabled: (options.enabled ?? true) && unidadeId !== null,
     })
 }

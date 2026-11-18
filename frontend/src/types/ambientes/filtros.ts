@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import {TipoFiltro} from '@/types/ambientes/enums'
 
 export interface Filtros {
     nome: string
@@ -54,3 +55,16 @@ export const UrlFiltrosSchema = z.object({
 // Subconjunto para os hooks de search params: apenas os campos de filtro.
 // `page`/`size` passaram a ser responsabilidade de `usePaginationParams`.
 export const FiltrosUrlSchema = UrlFiltrosSchema.omit({ page: true, size: true })
+
+/** Prioridade fechada: NOME → LOCALIZACAO_TIPO → TIPO → LOCALIZACAO → NENHUM. */
+export function derivarTipoFiltro(f: Filtros): TipoFiltro {
+    const temLocalizacao =
+        f.campusId !== null || f.unidadeId !== null ||
+        f.blocoId !== null || f.andar !== null
+
+    if (f.nome) return TipoFiltro.NOME
+    if (f.tipo && temLocalizacao) return TipoFiltro.LOCALIZACAO_TIPO
+    if (f.tipo) return TipoFiltro.TIPO
+    if (temLocalizacao) return TipoFiltro.LOCALIZACAO
+    return TipoFiltro.NENHUM
+}

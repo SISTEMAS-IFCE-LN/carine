@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { REFERENCIAS_PUBLICADAS_QUERY_KEY } from '@/hooks/useReferenciasPublicadas'
 import { NovoAmbientePage } from './page'
 import type { AmbienteInput } from '@/types/ambientes/request'
 import { toast } from 'sonner'
@@ -89,6 +90,7 @@ describe('NovoAmbientePage', () => {
     expect(toast.success).toHaveBeenCalledWith('Ambiente criado.')
     // O find-or-create pode criar campus/unidade/bloco → invalida o prefixo inteiro.
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['referencias'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
     expect(mockNavigate).toHaveBeenCalledWith('/ambientes/nao-publicados/42')
   })
 

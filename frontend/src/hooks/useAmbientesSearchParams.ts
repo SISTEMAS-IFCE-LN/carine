@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router'
-import { type Filtros, FiltrosUrlSchema, FILTROS_VAZIOS } from '@/types/ambientes/filtros'
-import { TipoFiltro } from '@/types/ambientes/enums'
+import { type Filtros, FiltrosUrlSchema, FILTROS_VAZIOS, derivarTipoFiltro } from '@/types/ambientes/filtros'
+import { chaveTipoAmbiente, TipoFiltro } from '@/types/ambientes/enums'
 import { usePaginationParams } from '@/hooks/usePaginationParams'
 import { useFiltroLocal } from '@/hooks/useFiltroLocal'
 
@@ -18,13 +18,6 @@ export interface AmbientesSearchParams {
 }
 
 // Acoplamento: filho só existe com o pai.
-function normalizar(f: Filtros): Filtros {
-    let n = f
-    if (n.unidadeId !== null && n.campusId === null) n = { ...n, unidadeId: null }
-    if (n.blocoId !== null && n.unidadeId === null) n = { ...n, blocoId: null }
-    return n
-}
-
 export function useAmbientesSearchParams(): AmbientesSearchParams {
     const [searchParams] = useSearchParams()
     const { page, size, handlePageChange, handleSizeChange, updateSearchParams } = usePaginationParams()
@@ -39,14 +32,16 @@ export function useAmbientesSearchParams(): AmbientesSearchParams {
             andar: searchParams.get('andar'),
             tipo: searchParams.get('tipo'),
         })
-        return result.success ? normalizar(result.data) : FILTROS_VAZIOS
+        if (!result.success) return FILTROS_VAZIOS
+        return {...result.data, tipo: chaveTipoAmbiente(result.data.tipo)}
     }, [searchParams])
 
     // Rascunho local sincronizado com a URL (back/forward) — delegado a useFiltroLocal
     const { local: filtrosLocal, setLocal: setFiltrosLocal } = useFiltroLocal<Filtros>(filtros)
 
     function handleFiltrosChange(novosFiltros: Filtros) {
-        const filtros = normalizar(novosFiltros)
+        // idempotente: chave técnica continua chave; rótulo/variação vira chave
+        const filtros = {...novosFiltros, tipo: chaveTipoAmbiente(novosFiltros.tipo)}
         setFiltrosLocal(filtros)
         updateSearchParams({
             nome: filtros.nome || null,
@@ -60,13 +55,7 @@ export function useAmbientesSearchParams(): AmbientesSearchParams {
     }
 
     // Derivar tipoFiltro a partir dos filtros ativos
-    const tipoFiltro = useMemo<TipoFiltro>(() => {
-        if (filtros.nome) return TipoFiltro.NOME
-        if (filtros.tipo) return TipoFiltro.TIPO
-        if (filtros.campusId !== null || filtros.unidadeId !== null ||
-            filtros.blocoId !== null || filtros.andar !== null) return TipoFiltro.LOCALIZACAO
-        return TipoFiltro.NENHUM
-    }, [filtros])
+    const tipoFiltro = useMemo<TipoFiltro>(() => derivarTipoFiltro(filtros), [filtros])
 
     return {
         page,

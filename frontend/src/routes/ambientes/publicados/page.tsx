@@ -74,6 +74,7 @@ export function PublicadosPage() {
                     selecao.limparSelecao()
                     handleFiltrosChange(novosFiltros)
                 }}
+                fonte="publicados"
             />
             {isLoading ? (
                 <p>Carregando…</p>

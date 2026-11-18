@@ -44,6 +44,7 @@ vi.mock('@/hooks/useReferencias', () => ({
 }))
 
 import {deletarAmbientes, enviarParaValidacao, fetchNaoPublicados} from '@/lib/api/api-naopublicados'
+import {REFERENCIAS_PUBLICADAS_QUERY_KEY} from '@/hooks/useReferenciasPublicadas'
 import {useAuth} from '@/hooks/useAuth'
 
 const userGestor: User = {
@@ -185,7 +186,9 @@ describe('NaoPublicadosPage', () => {
     it('deletar o lote chama deletarAmbientes com os ids selecionados', async () => {
         vi.mocked(fetchNaoPublicados).mockResolvedValue(PAGINA)
         vi.mocked(deletarAmbientes).mockResolvedValueOnce(undefined)
-        renderPage()
+        const queryClient = createQueryClient()
+        const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+        renderPage(queryClient)
 
         await selecionarEExecutarAcao('Deletar')
         expect(await screen.findByText('Deletar ambientes selecionados?')).toBeInTheDocument()
@@ -193,6 +196,7 @@ describe('NaoPublicadosPage', () => {
 
         await waitFor(() => expect(deletarAmbientes).toHaveBeenCalledWith([1]))
         expect(toast.success).toHaveBeenCalledWith('Operação concluída.')
+        expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
     })
 
     it('envia campusId/unidadeId/blocoId da URL ao buscar', async () => {
@@ -213,20 +217,20 @@ describe('NaoPublicadosPage', () => {
         })
     })
 
-    it('ignora blocoId sem unidade e inicia sem filtro', async () => {
+    it('preserva blocoId sem unidade e usa filtro de localização', async () => {
         vi.mocked(fetchNaoPublicados).mockResolvedValue(PAGINA)
         renderPage(undefined, ['/ambientes/nao-publicados?blocoId=1'])
 
         await waitFor(() => {
             expect(fetchNaoPublicados).toHaveBeenCalledWith(
-                expect.objectContaining({tipoFiltro: TipoFiltro.NENHUM}),
+                expect.objectContaining({tipoFiltro: TipoFiltro.LOCALIZACAO}),
                 expect.anything(),
             )
         })
         const [query] = vi.mocked(fetchNaoPublicados).mock.calls[0]
         expect(query.campusId).toBeUndefined()
         expect(query.unidadeId).toBeUndefined()
-        expect(query.blocoId).toBeUndefined()
+        expect(query.blocoId).toBe(1)
     })
 
     it('no erro do lote mostra a mensagem do backend e mantém o modal aberto', async () => {

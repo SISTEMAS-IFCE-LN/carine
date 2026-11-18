@@ -1,4 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
+import type {QueryClient} from '@tanstack/react-query'
 import {
     fetchBlocoResumo,
     fetchBlocosPublicados,
@@ -7,6 +8,10 @@ import {
 } from '@/lib/api/api-publicados'
 
 export const REFERENCIAS_PUBLICADAS_QUERY_KEY = ['referencias-publicados'] as const
+
+export function invalidarReferenciasPublicadas(queryClient: QueryClient): void {
+    void queryClient.invalidateQueries({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
+}
 
 interface OpcoesQuery {
     enabled?: boolean

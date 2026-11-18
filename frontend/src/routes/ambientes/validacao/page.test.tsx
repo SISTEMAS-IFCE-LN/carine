@@ -168,19 +168,19 @@ describe('ValidacaoPage (UC01-FE)', () => {
         })
     })
 
-    it('ignora blocoId sem unidade e inicia sem filtro', async () => {
+    it('preserva blocoId sem unidade e usa filtro de localização', async () => {
         vi.mocked(fetchValidacao).mockResolvedValue(mockData)
         renderPage(['/ambientes/validacao?blocoId=1'])
         await waitFor(() => {
             expect(fetchValidacao).toHaveBeenCalledWith(
-                expect.objectContaining({ tipoFiltro: TipoFiltro.NENHUM }),
+                expect.objectContaining({ tipoFiltro: TipoFiltro.LOCALIZACAO }),
                 expect.anything(),
             )
         })
         const [query] = vi.mocked(fetchValidacao).mock.calls[0]
         expect(query.campusId).toBeUndefined()
         expect(query.unidadeId).toBeUndefined()
-        expect(query.blocoId).toBeUndefined()
+        expect(query.blocoId).toBe(1)
     })
 
     it('aplica filtro por tipo enviando o nome do enum', async () => {

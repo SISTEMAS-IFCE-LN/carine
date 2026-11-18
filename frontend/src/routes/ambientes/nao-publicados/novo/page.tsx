@@ -5,6 +5,7 @@ import {criarAmbiente} from '@/lib/api/api-naopublicados'
 import type {AmbienteInput} from '@/types/ambientes/request'
 import {useAsyncAction} from '@/hooks/useAsyncAction'
 import {toast} from 'sonner'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 export function NovoAmbientePage() {
     const navigate = useNavigate()
@@ -23,6 +24,7 @@ export function NovoAmbientePage() {
             // Find-or-create pode criar campus/unidade/bloco → invalida o prefixo
             // inteiro para os selects refletirem os novos registros (arquitetura-frontend.md §12; UC06-FE).
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
+            invalidarReferenciasPublicadas(queryCliente)
             toast.success('Ambiente criado.')
             navigate(`/ambientes/nao-publicados/${novo.id}`)
         })
