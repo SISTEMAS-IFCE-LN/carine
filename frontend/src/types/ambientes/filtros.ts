@@ -38,12 +38,9 @@ const AndarFiltroSchema = z.coerce.number()
     .min(0, 'Andar deve ser maior ou igual a 0')
     .nullable()
 
-// Schema para validar parâmetros da URL (evita NaN em page/size/andar)
-// Usa preprocess para converter null em undefined (searchParams.get() retorna null quando não existe)
-// Para URL, campos opcionais podem ser vazios
-export const UrlFiltrosSchema = z.object({
-    page: z.preprocess((val) => val === null ? undefined : val, z.coerce.number().int().nonnegative().default(0)),
-    size: z.preprocess((val) => val === null ? undefined : val, z.coerce.number().int().positive().default(20)),
+// Schema para validar parâmetros de filtro da URL.
+// Usa preprocess para converter null em undefined (searchParams.get() retorna null quando não existe).
+export const FiltrosUrlSchema = z.object({
     nome: z.preprocess((val) => val === null ? undefined : val, NomeFiltroSchema.default('')),
     tipo: z.preprocess((val) => val === null ? undefined : val, TipoFiltroSchema.default('')),
     campusId: IdFiltroSchema,
@@ -52,19 +49,19 @@ export const UrlFiltrosSchema = z.object({
     andar: z.preprocess((val) => val === null ? undefined : val, AndarFiltroSchema.default(null)),
 })
 
-// Subconjunto para os hooks de search params: apenas os campos de filtro.
-// `page`/`size` passaram a ser responsabilidade de `usePaginationParams`.
-export const FiltrosUrlSchema = UrlFiltrosSchema.omit({ page: true, size: true })
+/** Verdadeiro quando ao menos um campo de localização está ativo. */
+export function temLocalizacao(f: Filtros): boolean {
+    return f.campusId !== null || f.unidadeId !== null ||
+        f.blocoId !== null || f.andar !== null
+}
 
 /** Prioridade fechada: NOME → LOCALIZACAO_TIPO → TIPO → LOCALIZACAO → NENHUM. */
 export function derivarTipoFiltro(f: Filtros): TipoFiltro {
-    const temLocalizacao =
-        f.campusId !== null || f.unidadeId !== null ||
-        f.blocoId !== null || f.andar !== null
+    const localizacaoAtiva = temLocalizacao(f)
 
     if (f.nome) return TipoFiltro.NOME
-    if (f.tipo && temLocalizacao) return TipoFiltro.LOCALIZACAO_TIPO
+    if (f.tipo && localizacaoAtiva) return TipoFiltro.LOCALIZACAO_TIPO
     if (f.tipo) return TipoFiltro.TIPO
-    if (temLocalizacao) return TipoFiltro.LOCALIZACAO
+    if (localizacaoAtiva) return TipoFiltro.LOCALIZACAO
     return TipoFiltro.NENHUM
 }

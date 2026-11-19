@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { useMemo, useState } from 'react'
-import { type Filtros, FILTROS_VAZIOS, derivarTipoFiltro } from '@/types/ambientes/filtros'
+import { type Filtros, FILTROS_VAZIOS, derivarTipoFiltro, temLocalizacao } from '@/types/ambientes/filtros'
 import { chaveTipoAmbiente, TipoAmbiente, TipoFiltro } from '@/types/ambientes/enums'
 import {
   Select,
@@ -25,16 +25,17 @@ function rotuloTipo(tipo: string): string {
   return TipoAmbiente[tipo as keyof typeof TipoAmbiente] ?? tipo
 }
 
-// Mapeia o valor do enum TipoFiltro para o rótulo exibido
+// Opções do seletor de modo de filtro: fonte única para o trigger e o menu.
+const OPCOES_TIPO_FILTRO: ReadonlyArray<{valor: TipoFiltro; rotulo: string}> = [
+  {valor: TipoFiltro.NENHUM, rotulo: 'Nenhum'},
+  {valor: TipoFiltro.NOME, rotulo: 'Nome'},
+  {valor: TipoFiltro.TIPO, rotulo: 'Tipo'},
+  {valor: TipoFiltro.LOCALIZACAO, rotulo: 'Localização'},
+  {valor: TipoFiltro.LOCALIZACAO_TIPO, rotulo: 'Localização + Tipo'},
+]
+
 function rotuloTipoFiltro(tipo: string): string {
-  const map: Record<string, string> = {
-    '': 'Nenhum',
-    'nome': 'Nome',
-    'tipo': 'Tipo',
-    'localizacao': 'Localização',
-    'localizacao-tipo': 'Localização + Tipo',
-  }
-  return map[tipo] ?? tipo
+  return OPCOES_TIPO_FILTRO.find((opcao) => opcao.valor === tipo)?.rotulo ?? tipo
 }
 
 export interface PesquisaBarAmbientesProps {
@@ -104,14 +105,10 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
   }
 
   function handleAplicar() {
-    const temLocalizacao =
-      local.campusId !== null || local.unidadeId !== null ||
-      local.blocoId !== null || local.andar !== null
-
     // Validar antes de aplicar
     if (tipoFiltro === TipoFiltro.NOME && !local.nome.trim()) return
     if (tipoFiltro === TipoFiltro.TIPO && !local.tipo) return
-    if (tipoFiltro === TipoFiltro.LOCALIZACAO_TIPO && (!local.tipo || !temLocalizacao)) return
+    if (tipoFiltro === TipoFiltro.LOCALIZACAO_TIPO && (!local.tipo || !temLocalizacao(local))) return
     onChange(local)
   }
 
@@ -169,7 +166,6 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
           id="filtro-andar"
           type="number"
           placeholder="Ex.: 0"
-          aria-label="Filtrar por andar"
           value={local.andar ?? ''}
           onChange={(e) => handleAndarChange(e.target.value)}
           min={0}
@@ -185,7 +181,7 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
         value={local.tipo}
         onValueChange={(value) => setLocal({ ...local, tipo: value ?? '' })}
       >
-        <SelectTrigger id="filtro-tipo-barra" aria-label="Filtrar por tipo">
+        <SelectTrigger id="filtro-tipo-barra">
           <SelectValue placeholder="Selecione o tipo">
             {local.tipo ? rotuloTipo(local.tipo) : undefined}
           </SelectValue>
@@ -214,11 +210,11 @@ export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAm
             )}
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={TipoFiltro.NENHUM}>Nenhum</SelectItem>
-            <SelectItem value={TipoFiltro.NOME}>Nome</SelectItem>
-            <SelectItem value={TipoFiltro.TIPO}>Tipo</SelectItem>
-            <SelectItem value={TipoFiltro.LOCALIZACAO}>Localização</SelectItem>
-            <SelectItem value={TipoFiltro.LOCALIZACAO_TIPO}>Localização + Tipo</SelectItem>
+            {OPCOES_TIPO_FILTRO.map((opcao) => (
+              <SelectItem key={opcao.valor} value={opcao.valor}>
+                {opcao.rotulo}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

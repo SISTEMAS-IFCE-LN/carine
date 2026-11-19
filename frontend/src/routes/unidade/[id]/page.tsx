@@ -8,16 +8,16 @@ import {buttonVariants} from '@/components/ui/button'
 import {Loading} from '@/components/ui/Loading'
 import {ErrorLista} from '@/components/common/ErrorLista'
 import type {CatalogoNavState} from '@/types/ambientes/navegacao'
+import {parseIdPositivo} from '@/lib/utils/parse-id'
 
 export function UnidadePage() {
     const {unidadeId} = useParams<{unidadeId: string}>()
     const location = useLocation()
     const estado = (location.state ?? {}) as CatalogoNavState
-    const id = Number(unidadeId)
-    const idValido = Number.isInteger(id) && id > 0
+    const id = parseIdPositivo(unidadeId)
 
     const {data: blocos = [], isLoading, error, refetch} =
-        useBlocosPublicados(idValido ? id : null)
+        useBlocosPublicados(id)
 
     const trilhos: TrilhoBreadcrumb[] = [
         ...(estado.campus
@@ -26,7 +26,7 @@ export function UnidadePage() {
         {nome: estado.unidade?.nome ?? 'Unidade'},
     ]
 
-    if (!idValido) {
+    if (id === null) {
         return (
             <div className="space-y-4">
                 <Breadcrumb trilhos={[{nome: 'Unidade não encontrada'}]}/>

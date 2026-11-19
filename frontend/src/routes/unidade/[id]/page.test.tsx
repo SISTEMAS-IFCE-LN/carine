@@ -7,8 +7,6 @@ import type {UseQueryResult} from '@tanstack/react-query'
 import type {ReferenciaRes} from '@/types/ambientes/referencia'
 
 vi.mock('@/hooks/useReferenciasPublicadas', () => ({
-    useCampusPublicados: vi.fn(),
-    useUnidadesPublicados: vi.fn(),
     useBlocosPublicados: vi.fn(),
 }))
 
@@ -25,9 +23,13 @@ function resultado<T>(data: T): UseQueryResult<T, Error> {
     } as unknown as UseQueryResult<T, Error>
 }
 
-function renderPage(path = '/unidade/3') {
+function renderPage(path = '/unidade/3', comEstado = true) {
+    const entrada = comEstado
+        ? {pathname: path, state: {campus: CAMPUS, unidade: UNIDADE}}
+        : {pathname: path}
+
     return render(
-        <MemoryRouter initialEntries={[{pathname: path, state: {campus: CAMPUS, unidade: UNIDADE}}]}>
+        <MemoryRouter initialEntries={[entrada]}>
             <Routes>
                 <Route path="/unidade/:unidadeId" element={<UnidadePage/>}/>
             </Routes>
@@ -60,5 +62,18 @@ describe('UnidadePage', () => {
 
         expect(screen.getByText('Nenhum bloco com ambientes publicados nesta unidade.')).toBeInTheDocument()
         expect(screen.getByRole('link', {name: 'Voltar ao campus'})).toHaveAttribute('href', '/campus/7')
+    })
+
+    it('em deep link sem state, CTA mantém apenas unidadeId e o trilho degrada', () => {
+        vi.mocked(useBlocosPublicados).mockReturnValue(resultado([BLOCO]))
+
+        renderPage('/unidade/3', false)
+
+        expect(screen.getByRole('link', {name: 'Ver todos os ambientes da unidade'}))
+            .toHaveAttribute('href', '/ambientes/publicados?unidadeId=3')
+        expect(screen.queryByRole('link', {name: 'LIMOEIRO DO NORTE'})).not.toBeInTheDocument()
+        const breadcrumb = screen.getByRole('navigation', {name: 'breadcrumb'})
+        expect(within(breadcrumb).getByText('Campus')).toBeInTheDocument()
+        expect(within(breadcrumb).getByText('Unidade')).toHaveAttribute('aria-current', 'page')
     })
 })

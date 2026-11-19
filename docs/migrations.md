@@ -387,7 +387,7 @@ docker compose up -d --build api frontend
 
 > Em WSL/Windows, o repositório fixa `*.sh`, `Dockerfile`, `docker-compose.yml`, `*.conf`, `*.yml`/`*.yaml` e `*.sql`
 > em LF via `.gitattributes`. Se um script já estiver com CRLF na working tree, converta-o antes de subir a stack:
-> `sed -i 's/\r$//' db/backup.sh db/verify.sh`.
+> `sed -i 's/\r$//' db/backup.sh db/verify.sh` (o mesmo vale para `frontend/nginx/*.conf`).
 
 ---
 

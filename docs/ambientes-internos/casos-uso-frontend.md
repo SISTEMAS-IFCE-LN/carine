@@ -395,6 +395,7 @@ Protegidas:
 
 - Tela: `Ambientes > Publicados` (rota `/ambientes/publicados`, semelhante ao UC01-FE). Filtragem e paginação.
 - Pré-condições: Acesso público (não autenticado).
+- Cabeçalho: botão `Voltar` (histórico anterior; em entrada direta, vai para a home) e filtros com rótulos visíveis (`Campus`, `Unidade`, `Bloco`, `Andar`, `Tipo`).
 - Fluxo principal (UI): Similar ao UC01-FE, mas chamando GET `/api/ambientes/publicados` e não possuindo botões de ação ou seleção. Os filtros utilizam endpoints específicos: `/api/ambientes/publicados/nome?nome={nome}`, `/api/ambientes/publicados/localizacao?campusId={id}&unidadeId={id}&blocoId={id}&andar={andar}&tipo={tipo}` e `/api/ambientes/publicados/tipo?tipo={tipo}`.
 - Filtros combinados: `tipo` é opcional no `/localizacao` e pode ser combinado com qualquer campo de localização, com a mesma regra de filtro do UC01-FE. A URL é compartilhável e preservada em deep link, inclusive com apenas `blocoId` e `tipo` (ex.: `?blocoId=12&tipo=Sala%20de%20Aula`). `tipo` sozinho continua usando `/tipo`.
 - Fonte das referências: a cascata `Campus → Unidade → Bloco → Andar` usa a **projeção publicada** (`/api/ambientes/publicados/campus|unidades|blocos`), então um anônimo não chama as refs administrativas e só vê níveis com ambiente publicado. Gestão e validação continuam usando as refs gerais.
@@ -408,7 +409,7 @@ Protegidas:
 - Pré-condições: Acesso público (não autenticado).
 - Fluxo principal (UI):
   1. A página chama `GET /api/ambientes/publicados/campus`.
-  2. Exibe título, descrição e o CTA `Ver todos os ambientes` para `/ambientes/publicados`.
+  2. Exibe o título `Campus`, a descrição `Explore os ambientes de cada campus.` e o CTA `Ver todos os ambientes` para `/ambientes/publicados`.
   3. Exibe um card-link por campus com o nome e a descrição `Ver unidades`, navegando para `/campus/{campusId}`.
 - Estados e erros:
   - Loading: componente `Loading`.
@@ -440,7 +441,7 @@ Protegidas:
 - Pré-condições: Acesso público.
 - Fluxo principal (UI):
   1. A página chama `GET /api/ambientes/publicados/blocos?unidadeId={id}`.
-  2. Exibe `Breadcrumb` (`Início > Campus > <unidade>` quando há `location.state`; senão `Início > Unidade`) e o CTA `Ver todos os ambientes da unidade` → `/ambientes/publicados?unidadeId={id}`.
+  2. Exibe `Breadcrumb` (`Início > Campus > <unidade>` quando há `location.state`; senão `Início > Unidade`) e o CTA `Ver todos os ambientes da unidade` → `/ambientes/publicados?campusId={campusId}&unidadeId={id}` quando há campus no estado; em deep link sem estado, `?unidadeId={id}`.
   3. Exibe um card-link por bloco (`Ver resumo do bloco`) → `/bloco/{blocoId}`, repassando campus e unidade em `location.state`.
 - Estados e erros:
   - ID inválido: `Breadcrumb` + `EstadoVazio` com ação de volta.
@@ -448,7 +449,7 @@ Protegidas:
   - Unidade sem bloco publicado: `EstadoVazio` "Nenhum bloco com ambientes publicados nesta unidade." com ação para o campus (quando conhecido) ou home.
 - Critérios de aceitação:
   - Em deep link, o nome da unidade não está disponível (a lista de blocos só traz `{id, nome}` dos blocos); o trilho mostra `Unidade`, mas os blocos são exibidos corretamente.
-  - O CTA preserva o filtro por unidade na listagem.
+  - O CTA preserva o filtro por unidade e inclui o campus quando disponível no `location.state`.
 
 ### UC35-FE: Resumo do Bloco e Atalhos de Tipo/Andar (T4)
 
@@ -457,13 +458,14 @@ Protegidas:
 - Fluxo principal (UI):
   1. A página chama `GET /api/ambientes/publicados/blocos/{blocoId}/resumo`.
   2. Exibe `Breadcrumb` (`Início > Campus > Unidade > Bloco` quando veio da T3; em deep link, apenas o bloco) e o resumo: área total (`formatarMedida` + `m²`), pavimentos e capacidade total.
-  3. Exibe cards de tipo (nome + total) que navegam para `/ambientes/publicados?blocoId={id}&tipo={rótulo}`.
-  4. Exibe cards de andar (título por `formatarAndar`; `Térreo` para `0`) que navegam para `/ambientes/publicados?blocoId={id}&andar={andar}`.
+  3. Exibe cards de tipo (nome + total) que navegam para `/ambientes/publicados?campusId={campusId}&unidadeId={unidadeId}&blocoId={id}&tipo={rótulo}` quando há estado de navegação; em deep link, apenas `?blocoId={id}&tipo={rótulo}`.
+  4. Exibe cards de andar (título por `formatarAndar`; `Térreo` para `0`) que navegam para `/ambientes/publicados?campusId={campusId}&unidadeId={unidadeId}&blocoId={id}&andar={andar}` quando há estado; em deep link, apenas `?blocoId={id}&andar={andar}`.
 - Estados e erros:
   - `404` do resumo (bloco inexistente ou sem publicado): `Breadcrumb` + `EstadoVazio` "Bloco não encontrado ou sem ambientes publicados", com link para a home; nunca crash.
   - Loading: `Loading`; demais erros: `ErrorLista` com retry.
 - Critérios de aceitação:
   - A contagem de cada card de tipo corresponde exatamente ao total retornado ao clicar no link (filtro por tipo em match exato).
+  - Os links de tipo/andar incluem campus e unidade quando disponíveis no `location.state`; em deep link, preservam apenas o `blocoId` e o filtro escolhido.
   - Os links de tipo/andar usam o builder de URL da listagem e são preservados em deep link.
   - Em deep link sem `location.state`, o resumo continua funcional e o trilho mostra apenas o bloco.
 

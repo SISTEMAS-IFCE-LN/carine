@@ -10,7 +10,6 @@ export interface AmbientesSearchParams {
     size: number
     filtros: Filtros
     filtrosLocal: Filtros
-    setFiltrosLocal: (f: Filtros) => void
     handleFiltrosChange: (f: Filtros) => void
     handlePageChange: (page: number) => void
     handleSizeChange: (size: string | null) => void
@@ -37,12 +36,12 @@ export function useAmbientesSearchParams(): AmbientesSearchParams {
     }, [searchParams])
 
     // Rascunho local sincronizado com a URL (back/forward) — delegado a useFiltroLocal
-    const { local: filtrosLocal, setLocal: setFiltrosLocal } = useFiltroLocal<Filtros>(filtros)
+    const { local: filtrosLocal, setLocal } = useFiltroLocal<Filtros>(filtros)
 
     function handleFiltrosChange(novosFiltros: Filtros) {
         // idempotente: chave técnica continua chave; rótulo/variação vira chave
         const filtros = {...novosFiltros, tipo: chaveTipoAmbiente(novosFiltros.tipo)}
-        setFiltrosLocal(filtros)
+        setLocal(filtros)
         updateSearchParams({
             nome: filtros.nome || null,
             campusId: filtros.campusId,
@@ -62,7 +61,6 @@ export function useAmbientesSearchParams(): AmbientesSearchParams {
         size,
         filtros,
         filtrosLocal,
-        setFiltrosLocal,
         handleFiltrosChange,
         handlePageChange,
         handleSizeChange,

@@ -9,7 +9,6 @@ import type {ReferenciaRes} from '@/types/ambientes/referencia'
 vi.mock('@/hooks/useReferenciasPublicadas', () => ({
     useCampusPublicados: vi.fn(),
     useUnidadesPublicados: vi.fn(),
-    useBlocosPublicados: vi.fn(),
 }))
 
 const CAMPUS: ReferenciaRes = {id: 7, nome: 'LIMOEIRO DO NORTE'}

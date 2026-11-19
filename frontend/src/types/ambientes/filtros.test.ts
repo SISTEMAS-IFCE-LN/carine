@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {derivarTipoFiltro, FILTROS_VAZIOS, type Filtros} from './filtros'
+import {derivarTipoFiltro, FILTROS_VAZIOS, temLocalizacao, type Filtros} from './filtros'
 import {TipoFiltro} from './enums'
 
 function filtros(parcial: Partial<Filtros>): Filtros {
@@ -32,5 +32,20 @@ describe('derivarTipoFiltro', () => {
 
     it('deriva NENHUM para filtros vazios', () => {
         expect(derivarTipoFiltro(FILTROS_VAZIOS)).toBe(TipoFiltro.NENHUM)
+    })
+})
+
+describe('temLocalizacao', () => {
+    it.each([
+        {campusId: 1},
+        {unidadeId: 2},
+        {blocoId: 3},
+        {andar: 0},
+    ])('é verdadeiro com %o', (parcial) => {
+        expect(temLocalizacao(filtros(parcial))).toBe(true)
+    })
+
+    it('é falso sem campos de localização', () => {
+        expect(temLocalizacao(FILTROS_VAZIOS)).toBe(false)
     })
 })

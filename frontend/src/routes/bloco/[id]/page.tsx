@@ -11,16 +11,20 @@ import {Loading} from '@/components/ui/Loading'
 import {ErrorLista} from '@/components/common/ErrorLista'
 import {formatarAndar, formatarMedida} from '@/lib/ambientes/formatters'
 import type {CatalogoNavState} from '@/types/ambientes/navegacao'
+import {parseIdPositivo} from '@/lib/utils/parse-id'
+
+function textoAmbientes(total: number): string {
+    return `${total} ambiente${total === 1 ? '' : 's'}`
+}
 
 export function BlocoPage() {
     const {blocoId} = useParams<{blocoId: string}>()
     const location = useLocation()
     const estado = (location.state ?? {}) as CatalogoNavState
-    const id = Number(blocoId)
-    const idValido = Number.isInteger(id) && id > 0
+    const id = parseIdPositivo(blocoId)
 
     const {data: resumo, isLoading, error, refetch} =
-        useBlocoResumo(idValido ? id : null)
+        useBlocoResumo(id)
 
     const campusId = estado.campus?.id
     const unidadeId = estado.unidade?.id
@@ -35,7 +39,7 @@ export function BlocoPage() {
         {nome: resumo?.nome ?? 'Bloco'},
     ]
 
-    if (!idValido) {
+    if (id === null) {
         return <EstadoBlocoNaoEncontrado trilhos={[{nome: 'Bloco não encontrado'}]}/>
     }
 
@@ -100,9 +104,9 @@ export function BlocoPage() {
                                     blocoId: resumo.id,
                                     tipo: item.tipo,
                                 })}
-                                ariaLabel={`Ver ${item.total} ambiente${item.total === 1 ? '' : 's'} do tipo ${item.tipo}`}
+                                ariaLabel={`Ver ${textoAmbientes(item.total)} do tipo ${item.tipo}`}
                                 titulo={item.tipo}
-                                descricao={`${item.total} ambiente${item.total === 1 ? '' : 's'}`}
+                                descricao={textoAmbientes(item.total)}
                             />
                         ))}
                     </div>
@@ -126,7 +130,7 @@ export function BlocoPage() {
                                 })}
                                 ariaLabel={`Ver ambientes do ${item.andar === 0 ? 'térreo' : `andar ${item.andar}`}`}
                                 titulo={formatarAndar(item.andar)}
-                                descricao={`${item.total} ambiente${item.total === 1 ? '' : 's'}`}
+                                descricao={textoAmbientes(item.total)}
                             />
                         ))}
                     </div>

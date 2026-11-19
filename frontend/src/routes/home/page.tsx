@@ -17,7 +17,7 @@ export function HomePage() {
         <section className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold">Campus disponíveis</h1>
+                    <h1 className="text-2xl font-bold">Campus</h1>
                     <p className="text-muted-foreground">
                         Explore os ambientes de cada campus.
                     </p>

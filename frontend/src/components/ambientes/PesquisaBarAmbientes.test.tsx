@@ -117,7 +117,7 @@ describe('PesquisaBarAmbientes', () => {
     const initial = { ...FILTROS_VAZIOS, tipo: 'Sala de Aula' }
     render(<PesquisaBarAmbientes initial={initial} onChange={mockOnChange} fonte="gerais" />)
 
-    expect(screen.getByLabelText('Filtrar por tipo')).toBeInTheDocument()
+    expect(screen.getByLabelText('Tipo')).toBeInTheDocument()
   })
 
   it('exibe a cascata Campus → Unidade → Bloco → Andar na ordem', () => {
@@ -126,7 +126,7 @@ describe('PesquisaBarAmbientes', () => {
     const campus = screen.getByLabelText('Campus')
     const unidade = screen.getByLabelText('Unidade')
     const bloco = screen.getByLabelText('Bloco')
-    const andar = screen.getByLabelText('Filtrar por andar')
+    const andar = screen.getByLabelText('Andar')
 
     expect(vemAntes(campus, unidade)).toBe(true)
     expect(vemAntes(unidade, bloco)).toBe(true)
@@ -139,7 +139,7 @@ describe('PesquisaBarAmbientes', () => {
     expect(screen.getByLabelText('Campus')).toBeInTheDocument()
     expect(screen.getByLabelText('Unidade')).toBeInTheDocument()
     expect(screen.getByLabelText('Bloco')).toBeInTheDocument()
-    expect(screen.getByLabelText('Filtrar por andar')).toBeInTheDocument()
+    expect(screen.getByLabelText('Andar')).toBeInTheDocument()
   })
 
   it('exibe inputs de localização quando initial tem andar', () => {
@@ -148,7 +148,7 @@ describe('PesquisaBarAmbientes', () => {
     expect(screen.getByLabelText('Campus')).toBeInTheDocument()
     expect(screen.getByLabelText('Unidade')).toBeInTheDocument()
     expect(screen.getByLabelText('Bloco')).toBeInTheDocument()
-    expect(screen.getByLabelText('Filtrar por andar')).toBeInTheDocument()
+    expect(screen.getByLabelText('Andar')).toBeInTheDocument()
   })
 
   it('desabilita unidade e bloco quando não há campus', () => {
@@ -242,7 +242,7 @@ describe('PesquisaBarAmbientes', () => {
   it('valida min=0 para andar', () => {
     render(<PesquisaBarAmbientes initial={{ ...FILTROS_VAZIOS, campusId: 1 }} onChange={mockOnChange} fonte="gerais" />)
 
-    const andarInput = screen.getByLabelText('Filtrar por andar')
+    const andarInput = screen.getByLabelText('Andar')
     expect(andarInput).toHaveAttribute('min', '0')
   })
 
@@ -295,7 +295,7 @@ describe('PesquisaBarAmbientes', () => {
     await user.click(await screen.findByRole('option', { name: 'Tipo' }))
 
     // Selecionar "Sala de Aula" no select de tipo
-    await user.click(screen.getByLabelText('Filtrar por tipo'))
+    await user.click(screen.getByLabelText('Tipo'))
     await user.click(await screen.findByRole('option', { name: 'Sala de Aula' }))
 
     // Aplicar
@@ -310,7 +310,7 @@ describe('PesquisaBarAmbientes', () => {
   it('exibe o rótulo do tipo no select quando initial tem nome do enum', () => {
     render(<PesquisaBarAmbientes initial={{ ...FILTROS_VAZIOS, tipo: 'SALA_AULA' }} onChange={mockOnChange} fonte="gerais" />)
 
-    expect(screen.getByLabelText('Filtrar por tipo')).toBeInTheDocument()
+    expect(screen.getByLabelText('Tipo')).toBeInTheDocument()
     // O select deve exibir o rótulo "Sala de Aula" para o valor SALA_AULA
     expect(screen.getByText('Sala de Aula')).toBeInTheDocument()
   })
@@ -349,7 +349,7 @@ describe('PesquisaBarAmbientes', () => {
     )
 
     expect(screen.getByText('Localização + Tipo')).toBeInTheDocument()
-    expect(screen.getByLabelText('Filtrar por tipo')).toBeInTheDocument()
+    expect(screen.getByLabelText('Tipo')).toBeInTheDocument()
     expect(screen.getByText('Sala de Aula')).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('Aplicar'))

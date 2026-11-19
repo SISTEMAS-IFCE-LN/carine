@@ -280,7 +280,8 @@ frontend/
 │   │   │   ├── formatters.ts         # DECIMAIS_MEDIDA, formatarMedida, formatarAndar, formatarAndarCompacto
 │   │   │   └── mappers.ts            # conversão resposta→request (rótulos → nomes técnicos) UC07–UC17
 │   │   └── utils/
-│   │       └── cn.ts                 # cn() e helpers de classes
+│   │       ├── cn.ts                 # cn() e helpers de classes
+│   │       └── parse-id.ts           # parseIdPositivo (IDs de rota)
 │   │
 │   ├── hooks/
 │   │   ├── useAsyncAction.ts         # executar ação async (loading + fechar no sucesso + toast de erro)
@@ -301,12 +302,12 @@ frontend/
 │   │   │   └── filtros.ts            # TipoFiltroUsuarios, FiltrosUsuarios, FILTROS_USUARIOS_VAZIOS
 │   │   └── ambientes/
 │   │       ├── enums.ts              # enums espelhados do backend (tipo/geometria/esquadria/status/filtro) + transforms de resposta de enum; localização não tem enum (usa referências)
-│   │       ├── filtros.ts            # Filtros (nome, tipo, campusId/unidadeId/blocoId/andar), FILTROS_VAZIOS, UrlFiltrosSchema, derivarTipoFiltro
+│   │       ├── filtros.ts            # Filtros (nome, tipo, campusId/unidadeId/blocoId/andar), FILTROS_VAZIOS, FiltrosUrlSchema, derivarTipoFiltro, temLocalizacao
 │   │       ├── referencia.ts         # ReferenciaSchema/ReferenciaInputSchema, ReferenciaRes/ReferenciaInput, REFERENCIA_VAZIA
 │   │       ├── navegacao.ts          # CatalogoNavState (campus/unidade em location.state)
 │   │       ├── bloco.ts              # BlocoResumoSchema/BlocoResumo (resumo derivado do bloco)
 │   │       ├── localizacao.ts        # LocalizacaoSchema (resposta: campus/unidade/bloco aninhados via ReferenciaSchema; usado por response/esquadrias)
-│   │       ├── query.ts              # AmbientesQuery, EsquadriasQuery
+│   │       ├── query.ts              # AmbientesQuery, EsquadriasQuery, paraAmbientesQuery
 │   │       ├── request.ts            # schemas de request (AmbienteReq…) + keysOf/nomeTecnicoDeRotulo
 │   │       ├── response.ts           # schemas/tipos de resposta de ambiente (AmbienteBasico, AmbienteDetalhe…)
 │   │       └── esquadrias.ts         # schemas/tipos de resposta de esquadrias (Esquadria, EsquadriasResponse…)

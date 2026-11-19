@@ -2,12 +2,13 @@ import {useMemo, useState} from 'react'
 import {useQuery, useQueryClient} from '@tanstack/react-query'
 import {useNavigate} from 'react-router'
 import {deletarAmbientes, enviarParaValidacao, fetchNaoPublicados} from '@/lib/api/api-naopublicados'
-import type {AmbientesQuery} from '@/types/ambientes/query'
+import {type AmbientesQuery, paraAmbientesQuery} from '@/types/ambientes/query'
 import {PAGES_ROUTES} from '@/constants/routes'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
 import {TabelaPadrao} from '@/components/ambientes/TabelaPadrao'
 import {type AcaoLote, AcoesLote} from '@/components/ambientes/AcoesLote'
 import {ErrorLista} from '@/components/common/ErrorLista'
+import {EstadoVazio} from '@/components/common/EstadoVazio'
 import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
 import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
@@ -32,17 +33,7 @@ export function NaoPublicadosPage() {
         tipoFiltro,
     } = useAmbientesSearchParams()
 
-    const query: AmbientesQuery = {
-        page,
-        size,
-        nome: filtros.nome || undefined,
-        campusId: filtros.campusId ?? undefined,
-        unidadeId: filtros.unidadeId ?? undefined,
-        blocoId: filtros.blocoId ?? undefined,
-        andar: filtros.andar ?? undefined,
-        tipo: filtros.tipo || undefined,
-        tipoFiltro,
-    }
+    const query: AmbientesQuery = paraAmbientesQuery(filtros, page, size, tipoFiltro)
 
     const {data, isLoading, error, refetch} = useQuery({
         queryKey: ['ambientes', 'nao-publicados', query],
@@ -99,7 +90,7 @@ export function NaoPublicadosPage() {
                 fonte="gerais"
             />
             {isLoading ? (
-                <p>Carregando…</p>
+                <p role="status">Carregando…</p>
             ) : data && data.ambientes.length > 0 ? (
                 <>
                     <AcoesLote
@@ -135,7 +126,7 @@ export function NaoPublicadosPage() {
                     />
                 </>
             ) : (
-                <p className="text-muted-foreground">Nenhum ambiente não publicado.</p>
+                <EstadoVazio mensagem="Nenhum ambiente não publicado."/>
             )}
             <ModalConfirmacao
                 open={modalLote !== null}

@@ -194,7 +194,7 @@ describe('ValidacaoPage (UC01-FE)', () => {
         await user.click(screen.getByLabelText('Tipo de filtro'))
         await user.click(await screen.findByRole('option', { name: 'Tipo' }))
         // Selecionar "Sala de Aula" no select de tipo
-        await user.click(screen.getByLabelText('Filtrar por tipo'))
+        await user.click(screen.getByLabelText('Tipo'))
         await user.click(await screen.findByRole('option', { name: 'Sala de Aula' }))
         // Aplicar
         await user.click(screen.getByText('Aplicar'))

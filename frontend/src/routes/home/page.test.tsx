@@ -9,8 +9,6 @@ import type {ReferenciaRes} from '@/types/ambientes/referencia'
 
 vi.mock('@/hooks/useReferenciasPublicadas', () => ({
     useCampusPublicados: vi.fn(),
-    useUnidadesPublicados: vi.fn(),
-    useBlocosPublicados: vi.fn(),
 }))
 
 const CAMPUS: ReferenciaRes[] = [
@@ -45,6 +43,8 @@ describe('HomePage', () => {
 
         renderPage()
 
+        expect(screen.getByRole('heading', {name: 'Campus'})).toBeInTheDocument()
+        expect(screen.getByText('Explore os ambientes de cada campus.')).toBeInTheDocument()
         expect(screen.getByRole('link', {name: 'Abrir campus LIMOEIRO DO NORTE'})).toHaveAttribute('href', '/campus/7')
         expect(screen.getByRole('link', {name: 'Abrir campus QUIXADÁ'})).toHaveAttribute('href', '/campus/9')
         expect(screen.getByRole('link', {name: 'Ver todos os ambientes'})).toHaveAttribute('href', '/ambientes/publicados')
