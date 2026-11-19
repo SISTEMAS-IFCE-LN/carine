@@ -35,7 +35,12 @@ describe('Header — anônimo', () => {
 
     it('renderiza o logo/título', () => {
         renderWithAuth()
-        expect(screen.getByText('Catálogo Edificações')).toBeInTheDocument()
+        expect(screen.getByText('CARINE')).toBeInTheDocument()
+        expect(screen.getByText('Catálogo de Registro de Informações de Edificações do IFCE'))
+            .toBeInTheDocument()
+        expect(screen.getByRole('link', {
+            name: 'CARINE: Catálogo de Registro de Informações de Edificações do IFCE',
+        })).toHaveAttribute('href', '/')
     })
 
     it('não renderiza HeaderNav', () => {
@@ -79,7 +84,12 @@ describe('Header — autenticado', () => {
 
     it('renderiza o logo/título', () => {
         renderWithAuth()
-        expect(screen.getByText('Catálogo Edificações')).toBeInTheDocument()
+        expect(screen.getByText('CARINE')).toBeInTheDocument()
+        expect(screen.getByText('Catálogo de Registro de Informações de Edificações do IFCE'))
+            .toBeInTheDocument()
+        expect(screen.getByRole('link', {
+            name: 'CARINE: Catálogo de Registro de Informações de Edificações do IFCE',
+        })).toHaveAttribute('href', '/')
     })
 
     it('renderiza HeaderNav', () => {

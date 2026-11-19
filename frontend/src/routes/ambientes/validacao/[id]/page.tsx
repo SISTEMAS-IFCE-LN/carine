@@ -10,6 +10,7 @@ import {StatusAmbiente} from '@/types/ambientes/enums'
 import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
 import {Role} from '@/types/usuarios/user'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 export function ValidacaoDetalhePage() {
     const {id} = useParams<{ id: string }>()
@@ -35,6 +36,7 @@ export function ValidacaoDetalhePage() {
         else if (modalOpen === 'privar') await privarAmbiente(ambiente.id)
         toast.success(modalOpen === 'publicar' ? 'Ambiente publicado.' : 'Ambiente privado.')
         void queryClient.invalidateQueries({queryKey: ['ambientes', 'validacao']})
+        invalidarReferenciasPublicadas(queryClient)
         navigate(PAGES_ROUTES.VALIDACAO)
     }
 

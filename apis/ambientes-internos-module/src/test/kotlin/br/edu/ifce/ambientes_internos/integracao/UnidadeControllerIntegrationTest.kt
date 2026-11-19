@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -24,8 +25,8 @@ import java.util.UUID
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestSecurityConfig::class)
-// sem @WithMockUser de propósito: o endpoint é público
-@DisplayName("Testes de integração do endpoint público de unidades")
+@WithMockUser(authorities = ["ROLE_GESTOR_SISTEMA"])
+@DisplayName("Testes de integração do endpoint administrativo de unidades")
 class UnidadeControllerIntegrationTest {
 
     @Autowired

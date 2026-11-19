@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "eb1d24cf-6f11-4ec8-b791-90b17d2ac45a",
-    "name": "catalogo-edificacoes",
+    "name": "CARINE",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "47361745",
     "_collection_link": "https://go.postman.co/collection/47361745-eb1d24cf-6f11-4ec8-b791-90b17d2ac45a?source=collection_link"
@@ -11,8 +11,117 @@
       "name": "publico",
       "item": [
         {
-          "name": "listarCampus (publico)",
+          "name": "listarCampusPublicados (publico)",
           "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/campus",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "campus"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listarUnidadesPublicadas (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/unidades?campusId=1",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "unidades"
+              ],
+              "query": [
+                {
+                  "key": "campusId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listarBlocosPublicados (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/blocos?unidadeId=1",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "blocos"
+              ],
+              "query": [
+                {
+                  "key": "unidadeId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "obterResumoBlocoPublicado (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/ambientes/publicados/blocos/1/resumo",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "api",
+                "ambientes",
+                "publicados",
+                "blocos",
+                "1",
+                "resumo"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "referencias",
+      "item": [
+        {
+          "name": "listarCampus",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -29,8 +138,18 @@
           "response": []
         },
         {
-          "name": "listarUnidadesPorCampus (publico)",
+          "name": "listarUnidadesPorCampus",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -53,8 +172,18 @@
           "response": []
         },
         {
-          "name": "listarBlocosPorUnidade (publico)",
+          "name": "listarBlocosPorUnidade",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ACCESS_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -76,7 +205,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Referências administrativas de localização: exigem ROLE_GESTOR_SISTEMA ou ROLE_VALIDADOR."
     },
     {
       "name": "nao-publicados",

@@ -1,6 +1,6 @@
-# Arquitetura do Backend - Catálogo de Edificações
+# Arquitetura do Backend - CARINE
 
-Este documento descreve a organização arquitetural do ecossistema do Catálogo de Edificações. O sistema adota uma *
+Este documento descreve a organização arquitetural do ecossistema do CARINE. O sistema adota uma *
 *Arquitetura Modular (Multi-Módulos)** fundamentada nos princípios de separação de conceitos, alta coesão e baixo
 acoplamento.
 
@@ -98,12 +98,17 @@ de testes do projeto.
   sem depender de todo o `SecurityConfig` real.
 * **Testes que validam erros de validação por parâmetros** continuam cobrindo `400 Bad Request`, mas apenas depois
   de satisfazer os requisitos de autenticação quando o endpoint estiver protegido.
-* **Endpoints públicos** — as listagens e pesquisas de ambientes publicados (RN-4.4) e as referências de localização
-  (`/api/campus`, `/api/unidades`, `/api/blocos`) — continuam sendo testados sem autenticação, para garantir que a
-  regra de acesso público não se torne regressiva (os testes de referência rodam sem `@WithMockUser` de propósito).
+* **Endpoints públicos** — as listagens e pesquisas de ambientes publicados (RN-4.4) e a projeção publicada da
+  hierarquia (`/api/ambientes/publicados/campus|unidades|blocos`, incluindo
+  `blocos/{blocoId}/resumo`) — continuam sendo testados sem autenticação, para garantir que a regra de acesso público
+  não se torne regressiva (os testes do catálogo público rodam sem `@WithMockUser` de propósito).
   O detalhe de um ambiente publicado (`GET /api/ambientes/publicados/{id}`) e o conjunto de esquadrias, que na cadeia
   real exigem `ROLE_COLABORADOR` (`seguranca.md §7.2`), são exercitados com
   `@WithMockUser(authorities = ["ROLE_COLABORADOR"])`.
+* **Referências de localização administrativas** — `GET /api/campus`, `/api/unidades` e `/api/blocos` exigem
+  `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`; os testes usam `@WithMockUser(authorities = ["ROLE_GESTOR_SISTEMA"])`
+  (ou `["ROLE_VALIDADOR"]`), além dos casos sem autenticação e com apenas `ROLE_COLABORADOR`, que devem receber
+  `401`/`403`.
 * O `TestApplication` do `ambientes-internos-module` foi atualizado para escanear tanto `br.edu.ifce.ambientes_internos`
   quanto `br.edu.ifce.security` (entidades, repositórios JPA, services) **mas exclui** os componentes de runtime do
   `security-module` (controllers, services de auth, `BootstrapAdminRunner`, properties) que não fazem sentido em
@@ -122,27 +127,31 @@ Em resumo:
 
 ### 1.6. Mapeamento de endpoints HTTP
 
-Definido em `SecurityConfig.apiFilterChain` (chain 3, com `@Order(3)`). Endpoints públicos (`permitAll`):
+Definido em `SecurityConfig.apiFilterChain` (chain 3, com `@Order(3)`). Endpoints públicos (`permitAll`, declarados
+**antes** de `/api/ambientes/publicados/**` — o primeiro matcher que casa vence):
 
-| Path                           | Descrição                                                                         |
-|--------------------------------|-----------------------------------------------------------------------------------|
-| `/api/ambientes/publicados/**` | Listagens de ambientes publicados (detalhe/esquadrias exigem `ROLE_COLABORADOR`). |
-| `/api/campus`                  | Lista de campi (público).                                                         |
-| `/api/unidades?campusId=`      | Unidades de um campus (público).                                                  |
-| `/api/blocos?unidadeId=`       | Blocos de uma unidade (público).                                                  |
-| `/auth/**`                     | Refresh, logout.                                                                  |
-| `/actuator/health`             | Health check (endpoint do Actuator).                                              |
-| `/oauth2/**` e `/login/**`     | Handshake OAuth2 (chain 1, com `IF_REQUIRED`).                                    |
+| Path                                                              | Descrição                                                                            |
+|-------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `/api/ambientes/publicados` (`/tipo`, `/nome`, `/localizacao`)    | Listagens e pesquisas de ambientes publicados.                                       |
+| `/api/ambientes/publicados/campus`                                | Campi com ao menos um ambiente publicado.                                            |
+| `/api/ambientes/publicados/unidades?campusId=`                    | Unidades do campus com ao menos um ambiente publicado.                               |
+| `/api/ambientes/publicados/blocos?unidadeId=`                     | Blocos da unidade com ao menos um ambiente publicado.                                |
+| `/api/ambientes/publicados/blocos/{blocoId}/resumo`               | Resumo derivado do bloco (somente ambientes publicados).                             |
+| `/callback.html`, `/failure.html`                                 | Páginas de teste do backend.                                                         |
+| `/auth/**`                                                        | Refresh, logout.                                                                     |
+| `/actuator/health`                                                | Health check (endpoint do Actuator).                                                 |
+| `/oauth2/**` e `/login/**`                                        | Handshake OAuth2 (chain 1, com `IF_REQUIRED`).                                       |
 
 Endpoints protegidos por `SecurityConfig`:
 
-| Path                                         | Authority                          |
-|----------------------------------------------|------------------------------------|
-| `/api/ambientes/nao-publicados/**`           | `ROLE_GESTOR_SISTEMA`              |
-| `/api/ambientes/validacao/**`                | `ROLE_VALIDADOR`                   |
-| `/api/ambientes/publicados/{id}` (GET)       | `ROLE_COLABORADOR`                 |
-| `/api/ambientes/publicados/esquadrias` (GET) | `ROLE_COLABORADOR`                 |
-| `/api/usuarios/**`                           | `ROLE_ADMINISTRADOR`               |
+| Path                                                                     | Authority                                                         |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------|
+| `/api/ambientes/nao-publicados/**`                                       | `ROLE_GESTOR_SISTEMA`                                             |
+| `/api/ambientes/validacao/**`                                            | `ROLE_VALIDADOR`                                                  |
+| `/api/ambientes/publicados/{id}` (GET)                                   | `ROLE_COLABORADOR`                                                |
+| `/api/ambientes/publicados/esquadrias` (GET)                             | `ROLE_COLABORADOR`                                                |
+| `/api/campus`, `/api/unidades?campusId=`, `/api/blocos?unidadeId=` (GET) | `ROLE_GESTOR_SISTEMA` **ou** `ROLE_VALIDADOR` (`hasAnyAuthority`) |
+| `/api/usuarios/**`                                                       | `ROLE_ADMINISTRADOR`                                              |
 
 Detalhamento completo em [`docs/seguranca.md`](./seguranca.md).
 
@@ -206,3 +215,15 @@ verdade; a aplicação sobe com `ddl-auto: validate` e os repositórios apenas c
   `ComparadorNatural` (ordem natural, não lexicográfica).
 - Os controllers `CampusController`, `UnidadeController` e `BlocoController` são somente leitura (`GET`); a criação
   dos três níveis acontece exclusivamente dentro dos casos de uso de ambiente.
+
+A **projeção publicada** da hierarquia (`CatalogoPublicadoUseCases`) é derivada apenas de ambientes `PUBLICADO`
+(RN-1.21): os GETs de campus/unidade/bloco usam `DISTINCT` sobre a cadeia `localizacao.bloco.unidade.campus` e ordenam
+em memória com `ComparadorNatural`. O resumo do bloco soma a área no domínio Kotlin
+(`Ambiente.calcularAreaAmbienteM2()` → `Geometria.calcularAreaTotalM2()`, `HALF_UP` com duas casas), sem SQL `CASE`, e
+calcula os pavimentos como `max(andar) + 1` (RN-1.20). Nível sem ambiente publicado não aparece na projeção; bloco
+inexistente ou sem publicado responde `404`.
+
+A projeção **não reutiliza** os casos de uso administrativos (`listarPorCampus`/`obterPorIdEValidarCampus`), que
+validam a existência do pai e lançam `IllegalArgumentException`: campus/unidade inexistente na projeção pública resulta
+em lista vazia. O filtro por tipo (`resolverTipos`) compara por **igualdade normalizada** com o nome técnico do enum ou
+com o rótulo exibido, sem correspondência parcial.

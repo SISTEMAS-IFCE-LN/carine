@@ -1,6 +1,6 @@
 # Como executar a aplicação
 
-Este documento contém as instruções práticas para rodar o Catálogo de Edificações em ambiente de desenvolvimento e validar a suíte de testes.
+Este documento contém as instruções práticas para rodar o CARINE em ambiente de desenvolvimento e validar a suíte de testes.
 
 ---
 
@@ -265,24 +265,28 @@ cd apis
 
 ### 3.5. Endpoints úteis para smoke test
 
-| Endpoint                                                                         | Método          | Auth?                     | Descrição                                                                                                                 |
-|----------------------------------------------------------------------------------|-----------------|---------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `/actuator/health`                                                               | GET             | Não                       | Health check.                                                                                                             |
-| `/h2`                                                                            | GET (navegador) | Não                       | Console do H2 in-memory, habilitado em dev.                                                                               |
-| `/oauth2/authorization/google`                                                   | GET (navegador) | Não                       | Inicia o handshake OAuth2. O callback redireciona para `/callback.html#token=...` com o access token no fragmento da URL. |
-| `/auth/refresh`                                                                  | POST            | Cookie                    | Renova o access token.                                                                                                    |
-| `/auth/logout`                                                                   | POST            | Cookie                    | Revoga refresh token e limpa cookie.                                                                                      |
-| `/api/ambientes/publicados`                                                      | GET             | Não                       | Lista ambientes publicados (público).                                                                                     |
-| `/api/ambientes/publicados/{id}`                                                 | GET             | Bearer                    | Detalhe de um ambiente publicado.                                                                                         |
-| `/api/ambientes/publicados/esquadrias?ids=1,2`                                   | GET             | Bearer                    | Esquadrias de um conjunto.                                                                                                |
-| `/api/campus`                                                                    | GET             | Não                       | Lista de campi (referência de localização, pública).                                                                      |
-| `/api/unidades?campusId=1`                                                       | GET             | Não                       | Unidades de um campus (pública).                                                                                          |
-| `/api/blocos?unidadeId=1`                                                        | GET             | Não                       | Blocos de uma unidade (pública).                                                                                          |
-| `/api/ambientes/publicados/localizacao?campusId=1&unidadeId=1&blocoId=1&andar=0` | GET             | Não                       | Listagem por IDs de localização (IDs opcionais; pelo menos um obrigatório).                                               |
-| `/api/ambientes/nao-publicados`                                                  | GET             | Bearer (`GESTOR_SISTEMA`) | Lista não publicados.                                                                                                     |
-| `/api/ambientes/validacao`                                                       | GET             | Bearer (`VALIDADOR`)      | Lista em validação.                                                                                                       |
-| `/api/usuarios/{id}/perfis`                                                      | PATCH           | Bearer (`ADMINISTRADOR`)  | Atualiza perfis.                                                                                                          |
-| `/api/usuarios/{id}/desativar`                                                   | PATCH           | Bearer (`ADMINISTRADOR`)  | Desativa usuário.                                                                                                         |
+| Endpoint                                                                         | Método          | Auth?                                 | Descrição                                                                                                                 |
+|----------------------------------------------------------------------------------|-----------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `/actuator/health`                                                               | GET             | Não                                   | Health check.                                                                                                             |
+| `/h2`                                                                            | GET (navegador) | Não                                   | Console do H2 in-memory, habilitado em dev.                                                                               |
+| `/oauth2/authorization/google`                                                   | GET (navegador) | Não                                   | Inicia o handshake OAuth2. O callback redireciona para `/callback.html#token=...` com o access token no fragmento da URL. |
+| `/auth/refresh`                                                                  | POST            | Cookie                                | Renova o access token.                                                                                                    |
+| `/auth/logout`                                                                   | POST            | Cookie                                | Revoga refresh token e limpa cookie.                                                                                      |
+| `/api/ambientes/publicados`                                                      | GET             | Não                                   | Lista ambientes publicados (público).                                                                                     |
+| `/api/ambientes/publicados/{id}`                                                 | GET             | Bearer                                | Detalhe de um ambiente publicado.                                                                                         |
+| `/api/ambientes/publicados/esquadrias?ids=1,2`                                   | GET             | Bearer                                | Esquadrias de um conjunto.                                                                                                |
+| `/api/ambientes/publicados/campus`                                               | GET             | Não                                   | Campi com ao menos um ambiente publicado.                                                                                 |
+| `/api/ambientes/publicados/unidades?campusId=1`                                  | GET             | Não                                   | Unidades do campus com ao menos um publicado.                                                                             |
+| `/api/ambientes/publicados/blocos?unidadeId=1`                                   | GET             | Não                                   | Blocos da unidade com ao menos um publicado.                                                                              |
+| `/api/ambientes/publicados/blocos/1/resumo`                                      | GET             | Não                                   | Resumo derivado do bloco (`404` sem ambiente publicado).                                                                  |
+| `/api/campus`                                                                    | GET             | Bearer (`GESTOR_SISTEMA`/`VALIDADOR`) | Referência administrativa: lista de campi.                                                                                |
+| `/api/unidades?campusId=1`                                                       | GET             | Bearer (`GESTOR_SISTEMA`/`VALIDADOR`) | Referência administrativa: unidades de um campus.                                                                         |
+| `/api/blocos?unidadeId=1`                                                        | GET             | Bearer (`GESTOR_SISTEMA`/`VALIDADOR`) | Referência administrativa: blocos de uma unidade.                                                                         |
+| `/api/ambientes/publicados/localizacao?campusId=1&unidadeId=1&blocoId=1&andar=0` | GET             | Não                                   | Listagem por IDs de localização (IDs opcionais; pelo menos um obrigatório). Aceita `tipo` opcional combinado.             |
+| `/api/ambientes/nao-publicados`                                                  | GET             | Bearer (`GESTOR_SISTEMA`)             | Lista não publicados.                                                                                                     |
+| `/api/ambientes/validacao`                                                       | GET             | Bearer (`VALIDADOR`)                  | Lista em validação.                                                                                                       |
+| `/api/usuarios/{id}/perfis`                                                      | PATCH           | Bearer (`ADMINISTRADOR`)              | Atualiza perfis.                                                                                                          |
+| `/api/usuarios/{id}/desativar`                                                   | PATCH           | Bearer (`ADMINISTRADOR`)              | Desativa usuário.                                                                                                         |
 
 ### 3.6. Smoke test via Postman
 
@@ -290,19 +294,40 @@ A coleção Postman está em `docs/catalogo-edificacoes.postman_collection.json`
 
 1. Abrir Postman → **File → Import**.
 2. Selecionar o arquivo `catalogo-edificacoes.postman_collection.json`.
-3. A coleção já contém os endpoints públicos e protegidos.
+3. A coleção reúne os endpoints públicos e protegidos.
 
-Para testar endpoints protegidos, faça login via Google, copie o `accessToken` retornado e preencha a variável de coleção `ACCESS_TOKEN`. Os requests protegidos usam `Authorization: Bearer {{ACCESS_TOKEN}}`, sem token hardcoded no arquivo.
+Para testar endpoints protegidos, faça login via Google, copie o `accessToken` retornado e preencha a variável de coleção `ACCESS_TOKEN`. Os requests protegidos usam `Authorization: Bearer {{ACCESS_TOKEN}}`, sem token hardcoded no arquivo. Ao executar o smoke test, use os contratos abaixo como referência: os requests de referências gerais exigem `Authorization`, e os requests de `/tipo` devem usar o nome técnico do enum ou o rótulo exato (o filtro não é parcial).
 
-Contratos de localização nos requests da coleção:
+Contratos de localização no smoke test (API):
 
-- Referências públicas (UC31, sem autenticação):
+- Referências administrativas (UC31, com `Authorization`):
 
   ```
   GET /api/campus
   GET /api/unidades?campusId=1
   GET /api/blocos?unidadeId=1
+  Authorization: Bearer {{ACCESS_TOKEN}}
   ```
+
+  Os três endpoints exigem `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`.
+
+- Projeção publicada da hierarquia (UC32, sem autenticação):
+
+  ```
+  GET /api/ambientes/publicados/campus
+  GET /api/ambientes/publicados/unidades?campusId=1
+  GET /api/ambientes/publicados/blocos?unidadeId=1
+  ```
+
+  Retornam apenas níveis com ao menos um ambiente publicado, no formato `[{id, nome}]` e em ordem natural.
+
+- Resumo do bloco (UC33, sem autenticação):
+
+  ```
+  GET /api/ambientes/publicados/blocos/1/resumo
+  ```
+
+  Bloco inexistente ou sem ambiente publicado → `404`.
 
 - Escrita de ambiente (`POST /api/ambientes/nao-publicados`, `POST /{id}`, `POST /{id}/duplicar`,
   `PATCH /{id}/dados-basicos`) — `localizacao` aninhada com exatamente um de `id` (reuso) ou `nome`
@@ -317,14 +342,17 @@ Contratos de localização nos requests da coleção:
   }
   ```
 
-- Filtro por localização (em `nao-publicados`, `validacao` e `publicados`) — apenas IDs:
+- Filtro por localização (em `nao-publicados`, `validacao` e `publicados`) — apenas IDs, com `tipo` opcional
+  combinável:
 
   ```
   GET /api/ambientes/nao-publicados/localizacao?campusId=1&unidadeId=1&blocoId=1&andar=0
+  GET /api/ambientes/publicados/localizacao?blocoId=1&tipo=SALA_AULA&page=0&size=20
   ```
 
-  Os IDs são opcionais, mas pelo menos um campo de localização deve ser enviado (nenhum campo → `400 Bad Request`); ID inexistente ou
-  unidade/bloco fora do pai retorna página vazia.
+  Os IDs são opcionais, mas pelo menos um campo de localização deve ser enviado (nenhum campo → `400 Bad Request`); ID
+  inexistente ou unidade/bloco fora do pai retorna página vazia. O `tipo` aceita o nome técnico do enum **ou** o rótulo,
+  em **match exato** normalizado; `tipo` sozinho (sem localização) continua usando `/tipo`.
 
 ### 3.7. Migrations e backup
 
@@ -404,6 +432,15 @@ Configuração de conexão (preenchida automaticamente):
 2. Adicionar `@WithMockUser(authorities = [...])` nos testes do controller.
 3. Adicionar caso de teste em `ambientes-internos-module/src/test/kotlin/.../integracao/`.
 4. Adicionar entrada na tabela de mapeamento HTTP em `docs/seguranca.md`.
+
+> A **ordem** dos matchers é semântica: o primeiro que casa vence. Literais públicos (`permitAll`) de
+> `/api/ambientes/publicados/...` devem ser declarados **antes** de `/api/ambientes/publicados/** → ROLE_COLABORADOR`.
+> Para authority com mais de um perfil, adicionar um overload de `customRequestMatchers` que use `hasAnyAuthority`
+> (ex.: `/api/campus|unidades|blocos` → `ROLE_GESTOR_SISTEMA` ou `ROLE_VALIDADOR`).
+>
+> **Gate de release:** a proteção das referências gerais e a troca da fonte pública do `PesquisaBarAmbientes` devem
+> entrar no **mesmo release**. Antes da troca, um anônimo em `/ambientes/publicados` dispara `GET /api/campus` no mount
+> e recebe `401` — a listagem continua funcionando, mas os selects ficam vazios.
 
 ### 6.2. Adicionar uma nova env var
 

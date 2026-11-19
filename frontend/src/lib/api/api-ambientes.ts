@@ -39,6 +39,18 @@ function definirQueryComponents(query: AmbientesQuery, apiRoute: string): QueryC
                 andar: query.andar,
             }
             break
+        case TipoFiltro.LOCALIZACAO_TIPO:
+            queryComponents.url = `${apiRoute}/localizacao`
+            queryComponents.params = {
+                page: query.page ?? 0,
+                size: query.size ?? 20,
+                campusId: query.campusId,
+                unidadeId: query.unidadeId,
+                blocoId: query.blocoId,
+                andar: query.andar,
+                tipo: query.tipo,
+            }
+            break
         default:
             queryComponents.url = `${apiRoute}`
             queryComponents.params = {page: query.page ?? 0, size: query.size ?? 20}

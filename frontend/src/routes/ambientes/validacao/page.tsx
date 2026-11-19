@@ -1,10 +1,11 @@
 import {useQuery} from '@tanstack/react-query'
 import {useEffect} from 'react'
 import {fetchValidacao} from '@/lib/api/api-validacao'
-import type {AmbientesQuery} from '@/types/ambientes/query'
+import {type AmbientesQuery, paraAmbientesQuery} from '@/types/ambientes/query'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
 import {TabelaPadrao} from '@/components/ambientes/TabelaPadrao'
-import {ErrorLista} from '@/components/ambientes/ErrorLista'
+import {ErrorLista} from '@/components/common/ErrorLista'
+import {EstadoVazio} from '@/components/common/EstadoVazio'
 import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
 import {toast} from 'sonner'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
@@ -22,17 +23,7 @@ export function ValidacaoPage() {
         tipoFiltro,
     } = useAmbientesSearchParams()
 
-    const query: AmbientesQuery = {
-        page,
-        size,
-        nome: filtros.nome || undefined,
-        campusId: filtros.campusId ?? undefined,
-        unidadeId: filtros.unidadeId ?? undefined,
-        blocoId: filtros.blocoId ?? undefined,
-        andar: filtros.andar ?? undefined,
-        tipo: filtros.tipo || undefined,
-        tipoFiltro,
-    }
+    const query: AmbientesQuery = paraAmbientesQuery(filtros, page, size, tipoFiltro)
 
     const {data, isLoading, error, refetch} = useQuery({
         queryKey: ['ambientes', 'validacao', query],
@@ -60,9 +51,10 @@ export function ValidacaoPage() {
             <PesquisaBarAmbientes
                 initial={filtrosLocal}
                 onChange={handleFiltrosChange}
+                fonte="gerais"
             />
             {isLoading ? (
-                <p>Carregando…</p>
+                <p role="status">Carregando…</p>
             ) : data && data.ambientes.length > 0 ? (
                 <>
                     <TabelaPadrao
@@ -82,7 +74,7 @@ export function ValidacaoPage() {
                     />
                 </>
             ) : (
-                <p className="text-muted-foreground">Nenhum ambiente aguardando validação.</p>
+                <EstadoVazio mensagem="Nenhum ambiente aguardando validação."/>
             )}
         </div>
     )

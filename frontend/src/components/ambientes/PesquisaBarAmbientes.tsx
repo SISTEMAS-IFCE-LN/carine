@@ -1,8 +1,9 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-import { type Filtros, FILTROS_VAZIOS } from '@/types/ambientes/filtros'
-import { TipoAmbiente, TipoFiltro } from '@/types/ambientes/enums'
+import { Label } from '@/components/ui/label'
+import { useMemo, useState } from 'react'
+import { type Filtros, FILTROS_VAZIOS, derivarTipoFiltro, temLocalizacao } from '@/types/ambientes/filtros'
+import { chaveTipoAmbiente, TipoAmbiente, TipoFiltro } from '@/types/ambientes/enums'
 import {
   Select,
   SelectContent,
@@ -13,51 +14,77 @@ import {
 import { useFiltroLocal } from '@/hooks/useFiltroLocal'
 import { CampoReferencia } from '@/components/ambientes/CampoReferencia'
 import { useCampus, useUnidades, useBlocos } from '@/hooks/useReferencias'
+import {
+  useBlocosPublicados,
+  useCampusPublicados,
+  useUnidadesPublicados,
+} from '@/hooks/useReferenciasPublicadas'
 
 // Converte o nome do enum (ex.: "SALA_AULA") no rótulo exibido (ex.: "Sala de Aula")
 function rotuloTipo(tipo: string): string {
   return TipoAmbiente[tipo as keyof typeof TipoAmbiente] ?? tipo
 }
 
-// Mapeia o valor do enum TipoFiltro para o rótulo exibido
+// Opções do seletor de modo de filtro: fonte única para o trigger e o menu.
+const OPCOES_TIPO_FILTRO: ReadonlyArray<{valor: TipoFiltro; rotulo: string}> = [
+  {valor: TipoFiltro.NENHUM, rotulo: 'Nenhum'},
+  {valor: TipoFiltro.NOME, rotulo: 'Nome'},
+  {valor: TipoFiltro.TIPO, rotulo: 'Tipo'},
+  {valor: TipoFiltro.LOCALIZACAO, rotulo: 'Localização'},
+  {valor: TipoFiltro.LOCALIZACAO_TIPO, rotulo: 'Localização + Tipo'},
+]
+
 function rotuloTipoFiltro(tipo: string): string {
-  const map: Record<string, string> = {
-    '': 'Nenhum',
-    'nome': 'Nome',
-    'tipo': 'Tipo',
-    'localizacao': 'Localização',
-  }
-  return map[tipo] ?? tipo
+  return OPCOES_TIPO_FILTRO.find((opcao) => opcao.valor === tipo)?.rotulo ?? tipo
 }
 
-export function PesquisaBarAmbientes({
-  initial,
-  onChange,
-}: {
+export interface PesquisaBarAmbientesProps {
   initial: Filtros
   onChange: (f: Filtros) => void
-}) {
-  // Detectar tipo de filtro inicial baseado nos valores iniciais
-  const [tipoFiltro, setTipoFiltro] = useState<TipoFiltro>(() => {
-    if (initial.nome) return TipoFiltro.NOME
-    if (initial.tipo) return TipoFiltro.TIPO
-    if (initial.campusId !== null || initial.unidadeId !== null ||
-        initial.blocoId !== null || initial.andar !== null) return TipoFiltro.LOCALIZACAO
-    return TipoFiltro.NENHUM
-  })
+  /** Página pública usa a projeção publicada; gestão/validação usam as refs completas. */
+  fonte: 'publicados' | 'gerais'
+}
 
-  const { local, setLocal } = useFiltroLocal<Filtros>(initial, () => {
+export function PesquisaBarAmbientes({ initial, onChange, fonte }: PesquisaBarAmbientesProps) {
+  const initialNormalizado = useMemo<Filtros>(
+    () => ({ ...initial, tipo: chaveTipoAmbiente(initial.tipo) }),
+    [initial],
+  )
+
+  const [tipoFiltro, setTipoFiltro] = useState<TipoFiltro>(() => derivarTipoFiltro(initialNormalizado))
+
+  const { local, setLocal } = useFiltroLocal<Filtros>(initialNormalizado, () => {
     // Re-derivar tipo de filtro quando initial muda externamente (back/forward)
-    if (initial.nome) setTipoFiltro(TipoFiltro.NOME)
-    else if (initial.tipo) setTipoFiltro(TipoFiltro.TIPO)
-    else if (initial.campusId !== null || initial.unidadeId !== null ||
-             initial.blocoId !== null || initial.andar !== null) setTipoFiltro(TipoFiltro.LOCALIZACAO)
-    else setTipoFiltro(TipoFiltro.NENHUM)
+    setTipoFiltro(derivarTipoFiltro(initialNormalizado))
   })
 
-  const {data: campi = [], isLoading: carregandoCampi} = useCampus()
-  const {data: unidades = [], isLoading: carregandoUnidades} = useUnidades(local.campusId)
-  const {data: blocos = [], isLoading: carregandoBlocos} = useBlocos(local.unidadeId)
+  const usandoPublicadas = fonte === 'publicados'
+
+  const campiPub = useCampusPublicados({ enabled: usandoPublicadas })
+  const campiGerais = useCampus({ enabled: !usandoPublicadas })
+  const unidadesPub = useUnidadesPublicados(
+    usandoPublicadas ? local.campusId : null,
+    { enabled: usandoPublicadas },
+  )
+  const unidadesGerais = useUnidades(
+    !usandoPublicadas ? local.campusId : null,
+    { enabled: !usandoPublicadas },
+  )
+  const blocosPub = useBlocosPublicados(
+    usandoPublicadas ? local.unidadeId : null,
+    { enabled: usandoPublicadas },
+  )
+  const blocosGerais = useBlocos(
+    !usandoPublicadas ? local.unidadeId : null,
+    { enabled: !usandoPublicadas },
+  )
+
+  const campi = usandoPublicadas ? (campiPub.data ?? []) : (campiGerais.data ?? [])
+  const unidades = usandoPublicadas ? (unidadesPub.data ?? []) : (unidadesGerais.data ?? [])
+  const blocos = usandoPublicadas ? (blocosPub.data ?? []) : (blocosGerais.data ?? [])
+  const carregandoCampi = usandoPublicadas ? campiPub.isLoading : campiGerais.isLoading
+  const carregandoUnidades = usandoPublicadas ? unidadesPub.isLoading : unidadesGerais.isLoading
+  const carregandoBlocos = usandoPublicadas ? blocosPub.isLoading : blocosGerais.isLoading
 
   function handleTipoFiltroChange(value: string | null) {
     setTipoFiltro((value ?? '') as TipoFiltro)
@@ -81,6 +108,7 @@ export function PesquisaBarAmbientes({
     // Validar antes de aplicar
     if (tipoFiltro === TipoFiltro.NOME && !local.nome.trim()) return
     if (tipoFiltro === TipoFiltro.TIPO && !local.tipo) return
+    if (tipoFiltro === TipoFiltro.LOCALIZACAO_TIPO && (!local.tipo || !temLocalizacao(local))) return
     onChange(local)
   }
 
@@ -91,6 +119,83 @@ export function PesquisaBarAmbientes({
     initial.blocoId !== null ||
     initial.andar !== null ||
     initial.tipo !== ''
+
+  const camposLocalizacao = (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+      <CampoReferencia
+        label="Campus"
+        value={{ id: local.campusId, nome: null }}
+        opcoes={campi}
+        carregando={carregandoCampi}
+        permitirCadastro={false}
+        onChange={(v) => setLocal({
+          ...local,
+          campusId: v.id,
+          unidadeId: null,
+          blocoId: null,
+        })}
+      />
+
+      <CampoReferencia
+        label="Unidade"
+        value={{ id: local.unidadeId, nome: null }}
+        opcoes={unidades}
+        carregando={carregandoUnidades}
+        permitirCadastro={false}
+        disabled={local.campusId === null}
+        onChange={(v) => setLocal({
+          ...local,
+          unidadeId: v.id,
+          blocoId: null,
+        })}
+      />
+
+      <CampoReferencia
+        label="Bloco"
+        value={{ id: local.blocoId, nome: null }}
+        opcoes={blocos}
+        carregando={carregandoBlocos}
+        permitirCadastro={false}
+        disabled={local.unidadeId === null}
+        onChange={(v) => setLocal({ ...local, blocoId: v.id })}
+      />
+
+      <div className="space-y-1.5">
+        <Label htmlFor="filtro-andar">Andar</Label>
+        <Input
+          id="filtro-andar"
+          type="number"
+          placeholder="Ex.: 0"
+          value={local.andar ?? ''}
+          onChange={(e) => handleAndarChange(e.target.value)}
+          min={0}
+        />
+      </div>
+    </div>
+  )
+
+  const campoTipo = (
+    <div className="max-w-md space-y-1.5">
+      <Label htmlFor="filtro-tipo-barra">Tipo</Label>
+      <Select
+        value={local.tipo}
+        onValueChange={(value) => setLocal({ ...local, tipo: value ?? '' })}
+      >
+        <SelectTrigger id="filtro-tipo-barra">
+          <SelectValue placeholder="Selecione o tipo">
+            {local.tipo ? rotuloTipo(local.tipo) : undefined}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(TipoAmbiente).map(([key, value]) => (
+            <SelectItem key={key} value={key}>
+              {value}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
 
   return (
     <div className="space-y-4">
@@ -105,10 +210,11 @@ export function PesquisaBarAmbientes({
             )}
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={TipoFiltro.NENHUM}>Nenhum</SelectItem>
-            <SelectItem value={TipoFiltro.NOME}>Nome</SelectItem>
-            <SelectItem value={TipoFiltro.TIPO}>Tipo</SelectItem>
-            <SelectItem value={TipoFiltro.LOCALIZACAO}>Localização</SelectItem>
+            {OPCOES_TIPO_FILTRO.map((opcao) => (
+              <SelectItem key={opcao.valor} value={opcao.valor}>
+                {opcao.rotulo}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -126,76 +232,14 @@ export function PesquisaBarAmbientes({
         </div>
       )}
 
-      {tipoFiltro === TipoFiltro.TIPO && (
-        <div className="max-w-md">
-          <Select
-            value={local.tipo}
-            onValueChange={(value) => setLocal({ ...local, tipo: value ?? '' })}
-          >
-            <SelectTrigger aria-label="Filtrar por tipo">
-              <SelectValue placeholder="Selecione o tipo">
-                {local.tipo ? rotuloTipo(local.tipo) : undefined}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(TipoAmbiente).map(([key, value]) => (
-                <SelectItem key={key} value={key}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      {tipoFiltro === TipoFiltro.TIPO && campoTipo}
 
-      {tipoFiltro === TipoFiltro.LOCALIZACAO && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <CampoReferencia
-            label="Campus"
-            value={{ id: local.campusId, nome: null }}
-            opcoes={campi}
-            carregando={carregandoCampi}
-            permitirCadastro={false}
-            onChange={(v) => setLocal({
-              ...local,
-              campusId: v.id,
-              unidadeId: null,
-              blocoId: null,
-            })}
-          />
+      {tipoFiltro === TipoFiltro.LOCALIZACAO && camposLocalizacao}
 
-          <CampoReferencia
-            label="Unidade"
-            value={{ id: local.unidadeId, nome: null }}
-            opcoes={unidades}
-            carregando={carregandoUnidades}
-            permitirCadastro={false}
-            disabled={local.campusId === null}
-            onChange={(v) => setLocal({
-              ...local,
-              unidadeId: v.id,
-              blocoId: null,
-            })}
-          />
-
-          <CampoReferencia
-            label="Bloco"
-            value={{ id: local.blocoId, nome: null }}
-            opcoes={blocos}
-            carregando={carregandoBlocos}
-            permitirCadastro={false}
-            disabled={local.unidadeId === null}
-            onChange={(v) => setLocal({ ...local, blocoId: v.id })}
-          />
-
-          <Input
-            type="number"
-            placeholder="Andar"
-            aria-label="Filtrar por andar"
-            value={local.andar ?? ''}
-            onChange={(e) => handleAndarChange(e.target.value)}
-            min={0}
-          />
+      {tipoFiltro === TipoFiltro.LOCALIZACAO_TIPO && (
+        <div className="space-y-3">
+          {camposLocalizacao}
+          {campoTipo}
         </div>
       )}
 
@@ -205,11 +249,12 @@ export function PesquisaBarAmbientes({
           variant="outline"
           onClick={handleAplicar}
           disabled={tipoFiltro === TipoFiltro.NENHUM}
+          className="min-h-11 md:min-h-0"
         >
           Aplicar
         </Button>
         {temFiltros && (
-          <Button variant="ghost" onClick={handleLimpar}>
+          <Button variant="ghost" onClick={handleLimpar} className="min-h-11 md:min-h-0">
             Limpar
           </Button>
         )}

@@ -1,12 +1,16 @@
 import {useQuery} from '@tanstack/react-query'
 import {useEffect, useMemo} from 'react'
+import {useNavigate, useLocation} from 'react-router'
 import {fetchPublicados} from '@/lib/api/api-publicados'
-import type {AmbientesQuery} from '@/types/ambientes/query'
+import {type AmbientesQuery, paraAmbientesQuery} from '@/types/ambientes/query'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
 import {TabelaPadrao} from '@/components/ambientes/TabelaPadrao'
 import {AcoesLote} from '@/components/ambientes/AcoesLote'
-import {ErrorLista} from '@/components/ambientes/ErrorLista'
+import {ErrorLista} from '@/components/common/ErrorLista'
+import {EstadoVazio} from '@/components/common/EstadoVazio'
 import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
+import {Button} from '@/components/ui/button'
+import {PAGES_ROUTES} from '@/constants/routes'
 import {toast} from 'sonner'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
@@ -14,7 +18,17 @@ import {useAuth} from '@/hooks/useAuth'
 
 export function PublicadosPage() {
     const {user} = useAuth()
+    const navigate = useNavigate()
+    const location = useLocation()
     const autenticado = user !== null
+
+    function voltar() {
+        if (location.key !== 'default') {
+            navigate(-1)
+        } else {
+            navigate(PAGES_ROUTES.HOME)
+        }
+    }
 
     const {
         page,
@@ -27,17 +41,7 @@ export function PublicadosPage() {
         tipoFiltro,
     } = useAmbientesSearchParams()
 
-    const query: AmbientesQuery = {
-        page,
-        size,
-        nome: filtros.nome || undefined,
-        campusId: filtros.campusId ?? undefined,
-        unidadeId: filtros.unidadeId ?? undefined,
-        blocoId: filtros.blocoId ?? undefined,
-        andar: filtros.andar ?? undefined,
-        tipo: filtros.tipo || undefined,
-        tipoFiltro,
-    }
+    const query: AmbientesQuery = paraAmbientesQuery(filtros, page, size, tipoFiltro)
 
     const {data, isLoading, error, refetch} = useQuery({
         queryKey: ['ambientes', 'publicados', query],
@@ -68,15 +72,21 @@ export function PublicadosPage() {
 
     return (
         <div className="space-y-4">
+            <div>
+                <Button variant="outline" onClick={voltar}>
+                    Voltar
+                </Button>
+            </div>
             <PesquisaBarAmbientes
                 initial={filtrosLocal}
                 onChange={(novosFiltros) => {
                     selecao.limparSelecao()
                     handleFiltrosChange(novosFiltros)
                 }}
+                fonte="publicados"
             />
             {isLoading ? (
-                <p>Carregando…</p>
+                <p role="status">Carregando…</p>
             ) : data && data.ambientes.length > 0 ? (
                 <>
                     {autenticado && (
@@ -112,7 +122,7 @@ export function PublicadosPage() {
                     />
                 </>
             ) : (
-                <p className="text-muted-foreground">Nenhum ambiente encontrado.</p>
+                <EstadoVazio mensagem="Nenhum ambiente encontrado."/>
             )}
         </div>
     )

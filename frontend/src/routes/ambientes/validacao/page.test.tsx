@@ -168,19 +168,19 @@ describe('ValidacaoPage (UC01-FE)', () => {
         })
     })
 
-    it('ignora blocoId sem unidade e inicia sem filtro', async () => {
+    it('preserva blocoId sem unidade e usa filtro de localização', async () => {
         vi.mocked(fetchValidacao).mockResolvedValue(mockData)
         renderPage(['/ambientes/validacao?blocoId=1'])
         await waitFor(() => {
             expect(fetchValidacao).toHaveBeenCalledWith(
-                expect.objectContaining({ tipoFiltro: TipoFiltro.NENHUM }),
+                expect.objectContaining({ tipoFiltro: TipoFiltro.LOCALIZACAO }),
                 expect.anything(),
             )
         })
         const [query] = vi.mocked(fetchValidacao).mock.calls[0]
         expect(query.campusId).toBeUndefined()
         expect(query.unidadeId).toBeUndefined()
-        expect(query.blocoId).toBeUndefined()
+        expect(query.blocoId).toBe(1)
     })
 
     it('aplica filtro por tipo enviando o nome do enum', async () => {
@@ -194,7 +194,7 @@ describe('ValidacaoPage (UC01-FE)', () => {
         await user.click(screen.getByLabelText('Tipo de filtro'))
         await user.click(await screen.findByRole('option', { name: 'Tipo' }))
         // Selecionar "Sala de Aula" no select de tipo
-        await user.click(screen.getByLabelText('Filtrar por tipo'))
+        await user.click(screen.getByLabelText('Tipo'))
         await user.click(await screen.findByRole('option', { name: 'Sala de Aula' }))
         // Aplicar
         await user.click(screen.getByText('Aplicar'))

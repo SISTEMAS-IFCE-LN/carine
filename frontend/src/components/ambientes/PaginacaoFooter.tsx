@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { formatarMedida } from '@/lib/ambientes/formatters'
 import {
     Select,
     SelectContent,
@@ -39,7 +40,7 @@ export function PaginacaoFooter({
     return (
         <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-muted-foreground">
-                Área Total: {areaTotal.toFixed(2)} m²
+                Área Total: {formatarMedida(areaTotal)} m²
             </span>
             <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Itens por página:</span>

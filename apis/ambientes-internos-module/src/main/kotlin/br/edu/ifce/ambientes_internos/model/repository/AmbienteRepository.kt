@@ -1,6 +1,9 @@
 package br.edu.ifce.ambientes_internos.model.repository
 
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Ambiente
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Bloco
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Campus
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Unidade
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.enums.StatusAmbiente
 import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.enums.TipoAmbiente
 import org.springframework.data.domain.Page
@@ -138,6 +141,38 @@ interface AmbienteRepository : JpaRepository<Ambiente, Long> {
         """
             select a from Ambiente a
             where a.status = :status
+            and (:filtrarCampus = false or a.localizacao.bloco.unidade.campus.id = :campusId)
+            and (:filtrarUnidade = false or a.localizacao.bloco.unidade.id = :unidadeId)
+            and (:filtrarBloco = false or a.localizacao.bloco.id = :blocoId)
+            and (:andar is null or a.localizacao.andar = :andar)
+            and a.tipo in :tipos
+        """
+    )
+    fun findByLocalizacaoAndTiposAndStatus(
+        @Param("campusId") campusId: Long?,
+        @Param("unidadeId") unidadeId: Long?,
+        @Param("blocoId") blocoId: Long?,
+        @Param("filtrarCampus") filtrarCampus: Boolean,
+        @Param("filtrarUnidade") filtrarUnidade: Boolean,
+        @Param("filtrarBloco") filtrarBloco: Boolean,
+        @Param("andar") andar: Int?,
+        @Param("tipos") tipos: Set<TipoAmbiente>,
+        @Param("status") status: StatusAmbiente,
+        pageable: Pageable,
+    ): Page<Ambiente>
+
+    @EntityGraph(
+        attributePaths = [
+            "localizacao",
+            "localizacao.bloco",
+            "localizacao.bloco.unidade",
+            "localizacao.bloco.unidade.campus"
+        ]
+    )
+    @Query(
+        """
+            select a from Ambiente a
+            where a.status = :status
             and a.tipo in :tipos
         """
     )
@@ -146,5 +181,65 @@ interface AmbienteRepository : JpaRepository<Ambiente, Long> {
         @Param("status") status: StatusAmbiente,
         pageable: Pageable
     ): Page<Ambiente>
+
+    @Query(
+        """
+            select distinct c from Campus c
+            where c.id in (
+                select amb.localizacao.bloco.unidade.campus.id
+                from Ambiente amb
+                where amb.status = :status
+            )
+        """
+    )
+    fun findCampiDistintosPorStatus(@Param("status") status: StatusAmbiente): List<Campus>
+
+    @Query(
+        """
+            select distinct u from Unidade u
+            where u.campus.id = :campusId
+              and u.id in (
+                  select amb.localizacao.bloco.unidade.id
+                  from Ambiente amb
+                  where amb.status = :status
+                    and amb.localizacao.bloco.unidade.campus.id = :campusId
+              )
+        """
+    )
+    fun findUnidadesDistintasPorStatus(
+        @Param("campusId") campusId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Unidade>
+
+    @Query(
+        """
+            select distinct b from Bloco b
+            where b.unidade.id = :unidadeId
+              and b.id in (
+                  select amb.localizacao.bloco.id
+                  from Ambiente amb
+                  where amb.status = :status
+                    and amb.localizacao.bloco.unidade.id = :unidadeId
+              )
+        """
+    )
+    fun findBlocosDistintosPorStatus(
+        @Param("unidadeId") unidadeId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Bloco>
+
+    @Query(
+        """
+            select distinct a from Ambiente a
+            join fetch a.localizacao l
+            join fetch l.bloco b
+            left join fetch a.geometrias
+            where a.status = :status and b.id = :blocoId
+        """
+    )
+    fun findAllByBlocoAndStatus(
+        @Param("blocoId") blocoId: Long,
+        @Param("status") status: StatusAmbiente,
+    ): List<Ambiente>
 
 }

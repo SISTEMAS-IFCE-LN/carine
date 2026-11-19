@@ -34,8 +34,8 @@ abstract class BaseUseCases(
     protected fun resolverTipos(filtro: String?): Set<TipoAmbiente>? {
         val textoNormalizado = filtro?.trim()?.takeIf { it.isNotBlank() }?.normalizarTexto() ?: return null
         return TipoAmbiente.entries.filter { tipo ->
-            tipo.name.normalizarTexto().contains(textoNormalizado) ||
-                    tipo.nome.normalizarTexto().contains(textoNormalizado)
+            tipo.name.normalizarTexto() == textoNormalizado ||
+                    tipo.nome.normalizarTexto() == textoNormalizado
         }.toSet()
     }
 
@@ -104,18 +104,38 @@ abstract class BaseUseCases(
         }
 
         val pageableLimitado = limitarPageable(pageable)
+        val tipos = resolverTipos(localizacao.tipo)
 
-        val page = repoAmb.findByLocalizacaoAndStatus(
-            campusId = localizacao.campusId,
-            unidadeId = localizacao.unidadeId,
-            blocoId = localizacao.blocoId,
-            filtrarCampus = localizacao.campusId != null,
-            filtrarUnidade = localizacao.unidadeId != null,
-            filtrarBloco = localizacao.blocoId != null,
-            andar = localizacao.andar,
-            status = status,
-            pageable = pageableLimitado
-        )
+        if (tipos != null && tipos.isEmpty()) {
+            return AmbientesBasicosPaginadosRes.from(paginaVazia(pageableLimitado))
+        }
+
+        val page = if (tipos != null) {
+            repoAmb.findByLocalizacaoAndTiposAndStatus(
+                campusId = localizacao.campusId,
+                unidadeId = localizacao.unidadeId,
+                blocoId = localizacao.blocoId,
+                filtrarCampus = localizacao.campusId != null,
+                filtrarUnidade = localizacao.unidadeId != null,
+                filtrarBloco = localizacao.blocoId != null,
+                andar = localizacao.andar,
+                tipos = tipos,
+                status = status,
+                pageable = pageableLimitado,
+            )
+        } else {
+            repoAmb.findByLocalizacaoAndStatus(
+                campusId = localizacao.campusId,
+                unidadeId = localizacao.unidadeId,
+                blocoId = localizacao.blocoId,
+                filtrarCampus = localizacao.campusId != null,
+                filtrarUnidade = localizacao.unidadeId != null,
+                filtrarBloco = localizacao.blocoId != null,
+                andar = localizacao.andar,
+                status = status,
+                pageable = pageableLimitado,
+            )
+        }
         return AmbientesBasicosPaginadosRes.from(page)
     }
 

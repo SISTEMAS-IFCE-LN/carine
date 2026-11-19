@@ -2,6 +2,13 @@ package br.edu.ifce.ambientes_internos.integracao
 
 import br.edu.ifce.ambientes_internos.TestApplication
 import br.edu.ifce.ambientes_internos.TestSecurityConfig
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.Localizacao
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.SalaAula
+import br.edu.ifce.ambientes_internos.model.domain.entity.ambientes.enums.StatusAmbiente
+import br.edu.ifce.ambientes_internos.model.repository.AmbienteRepository
+import br.edu.ifce.ambientes_internos.model.repository.BlocoRepository
+import br.edu.ifce.ambientes_internos.model.repository.CampusRepository
+import br.edu.ifce.ambientes_internos.model.repository.UnidadeRepository
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,6 +22,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.math.BigDecimal
+import java.util.UUID
 
 @SpringBootTest(classes = [TestApplication::class])
 @AutoConfigureMockMvc
@@ -25,6 +34,64 @@ class AmbienteSegurancaRotasIntegrationTest {
 
     @Autowired
     lateinit var mockMvc: MockMvc
+
+    @Autowired
+    lateinit var repoAmb: AmbienteRepository
+
+    @Autowired
+    lateinit var repoCampus: CampusRepository
+
+    @Autowired
+    lateinit var repoUnidade: UnidadeRepository
+
+    @Autowired
+    lateinit var repoBloco: BlocoRepository
+
+    @Test
+    fun `deve permitir acesso anonimo a hierarquia publicada`() {
+        mockMvc.perform(
+            get("/api/ambientes/publicados/campus")
+                .header(HttpHeaders.ACCEPT, "application/json")
+        ).andExpect(status().isOk)
+    }
+
+    @Test
+    fun `deve negar acesso anonimo ao detalhe de ambiente publicado`() {
+        val id = criarAmbientePublicado()
+
+        mockMvc.perform(
+            get("/api/ambientes/publicados/$id")
+                .header(HttpHeaders.ACCEPT, "application/json")
+        ).andExpect(status().isUnauthorized)
+    }
+
+    @Test
+    fun `deve permitir acesso ao detalhe de ambiente publicado com jwt de colaborador`() {
+        val id = criarAmbientePublicado()
+
+        mockMvc.perform(
+            get("/api/ambientes/publicados/$id")
+                .with(jwtComRoles("ROLE_COLABORADOR"))
+                .header(HttpHeaders.ACCEPT, "application/json")
+        ).andExpect(status().isOk)
+    }
+
+    private fun criarAmbientePublicado(): Long {
+        val sufixo = UUID.randomUUID().toString().take(8)
+        val campus = criarCampus(repoCampus, "CAMPUS SEGURANCA $sufixo")
+        val unidade = criarUnidade(repoCampus, repoUnidade, campus.nome, "UNIDADE $sufixo")
+        val bloco = criarBloco(repoBloco, unidade, "BLOCO $sufixo")
+        val sala = SalaAula(
+            nome = "SALA $sufixo",
+            localizacao = Localizacao(bloco = bloco, andar = 0),
+            capacidade = 20,
+            geometrias = mutableSetOf(),
+            pesDireitos = mutableSetOf(BigDecimal("3.0")),
+            esquadrias = mutableSetOf(),
+        )
+        sala.status = StatusAmbiente.PUBLICADO
+        return repoAmb.save(sala).id!!
+    }
 
     @Test
     fun `deve permitir acesso aos ambientes publicados com jwt de colaborador`() {

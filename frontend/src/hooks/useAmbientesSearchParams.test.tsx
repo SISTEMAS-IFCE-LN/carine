@@ -75,7 +75,7 @@ describe('useAmbientesSearchParams', () => {
     expect(result.current.page).toBe(0)
   })
 
-  it('handleFiltrosChange descarta unidade sem campus', () => {
+  it('handleFiltrosChange preserva unidade sem campus', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/']),
     })
@@ -87,10 +87,10 @@ describe('useAmbientesSearchParams', () => {
       })
     })
 
-    expect(result.current.filtros.unidadeId).toBeNull()
+    expect(result.current.filtros.unidadeId).toBe(2)
   })
 
-  it('handleFiltrosChange descarta bloco sem unidade', () => {
+  it('handleFiltrosChange preserva bloco sem unidade', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/']),
     })
@@ -104,34 +104,34 @@ describe('useAmbientesSearchParams', () => {
     })
 
     expect(result.current.filtros.campusId).toBe(1)
-    expect(result.current.filtros.blocoId).toBeNull()
+    expect(result.current.filtros.blocoId).toBe(3)
   })
 
-  it('descarta unidadeId da URL quando não há campusId', () => {
+  it('preserva unidadeId da URL quando não há campusId', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/?nome=sala&unidadeId=2']),
     })
 
     expect(result.current.filtros.nome).toBe('sala')
-    expect(result.current.filtros.unidadeId).toBeNull()
+    expect(result.current.filtros.unidadeId).toBe(2)
   })
 
-  it('descarta blocoId da URL quando não há unidadeId', () => {
+  it('preserva blocoId da URL quando não há unidadeId', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/?campusId=1&blocoId=3']),
     })
 
     expect(result.current.filtros.campusId).toBe(1)
-    expect(result.current.filtros.blocoId).toBeNull()
+    expect(result.current.filtros.blocoId).toBe(3)
   })
 
-  it('descarta blocoId da URL quando o pai também foi descartado', () => {
+  it('preserva blocoId da URL quando o pai também está ausente', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/?unidadeId=2&blocoId=3']),
     })
 
-    expect(result.current.filtros.unidadeId).toBeNull()
-    expect(result.current.filtros.blocoId).toBeNull()
+    expect(result.current.filtros.unidadeId).toBe(2)
+    expect(result.current.filtros.blocoId).toBe(3)
   })
 
   it.each([
@@ -327,11 +327,101 @@ describe('useAmbientesSearchParams', () => {
     expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO)
   })
 
-  it('blocoId órfão na URL não ativa filtro de localização', () => {
+  it('blocoId isolado na URL ativa filtro de localização', () => {
     const { result } = renderHook(() => useAmbientesSearchParams(), {
       wrapper: createWrapper(['/?blocoId=3']),
     })
 
-    expect(result.current.tipoFiltro).toBe(TipoFiltro.NENHUM)
+    expect(result.current.filtros.blocoId).toBe(3)
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO)
+  })
+
+  it('deriva LOCALIZACAO_TIPO com blocoId e tipo técnico', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?blocoId=12&tipo=SALA_AULA']),
+    })
+
+    expect(result.current.filtros.blocoId).toBe(12)
+    expect(result.current.filtros.tipo).toBe('SALA_AULA')
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO_TIPO)
+  })
+
+  it('canonicaliza o rótulo do tipo lido da URL', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?tipo=Laborat%C3%B3rio&blocoId=12']),
+    })
+
+    expect(result.current.filtros.tipo).toBe('LABORATORIO')
+    expect(result.current.filtros.blocoId).toBe(12)
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO_TIPO)
+  })
+
+  it('canonicaliza o rótulo com espaço do tipo lido da URL', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?tipo=Sala%20de%20Aula&blocoId=12']),
+    })
+
+    expect(result.current.filtros.tipo).toBe('SALA_AULA')
+  })
+
+  it('mantém tipo desconhecido como veio', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?tipo=lab&blocoId=12']),
+    })
+
+    expect(result.current.filtros.tipo).toBe('lab')
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO_TIPO)
+  })
+
+  it('preserva blocoId e andar juntos', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?blocoId=12&andar=0']),
+    })
+
+    expect(result.current.filtros.blocoId).toBe(12)
+    expect(result.current.filtros.andar).toBe(0)
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO)
+  })
+
+  it('deriva TIPO quando há tipo sem localização', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?tipo=SALA_AULA']),
+    })
+
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.TIPO)
+  })
+
+  it('deriva LOCALIZACAO_TIPO com campusId e tipo', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?campusId=1&tipo=SALA_AULA']),
+    })
+
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO_TIPO)
+  })
+
+  it('prioriza NOME quando nome e tipo estão presentes', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?nome=sala&tipo=SALA_AULA']),
+    })
+
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.NOME)
+  })
+
+  it('handleFiltrosChange canoniza o rótulo do tipo na URL', () => {
+    const { result } = renderHook(() => useAmbientesSearchParams(), {
+      wrapper: createWrapper(['/?blocoId=12']),
+    })
+
+    act(() => {
+      result.current.handleFiltrosChange({
+        ...FILTROS_VAZIOS,
+        blocoId: 12,
+        tipo: 'Sala de Aula',
+      })
+    })
+
+    expect(result.current.filtros.blocoId).toBe(12)
+    expect(result.current.filtros.tipo).toBe('SALA_AULA')
+    expect(result.current.tipoFiltro).toBe(TipoFiltro.LOCALIZACAO_TIPO)
   })
 })

@@ -28,6 +28,7 @@ vi.mock('@/hooks/useAuth', () => ({
 
 import { fetchDetalheValidacao, publicarAmbiente, privarAmbiente } from '@/lib/api/api-validacao'
 import { useAuth } from '@/hooks/useAuth'
+import { REFERENCIAS_PUBLICADAS_QUERY_KEY } from '@/hooks/useReferenciasPublicadas'
 
 const userValidador: User = {
   id: 1,
@@ -80,9 +81,9 @@ function createQueryClient() {
   })
 }
 
-function renderPage(initialEntries: string[] = ['/ambientes/validacao/1']) {
+function renderPage(initialEntries: string[] = ['/ambientes/validacao/1'], client?: QueryClient) {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={client ?? createQueryClient()}>
       <MemoryRouter initialEntries={initialEntries}>
         <Routes>
           <Route path="/ambientes/validacao/:id" element={<ValidacaoDetalhePage />} />
@@ -190,7 +191,9 @@ describe('ValidacaoDetalhePage', () => {
     it('publica o ambiente ao confirmar o modal', async () => {
       vi.mocked(fetchDetalheValidacao).mockResolvedValue(makeAmbiente(StatusAmbiente.AGUARDANDO_VALIDACAO))
       vi.mocked(publicarAmbiente).mockResolvedValue(undefined)
-      renderPage()
+      const queryClient = createQueryClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+      renderPage(undefined, queryClient)
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Publicar' })).toBeEnabled()
       })
@@ -204,13 +207,16 @@ describe('ValidacaoDetalhePage', () => {
       })
       const { toast } = await import('sonner')
       expect(toast.success).toHaveBeenCalledWith('Ambiente publicado.')
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
       expect(await screen.findByText('lista')).toBeInTheDocument()
     })
 
     it('priva o ambiente ao confirmar o modal', async () => {
       vi.mocked(fetchDetalheValidacao).mockResolvedValue(makeAmbiente(StatusAmbiente.AGUARDANDO_VALIDACAO))
       vi.mocked(privarAmbiente).mockResolvedValue(undefined)
-      renderPage()
+      const queryClient = createQueryClient()
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+      renderPage(undefined, queryClient)
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Privar' })).toBeEnabled()
       })
@@ -224,6 +230,7 @@ describe('ValidacaoDetalhePage', () => {
       })
       const { toast } = await import('sonner')
       expect(toast.success).toHaveBeenCalledWith('Ambiente privado.')
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
       expect(await screen.findByText('lista')).toBeInTheDocument()
     })
 

@@ -9,7 +9,6 @@ export interface UsuariosSearchParams {
     size: number
     filtros: FiltrosUsuarios
     filtrosLocal: FiltrosUsuarios
-    setFiltrosLocal: (f: FiltrosUsuarios) => void
     handleFiltrosChange: (f: FiltrosUsuarios) => void
     handlePageChange: (page: number) => void
     handleSizeChange: (size: string | null) => void
@@ -32,10 +31,10 @@ export function useUsuariosSearchParams(): UsuariosSearchParams {
     }), [searchParams])
 
     // Rascunho local sincronizado com a URL (back/forward) — delegado a useFiltroLocal
-    const {local: filtrosLocal, setLocal: setFiltrosLocal} = useFiltroLocal<FiltrosUsuarios>(filtros)
+    const {local: filtrosLocal, setLocal} = useFiltroLocal<FiltrosUsuarios>(filtros)
 
     function handleFiltrosChange(novos: FiltrosUsuarios) {
-        setFiltrosLocal(novos)
+        setLocal(novos)
         // nome e email são mutuamente exclusivos: aplicar um limpa o outro
         updateSearchParams({nome: novos.nome || null, email: novos.email || null, page: 0})
     }
@@ -51,7 +50,6 @@ export function useUsuariosSearchParams(): UsuariosSearchParams {
         size,
         filtros,
         filtrosLocal,
-        setFiltrosLocal,
         handleFiltrosChange,
         handlePageChange,
         handleSizeChange,

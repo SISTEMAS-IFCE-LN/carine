@@ -1,5 +1,5 @@
 ﻿import {Suspense} from 'react'
-import {createBrowserRouter, Navigate} from 'react-router'
+import {createBrowserRouter} from 'react-router'
 import {PublicOnly} from '@/components/auth/PublicOnly'
 import {RequireAuth} from '@/components/auth/RequireAuth'
 import {RequireRole} from '@/components/auth/RequireRole'
@@ -11,6 +11,10 @@ import {
     CallbackPage,
     UnauthorizedPage,
     ProtectedLayout,
+    HomePage,
+    CampusPage,
+    UnidadePage,
+    BlocoPage,
     PublicadosPage,
     PublicadoDetalhePage,
     EsquadriasPage,
@@ -33,6 +37,11 @@ export const router = createBrowserRouter([
     {
         element: <Suspense fallback={<Loading/>}><ProtectedLayout/></Suspense>,
         children: [
+            // Home pública de campi (UC32-FE)
+            {index: true, element: <Suspense fallback={<Loading/>}><HomePage/></Suspense>},
+            {path: 'campus/:campusId', element: <Suspense fallback={<Loading/>}><CampusPage/></Suspense>},
+            {path: 'unidade/:unidadeId', element: <Suspense fallback={<Loading/>}><UnidadePage/></Suspense>},
+            {path: 'bloco/:blocoId', element: <Suspense fallback={<Loading/>}><BlocoPage/></Suspense>},
             // Pública (UC21-FE) — sem RequireAuth, mas com Header
             {path: '/ambientes/publicados', element: <Suspense fallback={<Loading/>}><PublicadosPage/></Suspense>},
             // Autenticadas
@@ -79,6 +88,5 @@ export const router = createBrowserRouter([
             },
         ],
     },
-    {path: '/', element: <Navigate to={PAGES_ROUTES.PUBLICADOS} replace/>},
     {path: '*', element: <Suspense fallback={<Loading/>}><UnauthorizedPage/></Suspense>},
 ])

@@ -2,12 +2,13 @@ import {useMemo, useState} from 'react'
 import {useQuery, useQueryClient} from '@tanstack/react-query'
 import {useNavigate} from 'react-router'
 import {deletarAmbientes, enviarParaValidacao, fetchNaoPublicados} from '@/lib/api/api-naopublicados'
-import type {AmbientesQuery} from '@/types/ambientes/query'
+import {type AmbientesQuery, paraAmbientesQuery} from '@/types/ambientes/query'
 import {PAGES_ROUTES} from '@/constants/routes'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
 import {TabelaPadrao} from '@/components/ambientes/TabelaPadrao'
 import {type AcaoLote, AcoesLote} from '@/components/ambientes/AcoesLote'
-import {ErrorLista} from '@/components/ambientes/ErrorLista'
+import {ErrorLista} from '@/components/common/ErrorLista'
+import {EstadoVazio} from '@/components/common/EstadoVazio'
 import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
 import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
@@ -15,6 +16,7 @@ import {Role} from '@/types/usuarios/user'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
 import {toast} from 'sonner'
+import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
 
 export function NaoPublicadosPage() {
     const navigate = useNavigate()
@@ -31,17 +33,7 @@ export function NaoPublicadosPage() {
         tipoFiltro,
     } = useAmbientesSearchParams()
 
-    const query: AmbientesQuery = {
-        page,
-        size,
-        nome: filtros.nome || undefined,
-        campusId: filtros.campusId ?? undefined,
-        unidadeId: filtros.unidadeId ?? undefined,
-        blocoId: filtros.blocoId ?? undefined,
-        andar: filtros.andar ?? undefined,
-        tipo: filtros.tipo || undefined,
-        tipoFiltro,
-    }
+    const query: AmbientesQuery = paraAmbientesQuery(filtros, page, size, tipoFiltro)
 
     const {data, isLoading, error, refetch} = useQuery({
         queryKey: ['ambientes', 'nao-publicados', query],
@@ -61,7 +53,11 @@ export function NaoPublicadosPage() {
     async function confirmarLote() {
         const ids = selecao.selectedIds
         if (modalLote === 'validar') await enviarParaValidacao(ids)
-        else if (modalLote === 'deletar') await deletarAmbientes(ids)
+        else if (modalLote === 'deletar') {
+            await deletarAmbientes(ids)
+            // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19).
+            invalidarReferenciasPublicadas(queryClient)
+        }
         toast.success('Operação concluída.')
         selecao.limparSelecao()
         void queryClient.invalidateQueries({queryKey: ['ambientes', 'nao-publicados']})
@@ -91,9 +87,10 @@ export function NaoPublicadosPage() {
                     selecao.limparSelecao()
                     handleFiltrosChange(novosFiltros)
                 }}
+                fonte="gerais"
             />
             {isLoading ? (
-                <p>Carregando…</p>
+                <p role="status">Carregando…</p>
             ) : data && data.ambientes.length > 0 ? (
                 <>
                     <AcoesLote
@@ -129,7 +126,7 @@ export function NaoPublicadosPage() {
                     />
                 </>
             ) : (
-                <p className="text-muted-foreground">Nenhum ambiente não publicado.</p>
+                <EstadoVazio mensagem="Nenhum ambiente não publicado."/>
             )}
             <ModalConfirmacao
                 open={modalLote !== null}
