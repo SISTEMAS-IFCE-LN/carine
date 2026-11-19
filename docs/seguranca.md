@@ -1,4 +1,4 @@
-# Segurança do Catálogo de Edificações
+# Segurança do CARINE
 
 Este documento descreve em detalhe o modelo de autenticação, autorização, gestão de tokens e configuração externa de segurança do sistema.
 

@@ -2,6 +2,7 @@ import {useSearchParams} from 'react-router'
 import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
 import {PAGES_ROUTES} from '@/constants/routes'
+import {SYSTEM_DESCRIPTION, SYSTEM_NAME} from '@/constants/branding'
 
 const MENSAGENS_ERRO: Record<string, string> = {
     inativo: 'Usuário inativo. Contate o administrador.',
@@ -22,9 +23,9 @@ export function LoginPage() {
         <div className="min-h-screen flex items-center justify-center bg-muted p-4">
             <Card className="p-8 max-w-md w-full space-y-6">
                 <div className="space-y-2 text-center">
-                    <h1 className="text-2xl font-bold">Catálogo de Edificações</h1>
+                    <h1 className="text-2xl font-bold">{SYSTEM_NAME}</h1>
                     <p className="text-sm text-muted-foreground">
-                        IFCE — Campus Limoeiro do Norte
+                        {SYSTEM_DESCRIPTION}
                     </p>
                 </div>
                 {mensagemErro && (

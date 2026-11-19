@@ -1,6 +1,6 @@
-# Arquitetura do Backend - Catálogo de Edificações
+# Arquitetura do Backend - CARINE
 
-Este documento descreve a organização arquitetural do ecossistema do Catálogo de Edificações. O sistema adota uma *
+Este documento descreve a organização arquitetural do ecossistema do CARINE. O sistema adota uma *
 *Arquitetura Modular (Multi-Módulos)** fundamentada nos princípios de separação de conceitos, alta coesão e baixo
 acoplamento.
 

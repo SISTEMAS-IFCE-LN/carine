@@ -3,6 +3,7 @@ import {HeaderNav} from '@/components/layout/HeaderNav'
 import {useAuth} from '@/hooks/useAuth'
 import {Button, buttonVariants} from '@/components/ui/button'
 import {PAGES_ROUTES} from '@/constants/routes'
+import {SYSTEM_DESCRIPTION, SYSTEM_FULL_NAME, SYSTEM_NAME} from '@/constants/branding'
 import {cn} from '@/lib/utils/cn'
 
 export function Header() {
@@ -14,7 +15,19 @@ export function Header() {
                 <div className="flex h-16 items-center justify-between">
                     <div className="flex items-center gap-2">
                         {user && <HeaderNav />}
-                        <Link to="/" className="font-bold text-xl">Catálogo Edificações</Link>
+                        <Link
+                            to="/"
+                            className="min-w-0"
+                            aria-label={SYSTEM_FULL_NAME}
+                            title={SYSTEM_FULL_NAME}
+                        >
+                            <span className="block font-bold text-xl leading-tight">
+                                {SYSTEM_NAME}
+                            </span>
+                            <span className="block max-w-[14rem] text-[0.6rem] leading-tight text-muted-foreground sm:max-w-none sm:text-xs">
+                                {SYSTEM_DESCRIPTION}
+                            </span>
+                        </Link>
                     </div>
                     <div className="flex items-center gap-4">
                         {user ? (

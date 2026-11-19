@@ -1,6 +1,6 @@
 # Migrations de Banco de Dados
 
-O schema do Catálogo de Edificações é versionado com **Flyway**. As migrations ficam em `db/migration/` e são aplicadas por um job dedicado (`migrate`) antes da API. A aplicação não contém Flyway e sobe com `spring.jpa.hibernate.ddl-auto: validate`.
+O schema do CARINE é versionado com **Flyway**. As migrations ficam em `db/migration/` e são aplicadas por um job dedicado (`migrate`) antes da API. A aplicação não contém Flyway e sobe com `spring.jpa.hibernate.ddl-auto: validate`.
 
 Em desenvolvimento e testes, o H2 é criado com `create-drop`; as migrations são validadas contra PostgreSQL 17.
 

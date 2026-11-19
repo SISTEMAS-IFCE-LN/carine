@@ -1,6 +1,6 @@
-# Documentação do Catálogo de Edificações
+# Documentação do CARINE
 
-Este diretório concentra toda a documentação técnica e de negócio do projeto Catálogo de Edificações do IFCE — Campus Limoeiro do Norte.
+Este diretório concentra toda a documentação técnica e de negócio do projeto CARINE — Catálogo de Registro de Informações de Edificações do IFCE — Campus Limoeiro do Norte.
 
 ## Índice
 

@@ -1,6 +1,6 @@
-# Arquitetura Frontend — Catálogo de Edificações
+# Arquitetura Frontend — CARINE
 
-Este documento descreve a arquitetura do frontend do sistema Catálogo de Edificações. É a referência autoritativa para decisões de estrutura, segurança, roteamento, estado e deploy do frontend. Para o fluxo de autenticação, perfis e endpoints, ver [`seguranca.md`](./seguranca.md). Para os casos de uso do frontend, ver [`ambientes-internos/casos-uso-frontend.md`](./ambientes-internos/casos-uso-frontend.md).
+Este documento descreve a arquitetura do frontend do sistema CARINE. É a referência autoritativa para decisões de estrutura, segurança, roteamento, estado e deploy do frontend. Para o fluxo de autenticação, perfis e endpoints, ver [`seguranca.md`](./seguranca.md). Para os casos de uso do frontend, ver [`ambientes-internos/casos-uso-frontend.md`](./ambientes-internos/casos-uso-frontend.md).
 
 ---
 
@@ -313,6 +313,7 @@ frontend/
 │   │       └── esquadrias.ts         # schemas/tipos de resposta de esquadrias (Esquadria, EsquadriasResponse…)
 │   │
 │   └── constants/
+│       ├── branding.ts               # SYSTEM_NAME, SYSTEM_DESCRIPTION, SYSTEM_FULL_NAME
 │       ├── roles.ts                  # ROLE_LABELS (rótulos de perfis); Role vive em types/usuarios/user.ts
 │       └── routes.ts                 # PAGES_ROUTES, API_ROUTES, BACKEND_URL, rotaCampus/rotaUnidade/rotaBloco, rotaListagemPublicados
 │
@@ -1341,7 +1342,7 @@ O `Drawer` local usa a primitiva `@base-ui/react/drawer` como camada de comporta
 ### 15.4. Header unificado (hamburger + dropdown)
 
 - **Comportamento**: igual em todos os breakpoints (desktop e mobile).
-  À **esquerda** do logo "Catálogo Edificações", um botão hamburger (`Menu` do `lucide-react`) abre um `<DropdownMenu>`.
+  À **esquerda** do logo "CARINE", um botão hamburger (`Menu` do `lucide-react`) abre um `<DropdownMenu>`.
 
 - **Estrutura do menu**:
 

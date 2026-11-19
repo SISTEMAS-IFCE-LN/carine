@@ -12,8 +12,11 @@ function renderLogin(entrada = '/login') {
 }
 
 describe('LoginPage', () => {
-    it('exibe botão Entrar com Google', () => {
+    it('exibe a marca e o botão Entrar com Google', () => {
         renderLogin()
+        expect(screen.getByRole('heading', {name: 'CARINE'})).toBeInTheDocument()
+        expect(screen.getByText('Catálogo de Registro de Informações de Edificações do IFCE'))
+            .toBeInTheDocument()
         expect(
             screen.getByRole('button', {name: /entrar com google/i}),
         ).toBeInTheDocument()

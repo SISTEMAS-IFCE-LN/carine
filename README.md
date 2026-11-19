@@ -1,6 +1,6 @@
-# Catálogo de Edificações do IFCE
+# CARINE: Catálogo de Registro de Informações de Edificações do IFCE
 
-Este projeto tem como objetivo o desenvolvimento de um sistema para catalogação das edificações do Instituto Federal de Educação, Ciência e Tecnologia do Ceará (IFCE) Campus Limoeiro do Norte. O sistema visa organizar, documentar e facilitar o acesso às informações técnicas e arquitetônicas das edificações pertencentes ao IFCE.
+Este projeto tem como objetivo o desenvolvimento do CARINE — Catálogo de Registro de Informações de Edificações do IFCE — para catalogação das edificações do Instituto Federal de Educação, Ciência e Tecnologia do Ceará (IFCE), Campus Limoeiro do Norte. O sistema visa organizar, documentar e facilitar o acesso às informações técnicas e arquitetônicas das edificações pertencentes ao IFCE.
 
 ## Objetivos
 

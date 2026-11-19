@@ -1,4 +1,4 @@
-# Operação do Catálogo de Edificações
+# Operação do CARINE
 
 Este documento cobre os aspectos operacionais do sistema: profiles, comportamento de seeds SQL, geração de chaves RSA,
 migrations de schema, backup, Docker Compose e procedimento de bootstrap em produção.

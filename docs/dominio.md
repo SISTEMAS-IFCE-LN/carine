@@ -1,8 +1,8 @@
-# Domínio do Catálogo de Edificações do IFCE
+# Domínio do CARINE
 
 ## Visão Geral do Domínio
 
-O Catálogo de Edificações é um sistema de gestão e documentação das edificações do Instituto Federal de Educação, Ciência e Tecnologia do Ceará (IFCE), Campus de Limoeiro do Norte. O propósito do sistema é organizar, validar e disponibilizar informações técnicas e arquitetônicas das edificações do campus para diferentes públicos.
+O CARINE — Catálogo de Registro de Informações de Edificações do IFCE — é um sistema de gestão e documentação das edificações do Instituto Federal de Educação, Ciência e Tecnologia do Ceará (IFCE), Campus de Limoeiro do Norte. O propósito do sistema é organizar, validar e disponibilizar informações técnicas e arquitetônicas das edificações do campus para diferentes públicos.
 
 O domínio central gira em torno da **catalogação de ambientes**, onde cada ambiente representa um espaço físico com características construtivas específicas, passando por um ciclo de vida controlado desde sua criação até sua publicação oficial.
 

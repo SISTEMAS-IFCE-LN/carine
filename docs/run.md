@@ -1,6 +1,6 @@
 # Como executar a aplicação
 
-Este documento contém as instruções práticas para rodar o Catálogo de Edificações em ambiente de desenvolvimento e validar a suíte de testes.
+Este documento contém as instruções práticas para rodar o CARINE em ambiente de desenvolvimento e validar a suíte de testes.
 
 ---
 
