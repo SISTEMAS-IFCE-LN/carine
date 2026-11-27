@@ -123,7 +123,10 @@ export function NaoPublicadoDetalhePage() {
         {
             value: 'Alterar Tipo',
             actionKey: 'ambiente:alterar-tipo',
-            onRun: () => navigate(`/ambientes/nao-publicados/${ambiente.id}/alterar-tipo`, {replace: true}),
+            onRun: () => {
+                if (!ambiente) return
+                navigate(`/ambientes/nao-publicados/${ambiente.id}/alterar-tipo`, {replace: true})
+            },
         },
         {value: 'Duplicar', actionKey: 'ambiente:duplicar', onRun: () => setModal('duplicar')},
     ]
