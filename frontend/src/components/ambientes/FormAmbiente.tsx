@@ -78,7 +78,7 @@ const DEFAULT_AMBIENTE_INPUT: AmbienteFormValues = {
 
 interface Props {
     onSubmit: (data: AmbienteInput) => Promise<void>
-    // Pré-preenchimento do wizard (UC16 ModalAlterarTipo): AmbienteReq completo
+    // Pré-preenchimento do wizard (UC16 — página de alteração de tipo): AmbienteReq completo
     // do ambiente atual, com nomes técnicos (lib/ambientes/mappers).
     initial?: AmbienteInput
 }
