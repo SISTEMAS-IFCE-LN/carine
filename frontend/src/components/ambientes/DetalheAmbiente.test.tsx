@@ -176,10 +176,22 @@ describe('DetalheAmbiente — mobile (<md)', () => {
     expect(screen.getByRole('button', { name: 'Esquadrias' })).toBeInTheDocument()
   })
 
+  it('abre a seção Informações por padrão', () => {
+    render(<DetalheAmbiente ambiente={mockAmbiente} />)
+
+    expect(screen.getByText('Sala 101')).toBeVisible()
+    expect(screen.getByText('Tipo: Sala de Aula')).toBeVisible()
+    expect(screen.getByText(/Capacidade: 30/)).toBeVisible()
+    expect(screen.getByText(/LIMOEIRO DO NORTE • SEDE • BLOCO 1 • 1º Andar/)).toBeVisible()
+    expect(screen.getByText('Sala com ar-condicionado')).toBeVisible()
+  })
+
   it('expõe os dados básicos ao abrir Informações', async () => {
     const user = userEvent.setup()
     render(<DetalheAmbiente ambiente={mockAmbiente} />)
 
+    // Fecha a seção (aberta por padrão) e reabre para validar o toggle.
+    await user.click(screen.getByRole('button', { name: 'Informações' }))
     await user.click(screen.getByRole('button', { name: 'Informações' }))
 
     expect(screen.getByText('Tipo: Sala de Aula')).toBeVisible()

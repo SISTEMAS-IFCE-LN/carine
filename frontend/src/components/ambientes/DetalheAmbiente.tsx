@@ -143,7 +143,7 @@ export function DetalheAmbiente({ambiente}: { ambiente: AmbienteDetalhe }) {
 
     if (isMobile) {
         return (
-            <Accordion>
+            <Accordion defaultValue={['info']}>
                 <AccordionItem value="info">
                     <AccordionTrigger>Informações</AccordionTrigger>
                     <AccordionContent>
