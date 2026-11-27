@@ -26,4 +26,11 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  // Config e specs do Playwright rodam no Node (process.env, webServer etc.)
+  {
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    languageOptions: {
+      globals: {...globals.browser, ...globals.node},
+    },
+  },
 ])

@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint src e2e playwright.config.ts --ext .ts,.tsx",
     "audit": "npm audit --audit-level=high"
   },
   "dependencies": {
