@@ -66,6 +66,25 @@ describe('HeaderNav — autenticado', () => {
     expect(screen.getByRole('button', { name: /Abrir menu de navegação/i })).toBeInTheDocument()
   })
 
+  it('não aninha <button> no trigger e aplica alvo de toque de 44px no mobile', () => {
+    mockUseAuth.mockReturnValue({
+      user: {
+        id: 1,
+        nome: 'Teste',
+        email: 'test@ifce.edu.br',
+        perfis: [Role.COLABORADOR],
+        ativo: true,
+        criadoEm: '',
+      },
+    })
+    renderComponent()
+
+    const trigger = screen.getByRole('button', { name: /Abrir menu de navegação/i })
+    expect(trigger.tagName).toBe('BUTTON')
+    expect(trigger.querySelector('button')).toBeNull()
+    expect(trigger).toHaveClass('min-h-11', 'min-w-11', 'md:min-h-0', 'md:min-w-0')
+  })
+
   it('renderiza grupo "Ambientes" quando usuário tem ROLE_COLABORADOR', () => {
     mockUseAuth.mockReturnValue({
       user: {
