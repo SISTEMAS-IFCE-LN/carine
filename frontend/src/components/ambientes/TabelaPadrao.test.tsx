@@ -1,9 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router'
 import { TabelaPadrao } from './TabelaPadrao'
 import type { AmbienteBasico } from '@/types/ambientes/response'
 import { TipoAmbiente } from '@/types/ambientes/enums'
+
+const mockUseIsMobile = vi.fn()
+
+vi.mock('@/hooks/useIsMobile', () => ({
+    useIsMobile: () => mockUseIsMobile(),
+}))
 
 const CAMPUS = { id: 1, nome: 'LIMOEIRO DO NORTE' }
 const UNIDADE = { id: 1, nome: 'SEDE' }
@@ -34,6 +40,10 @@ function renderWithRouter(props: React.ComponentProps<typeof TabelaPadrao>) {
         </MemoryRouter>,
     )
 }
+
+beforeEach(() => {
+    mockUseIsMobile.mockReturnValue(false)
+})
 
 describe('TabelaPadrao — modo público (sem seleção)', () => {
     it('não renderiza coluna de checkbox quando onToggleSelect ausente', () => {
@@ -135,5 +145,49 @@ describe('TabelaPadrao — modo seleção (autenticado)', () => {
             'href',
             '/ambientes/publicados/1',
         )
+    })
+})
+
+describe('TabelaPadrao — cards em mobile (<md)', () => {
+    beforeEach(() => {
+        mockUseIsMobile.mockReturnValue(true)
+    })
+
+    it('renderiza cards em vez da tabela', () => {
+        renderWithRouter({ itens: mockItens })
+
+        expect(screen.queryByRole('table')).not.toBeInTheDocument()
+        expect(screen.getByTestId('tabela-cards')).toBeInTheDocument()
+        expect(screen.getByRole('link', { name: 'Sala 101' })).toHaveAttribute(
+            'href',
+            '/ambientes/publicados/1',
+        )
+        expect(screen.getByText(TipoAmbiente.SALA_AULA)).toBeInTheDocument()
+        expect(screen.getByText('LIMOEIRO DO NORTE • SEDE • BLOCO 1')).toBeInTheDocument()
+        expect(screen.getByText('Térreo')).toBeInTheDocument()
+        expect(screen.getByText('Capacidade 30 • 50.00 m²')).toBeInTheDocument()
+    })
+
+    it('não renderiza checkboxes no modo público, inclusive o selecionar todos', () => {
+        renderWithRouter({ itens: mockItens })
+
+        expect(screen.queryByLabelText('Selecionar todos da página')).not.toBeInTheDocument()
+        expect(screen.queryByLabelText('Selecionar Sala 101')).not.toBeInTheDocument()
+    })
+
+    it('integra o checkbox de seleção ao card e chama onToggleSelect', () => {
+        const onToggleSelect = vi.fn()
+        renderWithRouter({
+            itens: mockItens,
+            selectedIds: [1],
+            onToggleSelect,
+            onToggleSelectAll: vi.fn(),
+            allSelected: false,
+            someSelected: true,
+        })
+
+        expect(screen.queryByLabelText('Selecionar todos da página')).not.toBeInTheDocument()
+        fireEvent.click(screen.getByLabelText('Selecionar Sala 101'))
+        expect(onToggleSelect).toHaveBeenCalledWith(1)
     })
 })
