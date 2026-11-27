@@ -95,6 +95,31 @@ test('fluxo up-down: home → campus → unidade → bloco → listagem', async 
             },
         }),
     )
+    await page.route(/\/api\/ambientes\/publicados\/1$/, (route) =>
+        route.fulfill({
+            json: {
+                id: 1,
+                nome: 'Sala 101',
+                tipo: 'Sala de Aula',
+                localizacao: {
+                    id: 1,
+                    campus: {id: 1, nome: 'LIMOEIRO DO NORTE'},
+                    unidade: {id: 1, nome: 'SEDE'},
+                    bloco: {id: 1, nome: 'BLOCO A'},
+                    andar: 1,
+                },
+                capacidade: 30,
+                geometrias: [
+                    {id: 1, tipo: 'Retangular', base: 5, altura: 10, repeticao: 1, area: 50},
+                ],
+                areaAmbiente: 50,
+                pesDireitos: [3],
+                esquadriasDetalhes: {esquadrias: [], esquadriasTipoMaterial: []},
+                informacaoAdicional: '',
+                status: 'Publicado',
+            },
+        }),
+    )
 
     await page.goto('/')
     await page.getByRole('link', {name: /abrir campus limoeiro do norte/i}).click()
@@ -103,5 +128,14 @@ test('fluxo up-down: home → campus → unidade → bloco → listagem', async 
     await page.getByRole('link', {name: /ver todos os ambientes do bloco/i}).click()
 
     await expect(page).toHaveURL(/\/ambientes\/publicados\?.*blocoId=1/)
-    await expect(page.getByRole('link', {name: 'Sala 101'})).toBeVisible()
+    const linkAmbiente = page.getByRole('link', {name: 'Sala 101'})
+    await expect(linkAmbiente).toBeVisible()
+    await linkAmbiente.click()
+
+    await expect(page).toHaveURL(/\/ambientes\/publicados\/1$/)
+    await expect(page.getByRole('heading', {name: 'Sala 101'})).toBeVisible()
+
+    // Regressão: Voltar deve retornar à listagem filtrada, não à lista sem filtros.
+    await page.getByRole('button', {name: 'Voltar'}).click()
+    await expect(page).toHaveURL(/\/ambientes\/publicados\?.*blocoId=1/)
 })

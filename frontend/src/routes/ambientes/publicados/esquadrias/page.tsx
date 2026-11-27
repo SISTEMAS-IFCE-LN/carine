@@ -1,4 +1,4 @@
-import { useSearchParams, useNavigate } from 'react-router'
+import { useSearchParams } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { fetchEsquadriasPublicados } from '@/lib/api/api-publicados'
 import { useEffect, useMemo, useState } from 'react'
@@ -20,6 +20,7 @@ import {
 } from '@/lib/ambientes/esquadrias'
 import { MaterialEsquadria, TipoEsquadria } from '@/types/ambientes/enums'
 import { PAGES_ROUTES } from '@/constants/routes'
+import { useVoltar } from '@/hooks/useVoltar'
 
 const OPCAO_TODOS = 'TODOS'
 
@@ -49,7 +50,7 @@ function atualizarSearchParams(
 
 export function EsquadriasPage() {
     const [searchParams, setSearchParams] = useSearchParams()
-    const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.PUBLICADOS)
     const ids = useMemo(() => parseIds(searchParams.get('ids')), [searchParams])
 
     const filtroTipo = searchParams.get('tipo') ?? ''
@@ -127,7 +128,7 @@ export function EsquadriasPage() {
 
     return (
         <div className="space-y-6">
-            <Button variant="outline" onClick={() => navigate(PAGES_ROUTES.PUBLICADOS)}>
+            <Button variant="outline" onClick={voltar}>
                 Voltar
             </Button>
             {/* Filtros client-side por tipo e material (UC20-FE) */}

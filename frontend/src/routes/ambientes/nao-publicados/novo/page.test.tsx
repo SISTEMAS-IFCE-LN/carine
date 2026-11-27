@@ -91,7 +91,7 @@ describe('NovoAmbientePage', () => {
     // O find-or-create pode criar campus/unidade/bloco → invalida o prefixo inteiro.
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['referencias'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
-    expect(mockNavigate).toHaveBeenCalledWith('/ambientes/nao-publicados/42')
+    expect(mockNavigate).toHaveBeenCalledWith('/ambientes/nao-publicados/42', { replace: true })
   })
 
   it('exibe mensagem do backend e não navega em erro de criação', async () => {

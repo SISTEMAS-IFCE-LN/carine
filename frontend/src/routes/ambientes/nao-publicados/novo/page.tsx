@@ -26,7 +26,9 @@ export function NovoAmbientePage() {
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
             invalidarReferenciasPublicadas(queryCliente)
             toast.success('Ambiente criado.')
-            navigate(`/ambientes/nao-publicados/${novo.id}`)
+            // `replace`: o formulário não deve ser o destino do "Voltar" do
+            // detalhe recém-criado; o histórico volta para a lista de origem.
+            navigate(`/ambientes/nao-publicados/${novo.id}`, {replace: true})
         })
     }
 

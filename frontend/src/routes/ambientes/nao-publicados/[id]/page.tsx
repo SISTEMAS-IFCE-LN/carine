@@ -1,4 +1,5 @@
 import {useNavigate, useParams} from 'react-router'
+import {useVoltar} from '@/hooks/useVoltar'
 import {useQuery, useQueryClient} from '@tanstack/react-query'
 import {useState} from 'react'
 import {
@@ -49,6 +50,7 @@ type ModalEstado =
 export function NaoPublicadoDetalhePage() {
     const {id} = useParams()
     const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.NAO_PUBLICADOS)
     const queryCliente = useQueryClient()
     const [modal, setModal] = useState<ModalEstado>(null)
 
@@ -75,7 +77,7 @@ export function NaoPublicadoDetalhePage() {
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
         invalidarReferenciasPublicadas(queryCliente)
-        navigate(`/ambientes/nao-publicados/${novoId}`)
+        navigate(`/ambientes/nao-publicados/${novoId}`, {replace: true})
     }
 
     // UC16-FE: POST /{id} cria um NOVO ambiente e remove o antigo — invalidar a
@@ -84,7 +86,8 @@ export function NaoPublicadoDetalhePage() {
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
         invalidarReferenciasPublicadas(queryCliente)
-        navigate(`/ambientes/nao-publicados/${novoId}`)
+        // `replace`: o registro antigo foi removido — sem entrada morta no histórico.
+        navigate(`/ambientes/nao-publicados/${novoId}`, {replace: true})
     }
 
     // UC07-FE: editar dados básicos altera a localização (find-or-create de
@@ -142,7 +145,7 @@ export function NaoPublicadoDetalhePage() {
 
     return (
         <div className="space-y-4">
-            <Button variant="outline" onClick={() => navigate(PAGES_ROUTES.NAO_PUBLICADOS)}>Voltar</Button>
+            <Button variant="outline" onClick={voltar}>Voltar</Button>
             {/* Barra de ações no topo (arquitetura §15.11): select de ações
                 não-críticas à esquerda + críticas (UC15/UC18) como botões diretos. */}
             <AcoesAmbiente
