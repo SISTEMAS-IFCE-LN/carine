@@ -85,10 +85,20 @@ export function ModalFormulario<V extends FieldValues, R = void>({
             description={description}
             footer={
                 <>
-                    <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-11 md:min-h-0"
+                        onClick={() => onOpenChange(false)}
+                    >
                         Cancelar
                     </Button>
-                    <Button type="submit" form={formId} disabled={executando}>
+                    <Button
+                        type="submit"
+                        form={formId}
+                        disabled={executando}
+                        className="min-h-11 md:min-h-0"
+                    >
                         {executando ? 'Salvando…' : salvarLabel}
                     </Button>
                 </>

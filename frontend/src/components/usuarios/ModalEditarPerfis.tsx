@@ -73,8 +73,14 @@ export function ModalEditarPerfis({open, usuario, onOpenChange, onSalvar}: Props
                     ))}
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                    <Button onClick={salvar} disabled={executando}>
+                    <Button
+                        variant="outline"
+                        className="min-h-11 md:min-h-0"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button onClick={salvar} disabled={executando} className="min-h-11 md:min-h-0">
                         {executando ? 'Salvando…' : 'Salvar'}
                     </Button>
                 </DialogFooter>

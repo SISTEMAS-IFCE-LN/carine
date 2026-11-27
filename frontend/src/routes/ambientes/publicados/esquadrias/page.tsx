@@ -176,7 +176,12 @@ export function EsquadriasPage() {
                     <p className="text-sm text-muted-foreground">
                         Alguns ambientes solicitados não foram encontrados ou não possuem esquadrias publicadas.
                     </p>
-                    <Button variant="outline" size="sm" onClick={handleRemoverInvalidos}>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 md:min-h-0"
+                        onClick={handleRemoverInvalidos}
+                    >
                         Remover inválidos e tentar novamente
                     </Button>
                 </div>
@@ -200,6 +205,7 @@ export function EsquadriasPage() {
                         variant="outline"
                         size="sm"
                         disabled={!responseFiltrada.dadosPaginacao.hasPrevious}
+                        className="min-h-11 md:min-h-0"
                         onClick={() => setPage((p) => p - 1)}
                     >
                         Anterior
@@ -212,6 +218,7 @@ export function EsquadriasPage() {
                         variant="outline"
                         size="sm"
                         disabled={!responseFiltrada.dadosPaginacao.hasNext}
+                        className="min-h-11 md:min-h-0"
                         onClick={() => setPage((p) => p + 1)}
                     >
                         Próximo
