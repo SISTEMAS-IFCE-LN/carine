@@ -406,6 +406,7 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   // Gestor
   '/ambientes/nao-publicados':    [Role.GESTOR_SISTEMA],
   '/ambientes/nao-publicados/novo': [Role.GESTOR_SISTEMA],
+  '/ambientes/nao-publicados/:id/alterar-tipo': [Role.GESTOR_SISTEMA],
   '/ambientes/nao-publicados/:id': [Role.GESTOR_SISTEMA],
 
   // Colaborador (mínimo universal — todo autenticado tem este perfil)
@@ -915,6 +916,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Suspense fallback={<Loading />}><NaoPublicadosPage /></Suspense> },
               { path: 'novo', element: <Suspense fallback={<Loading />}><NovoAmbientePage /></Suspense> },
+              { path: ':id/alterar-tipo', element: <Suspense fallback={<Loading />}><AlterarTipoAmbientePage /></Suspense> },
               { path: ':id', element: <Suspense fallback={<Loading />}><NaoPublicadoDetalhePage /></Suspense> },
             ],
           },

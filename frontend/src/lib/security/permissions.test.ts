@@ -51,4 +51,7 @@ describe('getRequiredRoles', () => {
     it('retorna roles para rota nao-publicados novo', () => {
         expect(getRequiredRoles('/ambientes/nao-publicados/novo')).toEqual([Role.GESTOR_SISTEMA])
     })
+    it('retorna roles para rota de alteração de tipo', () => {
+        expect(getRequiredRoles('/ambientes/nao-publicados/123/alterar-tipo')).toEqual([Role.GESTOR_SISTEMA])
+    })
 })
