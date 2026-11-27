@@ -150,23 +150,13 @@ export function FormAmbiente({onSubmit, initial, onCancel}: Props) {
             )}
 
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                {/* Ordem mobile: Próximo/Salvar → Voltar → Cancelar.
-                    Desktop: Voltar → Próximo/Salvar, com Cancelar à direita. */}
-                {etapa > 0 && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={voltar}
-                        className="order-2 min-h-11 w-full md:order-1 md:min-h-0 md:w-auto"
-                    >
-                        Voltar
-                    </Button>
-                )}
+                {/* DOM = ordem mobile (e ordem de foco): Próximo/Salvar → Voltar → Cancelar.
+                    Em ≥md, apenas Voltar/Próximo são reordenados; Cancelar fica à direita. */}
                 {etapa < ETAPAS.length - 1 && (
                     <Button
                         type="button"
                         onClick={proximo}
-                        className="order-1 min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
+                        className="min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
                     >
                         Próximo
                     </Button>
@@ -175,9 +165,19 @@ export function FormAmbiente({onSubmit, initial, onCancel}: Props) {
                     <Button
                         type="submit"
                         disabled={submitting}
-                        className="order-1 min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
+                        className="min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
                     >
                         {submitting ? 'Salvando…' : 'Salvar'}
+                    </Button>
+                )}
+                {etapa > 0 && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={voltar}
+                        className="min-h-11 w-full md:order-1 md:min-h-0 md:w-auto"
+                    >
+                        Voltar
                     </Button>
                 )}
                 {onCancel && (
@@ -185,7 +185,7 @@ export function FormAmbiente({onSubmit, initial, onCancel}: Props) {
                         type="button"
                         variant="outline"
                         onClick={onCancel}
-                        className="order-3 min-h-11 w-full md:order-3 md:ml-auto md:min-h-0 md:w-auto"
+                        className="min-h-11 w-full md:ml-auto md:min-h-0 md:w-auto"
                     >
                         Cancelar
                     </Button>

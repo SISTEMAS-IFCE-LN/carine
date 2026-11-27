@@ -74,7 +74,6 @@ describe('FormAmbiente', () => {
 
     const proximo = screen.getByRole('button', { name: 'Próximo' })
     expect(proximo).toHaveClass(
-      'order-1',
       'min-h-11',
       'w-full',
       'md:order-2',
@@ -85,14 +84,15 @@ describe('FormAmbiente', () => {
 
     const cancelar = screen.getByRole('button', { name: 'Cancelar' })
     expect(cancelar).toHaveClass(
-      'order-3',
       'min-h-11',
       'w-full',
-      'md:order-3',
       'md:ml-auto',
       'md:min-h-0',
       'md:w-auto',
     )
+    expect(
+      proximo.compareDocumentPosition(cancelar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
   })
 
   it('na última etapa, ordena Salvar → Voltar → Cancelar no mobile e chama onCancel', async () => {
@@ -104,9 +104,17 @@ describe('FormAmbiente', () => {
     const voltar = screen.getByRole('button', { name: 'Voltar' })
     const cancelar = screen.getByRole('button', { name: 'Cancelar' })
 
-    expect(salvar).toHaveClass('order-1', 'md:order-2')
-    expect(voltar).toHaveClass('order-2', 'md:order-1')
-    expect(cancelar).toHaveClass('order-3', 'md:order-3', 'md:ml-auto')
+    expect(salvar).toHaveClass('md:order-2')
+    expect(voltar).toHaveClass('md:order-1')
+    expect(cancelar).toHaveClass('md:ml-auto')
+
+    // Ordem de foco/acessibilidade acompanha a ordem visual mobile.
+    expect(
+      salvar.compareDocumentPosition(voltar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      voltar.compareDocumentPosition(cancelar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
 
     fireEvent.click(cancelar)
     expect(onCancel).toHaveBeenCalledOnce()
