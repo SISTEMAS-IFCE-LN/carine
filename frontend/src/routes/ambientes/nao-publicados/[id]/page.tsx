@@ -98,10 +98,10 @@ export function NaoPublicadoDetalhePage() {
             // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19).
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
             invalidarReferenciasPublicadas(queryCliente)
-            navigate(PAGES_ROUTES.NAO_PUBLICADOS)
+            navigate(PAGES_ROUTES.NAO_PUBLICADOS, {replace: true})
         } else if (modal === 'enviar-validacao') {
             await enviarParaValidacao([ambiente.id])
-            navigate(PAGES_ROUTES.NAO_PUBLICADOS)
+            navigate(PAGES_ROUTES.NAO_PUBLICADOS, {replace: true})
         }
         toast.success('Operação concluída.')
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })

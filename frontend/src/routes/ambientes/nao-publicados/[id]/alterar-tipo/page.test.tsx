@@ -169,11 +169,12 @@ describe('AlterarTipoAmbientePage (UC16-FE)', () => {
         expect(mockFetchAmbiente).not.toHaveBeenCalled()
     })
 
-    it('usa o mesmo layout da página de cadastro e alerta sobre a substituição', async () => {
+    it('usa o layout compartilhado e alerta sobre a substituição', async () => {
         mockFetchAmbiente.mockResolvedValueOnce(AMBIENTE)
         renderPage()
 
         expect(await screen.findByRole('heading', {name: 'Alterar Tipo'})).toBeInTheDocument()
+        expect(screen.getByTestId('layout-formulario-ambiente')).toHaveClass('max-w-2xl')
         expect(screen.getByText(/cria um novo ambiente e remove o antigo/)).toBeInTheDocument()
         expect(screen.getByRole('button', {name: 'Cancelar'})).toBeInTheDocument()
     })

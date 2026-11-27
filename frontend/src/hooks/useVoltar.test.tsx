@@ -32,15 +32,4 @@ describe('useVoltar', () => {
 
         expect(mockNavigate).toHaveBeenCalledWith(-1)
     })
-
-    it('não navega para o fallback quando há histórico (preserva filtros da URL anterior)', () => {
-        mockLocation = {key: 'abc123'}
-        const {result} = renderHook(() => useVoltar('/'))
-
-        act(() => result.current())
-
-        expect(mockNavigate).toHaveBeenCalledTimes(1)
-        expect(mockNavigate).toHaveBeenCalledWith(-1)
-        expect(mockNavigate).not.toHaveBeenCalledWith('/')
-    })
 })

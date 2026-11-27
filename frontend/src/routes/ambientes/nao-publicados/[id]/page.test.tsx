@@ -29,7 +29,6 @@ vi.mock('@/lib/api/api-naopublicados', () => ({
     incluirEsquadrias: vi.fn(),
     atualizarEsquadrias: vi.fn(),
     atualizarInfoAdicional: vi.fn(),
-    alterarTipo: vi.fn(),
 }))
 
 vi.mock('sonner', () => ({
@@ -348,8 +347,6 @@ describe('NaoPublicadoDetalhePage', () => {
             expect(screen.queryByText('detalhe-duplicado')).not.toBeInTheDocument()
         })
     })
-
-
 
     describe('editar dados básicos via ModalEditarDadosBasicos (UC07-FE)', () => {
         it('abre pré-preenchido, salva e invalida o detalhe', async () => {

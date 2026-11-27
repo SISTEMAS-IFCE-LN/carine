@@ -195,9 +195,10 @@ describe('DetalheAmbiente — mobile (<md)', () => {
 
     // Fecha a seção (aberta por padrão) e reabre para validar o toggle.
     await user.click(screen.getByRole('button', { name: 'Informações' }))
+    expect(screen.queryByText('Tipo: Sala de Aula')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Informações' }))
 
-    expect(screen.getByText('Tipo: Sala de Aula')).toBeVisible()
+    expect(await screen.findByText('Tipo: Sala de Aula')).toBeVisible()
     expect(screen.getByText(/Capacidade: 30/)).toBeVisible()
     expect(screen.getByText(/LIMOEIRO DO NORTE • SEDE • BLOCO 1 • 1º Andar/)).toBeVisible()
     expect(screen.getByText('Sala com ar-condicionado')).toBeVisible()

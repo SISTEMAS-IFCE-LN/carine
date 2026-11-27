@@ -27,12 +27,7 @@ export function AlterarTipoAmbientePage() {
 
     const {data: ambiente, isLoading, error} = useQuery({
         queryKey: ['ambientes', 'nao-publicados', 'detalhe', id],
-        queryFn: ({signal}) => {
-            if (!idValido) {
-                throw new Error(`ID de ambiente inválido: ${id}`)
-            }
-            return fetchAmbienteNaoPublicado(idNumero, signal)
-        },
+        queryFn: ({signal}) => fetchAmbienteNaoPublicado(idNumero, signal),
         enabled: idValido,
     })
 
@@ -57,16 +52,6 @@ export function AlterarTipoAmbientePage() {
         })
     }
 
-    function cancelar() {
-        if (!ambiente) {
-            navigate(PAGES_ROUTES.NAO_PUBLICADOS)
-            return
-        }
-        // `replace`: o ambiente antigo deixa de existir apenas no sucesso; no
-        // cancelamento, o detalhe original é restaurado sem duplicar histórico.
-        navigate(`/ambientes/nao-publicados/${ambiente.id}`, {replace: true})
-    }
-
     if (isLoading) return <p>Carregando…</p>
 
     if (error || !ambiente) {
@@ -78,6 +63,14 @@ export function AlterarTipoAmbientePage() {
                 </Button>
             </div>
         )
+    }
+
+    const ambienteId = ambiente.id
+
+    function cancelar() {
+        // `replace`: o ambiente antigo deixa de existir apenas no sucesso; no
+        // cancelamento, o detalhe original é restaurado sem duplicar histórico.
+        navigate(`/ambientes/nao-publicados/${ambienteId}`, {replace: true})
     }
 
     return (
