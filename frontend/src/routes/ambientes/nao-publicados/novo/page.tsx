@@ -25,6 +25,9 @@ export function NovoAmbientePage() {
     async function onSubmit(values: AmbienteInput) {
         await executar(async () => {
             const novo = await criarAmbiente(values)
+            // A listagem usa staleTime curto (30s): invalida o prefixo para o novo
+            // registro aparecer imediatamente ao voltar do detalhe.
+            void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
             // Find-or-create pode criar campus/unidade/bloco → invalida o prefixo
             // inteiro para os selects refletirem os novos registros (arquitetura-frontend.md §12; UC06-FE).
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })

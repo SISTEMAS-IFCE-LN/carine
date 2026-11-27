@@ -109,6 +109,8 @@ describe('NovoAmbientePage', () => {
 
     await waitFor(() => expect(mockCriarAmbiente).toHaveBeenCalledWith(AMBIENTE_VALIDO))
     expect(toast.success).toHaveBeenCalledWith('Ambiente criado.')
+    // A listagem deve refletir o novo registro ao voltar do detalhe.
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['ambientes', 'nao-publicados'] })
     // O find-or-create pode criar campus/unidade/bloco → invalida o prefixo inteiro.
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['referencias'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
