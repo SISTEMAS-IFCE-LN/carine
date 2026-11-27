@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import {defineConfig, type Plugin} from 'vitest/config'
+import {defineConfig, configDefaults, type Plugin} from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import {fileURLToPath} from "node:url"
 import path from "node:path"
@@ -47,6 +47,8 @@ export default defineConfig({
         globals: true,
         environment: 'jsdom',
         setupFiles: './src/test/setup.ts',
+        // e2e/ é responsabilidade do @playwright/test (npm run test:e2e)
+        exclude: [...configDefaults.exclude, 'e2e/**'],
         coverage: {
             reporter: ['text', 'html'],
         },
