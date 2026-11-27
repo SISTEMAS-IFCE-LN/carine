@@ -69,6 +69,14 @@ describe('FormAmbiente', () => {
     expect(buscarEtapa(1, 'Dados Básicos')).not.toBeNull()
   })
 
+  it('empilha os botões de navegação no mobile e aplica alvo de toque', () => {
+    render(<FormAmbiente onSubmit={onSubmit} />)
+
+    const proximo = screen.getByRole('button', { name: 'Próximo' })
+    expect(proximo).toHaveClass('min-h-11', 'w-full', 'md:min-h-0', 'md:w-auto')
+    expect(proximo.parentElement).toHaveClass('flex-col', 'md:flex-row', 'md:items-center')
+  })
+
   it('não avança com a etapa atual inválida', async () => {
     render(<FormAmbiente onSubmit={onSubmit} />)
     fireEvent.click(screen.getByRole('button', { name: 'Próximo' }))

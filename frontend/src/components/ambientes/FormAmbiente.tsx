@@ -146,19 +146,32 @@ export function FormAmbiente({onSubmit, initial}: Props) {
                 </div>
             )}
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center">
                 {etapa > 0 && (
-                    <Button type="button" variant="outline" onClick={voltar}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={voltar}
+                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                    >
                         Voltar
                     </Button>
                 )}
                 {etapa < ETAPAS.length - 1 && (
-                    <Button type="button" onClick={proximo}>
+                    <Button
+                        type="button"
+                        onClick={proximo}
+                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                    >
                         Próximo
                     </Button>
                 )}
                 {etapa === ETAPAS.length - 1 && (
-                    <Button type="submit" disabled={submitting}>
+                    <Button
+                        type="submit"
+                        disabled={submitting}
+                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                    >
                         {submitting ? 'Salvando…' : 'Salvar'}
                     </Button>
                 )}
