@@ -97,15 +97,16 @@ describe('Header — autenticado', () => {
         expect(screen.getByRole('button', { name: /Abrir menu de navegação/i })).toBeInTheDocument()
     })
 
-    it('renderiza nome e email do usuário', () => {
+    it('renderiza o menu de perfil (triggers mobile e desktop)', () => {
         renderWithAuth()
-        expect(screen.getByText('Usuário Teste')).toBeInTheDocument()
-        expect(screen.getByText('user@ifce.edu.br')).toBeInTheDocument()
+        expect(screen.getAllByRole('button', {name: /Abrir perfil/i})).toHaveLength(2)
     })
 
-    it('renderiza botão Sair', () => {
+    it('não exibe nome/email/Sair inline antes de abrir o menu', () => {
         renderWithAuth()
-        expect(screen.getByText('Sair')).toBeInTheDocument()
+        expect(screen.queryByText('Usuário Teste')).not.toBeInTheDocument()
+        expect(screen.queryByText('user@ifce.edu.br')).not.toBeInTheDocument()
+        expect(screen.queryByText('Sair')).not.toBeInTheDocument()
     })
 
     it('não renderiza botão Login', () => {
@@ -113,9 +114,10 @@ describe('Header — autenticado', () => {
         expect(screen.queryByText('Login')).not.toBeInTheDocument()
     })
 
-    it('chama logout ao clicar em Sair', () => {
+    it('chama logout ao abrir o menu desktop e clicar em Sair', async () => {
         renderWithAuth()
-        fireEvent.click(screen.getByText('Sair'))
+        fireEvent.click(screen.getAllByLabelText('Abrir perfil')[1])
+        fireEvent.click(await screen.findByRole('menuitem', {name: 'Sair'}))
         expect(mockLogout).toHaveBeenCalledOnce()
     })
 })
