@@ -41,6 +41,15 @@ describe('ModalEditarPerfis', () => {
         expect(checkboxPorRole('Validador')).not.toBeChecked()
     })
 
+    it('aplica alvo de toque de 44px no mobile aos botões do footer', () => {
+        const usuario = makeUser()
+        render(<ModalEditarPerfis open usuario={usuario} onOpenChange={vi.fn()} onSalvar={vi.fn()}/>)
+
+        for (const nome of ['Cancelar', 'Salvar']) {
+            expect(screen.getByRole('button', {name: nome})).toHaveClass('min-h-11', 'md:min-h-0')
+        }
+    })
+
     it('mantém COLABORADOR marcado e desabilitado', () => {
         const usuario = makeUser({perfis: [Role.COLABORADOR, Role.ADMINISTRADOR]})
         render(<ModalEditarPerfis open usuario={usuario} onOpenChange={vi.fn()} onSalvar={vi.fn()}/>)

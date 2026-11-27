@@ -34,6 +34,22 @@ describe('ModalConfirmacaoStatusUsuario', () => {
         expect(screen.getByText('Desativar Usuário Teste?')).toBeInTheDocument()
     })
 
+    it('aplica alvo de toque de 44px no mobile aos botões do footer', () => {
+        render(
+            <ModalConfirmacaoStatusUsuario
+                open
+                usuario={usuario}
+                acao="desativar"
+                onConfirmar={vi.fn()}
+                onOpenChange={vi.fn()}
+            />,
+        )
+
+        for (const nome of ['Cancelar', 'Confirmar']) {
+            expect(screen.getByRole('button', {name: nome})).toHaveClass('min-h-11', 'md:min-h-0')
+        }
+    })
+
     it('renderiza título de ativação quando acao=ativar', () => {
         render(
             <ModalConfirmacaoStatusUsuario
