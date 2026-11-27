@@ -186,8 +186,25 @@ describe('TabelaPadrao — cards em mobile (<md)', () => {
             someSelected: true,
         })
 
-        expect(screen.queryByLabelText('Selecionar todos da página')).not.toBeInTheDocument()
         fireEvent.click(screen.getByLabelText('Selecionar Sala 101'))
         expect(onToggleSelect).toHaveBeenCalledWith(1)
+    })
+
+    it('exibe "Selecionar todos da página" no topo dos cards e chama onToggleSelectAll', () => {
+        const onToggleSelectAll = vi.fn()
+        renderWithRouter({
+            itens: mockItens,
+            selectedIds: [],
+            onToggleSelect: vi.fn(),
+            onToggleSelectAll,
+            allSelected: false,
+            someSelected: false,
+        })
+
+        expect(screen.getByText('Selecionar todos da página')).toBeVisible()
+        fireEvent.click(
+            screen.getByRole('checkbox', {name: 'Selecionar todos da página'}),
+        )
+        expect(onToggleSelectAll).toHaveBeenCalledOnce()
     })
 })

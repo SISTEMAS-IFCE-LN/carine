@@ -8,10 +8,12 @@ import {
 } from '@/components/ui/table'
 import {Badge} from '@/components/ui/badge'
 import {Checkbox} from '@/components/ui/checkbox'
+import {Label} from '@/components/ui/label'
 import type {AmbienteBasico} from '@/types/ambientes/response'
 import {Link} from 'react-router'
 import {formatarAndarCompacto, formatarMedida} from '@/lib/ambientes/formatters'
 import {useIsMobile} from '@/hooks/useIsMobile'
+import {useId} from 'react'
 
 interface TabelaPadraoProps {
     itens: AmbienteBasico[]
@@ -40,11 +42,29 @@ export function TabelaPadrao({
     someSelected,
 }: TabelaPadraoProps) {
     const isMobile = useIsMobile()
+    const selectAllId = useId()
     const comSelecao = typeof onToggleSelect === 'function'
 
     if (isMobile) {
         return (
             <div className="space-y-3 md:hidden" data-testid="tabela-cards">
+                {comSelecao && (
+                    <div className="flex min-h-11 items-center gap-2 rounded-lg border bg-muted/30 px-3">
+                        <Checkbox
+                            id={selectAllId}
+                            aria-label="Selecionar todos da página"
+                            checked={allSelected ?? false}
+                            indeterminate={someSelected && !allSelected}
+                            onCheckedChange={() => onToggleSelectAll?.()}
+                        />
+                        <Label
+                            htmlFor={selectAllId}
+                            className="min-h-11 flex-1 cursor-pointer py-2"
+                        >
+                            Selecionar todos da página
+                        </Label>
+                    </div>
+                )}
                 {itens.map((a) => {
                     const selecionado = comSelecao && selectedIds?.includes(a.id)
 
@@ -64,7 +84,7 @@ export function TabelaPadrao({
                                 )}
                                 <Link
                                     to={`${detalheBasePath}/${a.id}`}
-                                    className="font-semibold text-primary hover:underline"
+                                    className="min-w-0 break-words font-semibold text-primary hover:underline"
                                 >
                                     {a.nome}
                                 </Link>
