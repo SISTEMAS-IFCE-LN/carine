@@ -7,9 +7,12 @@ import type {AmbienteInput} from '@/types/ambientes/request'
 import {useAsyncAction} from '@/hooks/useAsyncAction'
 import {toast} from 'sonner'
 import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
+import {useVoltar} from '@/hooks/useVoltar'
+import {PAGES_ROUTES} from '@/constants/routes'
 
 export function NovoAmbientePage() {
     const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.NAO_PUBLICADOS)
     const queryCliente = useQueryClient()
 
     // Erros de criação (ex.: RN-1.7, nome duplicado) exibem ErroRes.mensagem
@@ -35,7 +38,7 @@ export function NovoAmbientePage() {
 
     return (
         <LayoutFormularioAmbiente titulo="Novo Ambiente">
-            <FormAmbiente onSubmit={onSubmit}/>
+            <FormAmbiente onSubmit={onSubmit} onCancel={voltar}/>
         </LayoutFormularioAmbiente>
     )
 }

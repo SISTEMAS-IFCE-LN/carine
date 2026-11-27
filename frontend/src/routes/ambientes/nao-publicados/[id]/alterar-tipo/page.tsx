@@ -84,17 +84,12 @@ export function AlterarTipoAmbientePage() {
         <LayoutFormularioAmbiente
             titulo="Alterar Tipo"
             descricao="Atenção: alterar o tipo cria um novo ambiente e remove o antigo."
-            acao={
-                <Button
-                    variant="outline"
-                    onClick={cancelar}
-                    className="min-h-11 md:min-h-0"
-                >
-                    Cancelar
-                </Button>
-            }
         >
-            <FormAmbiente initial={ambienteDeDetalhe(ambiente)} onSubmit={onSubmit}/>
+            <FormAmbiente
+                initial={ambienteDeDetalhe(ambiente)}
+                onSubmit={onSubmit}
+                onCancel={cancelar}
+            />
         </LayoutFormularioAmbiente>
     )
 }

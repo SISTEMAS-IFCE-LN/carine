@@ -149,6 +149,7 @@ Protegidas:
     6. Exibir erros inline para cada etapa conforme validações.
     7. Botão `Salvar` para submeter o formulário completo. (requisição POST para `/api/ambientes/nao-publicados`, com `localizacao` aninhada `{campus, unidade, bloco, andar}`; cada nível envia exatamente um de `id` ou `nome`, conforme UC06 do backend).
     8. Desabilitar botão `Salvar` e mostrar estado de loading durante a submissão.
+    9. Botão `Cancelar` no rodapé do formulário retorna à página anterior (histórico; em entrada direta, à listagem).
 - Validações client-side:
   - Campos obrigatórios (dados básicos, pelo menos uma geometria, pelo menos uma porta nas esquadrias).
   - Informação adicional do ambiente: opcional; quando preenchida, máx. 255 caracteres (espelha `@Size(max = 255)` de `AmbienteReq.kt`).

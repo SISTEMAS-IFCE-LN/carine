@@ -1455,7 +1455,7 @@ export function UserMenu() {
 ### 15.8. `FormAmbiente` (UC06-FE) — multistep responsivo
 
 - `<Stepper>` local; em mobile colapsa para "Etapa X de Y" + label da etapa atual (sem números grandes).
-- Botões `Voltar`/`Próximo`/`Salvar`/`Cancelar` em `w-full md:w-auto`.
+- Botões `Voltar`/`Próximo`/`Salvar`/`Cancelar` em `w-full md:w-auto`. No mobile a ordem vertical é `Próximo`/`Salvar` → `Voltar` → `Cancelar`; em `≥md` a linha segue `Voltar` → `Próximo`/`Salvar`, com `Cancelar` alinhado à direita.
 - Campos numéricos com `inputMode="numeric"` ou `"decimal"` (abre teclado correto no mobile).
 - Listas editáveis (geometrias, pés-direitos, esquadrias): cada item é um card empilhado, com botão "remover" (`lucide-react` `Trash2` ícone) à direita; novos itens adicionados ao final com animação ease-in.
 - 5ª etapa "Informação Adicional" (opcional): `<Textarea>` com `maxLength=255` e contador de caracteres; o campo pode ser deixado vazio (o `trigger()` da etapa passa) e preenchido depois via UC14-FE.

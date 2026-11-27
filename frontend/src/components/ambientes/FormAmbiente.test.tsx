@@ -70,11 +70,46 @@ describe('FormAmbiente', () => {
   })
 
   it('empilha os botões de navegação no mobile e aplica alvo de toque', () => {
-    render(<FormAmbiente onSubmit={onSubmit} />)
+    render(<FormAmbiente onSubmit={onSubmit} onCancel={vi.fn()} />)
 
     const proximo = screen.getByRole('button', { name: 'Próximo' })
-    expect(proximo).toHaveClass('min-h-11', 'w-full', 'md:min-h-0', 'md:w-auto')
+    expect(proximo).toHaveClass(
+      'order-1',
+      'min-h-11',
+      'w-full',
+      'md:order-2',
+      'md:min-h-0',
+      'md:w-auto',
+    )
     expect(proximo.parentElement).toHaveClass('flex-col', 'md:flex-row', 'md:items-center')
+
+    const cancelar = screen.getByRole('button', { name: 'Cancelar' })
+    expect(cancelar).toHaveClass(
+      'order-3',
+      'min-h-11',
+      'w-full',
+      'md:order-3',
+      'md:ml-auto',
+      'md:min-h-0',
+      'md:w-auto',
+    )
+  })
+
+  it('na última etapa, ordena Salvar → Voltar → Cancelar no mobile e chama onCancel', async () => {
+    const onCancel = vi.fn()
+    render(<FormAmbiente onSubmit={onSubmit} onCancel={onCancel} />)
+    await ateAInfoAdicional()
+
+    const salvar = screen.getByRole('button', { name: 'Salvar' })
+    const voltar = screen.getByRole('button', { name: 'Voltar' })
+    const cancelar = screen.getByRole('button', { name: 'Cancelar' })
+
+    expect(salvar).toHaveClass('order-1', 'md:order-2')
+    expect(voltar).toHaveClass('order-2', 'md:order-1')
+    expect(cancelar).toHaveClass('order-3', 'md:order-3', 'md:ml-auto')
+
+    fireEvent.click(cancelar)
+    expect(onCancel).toHaveBeenCalledOnce()
   })
 
   it('não avança com a etapa atual inválida', async () => {

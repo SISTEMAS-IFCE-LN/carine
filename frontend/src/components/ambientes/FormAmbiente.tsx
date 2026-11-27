@@ -81,9 +81,12 @@ interface Props {
     // Pré-preenchimento do wizard (UC16 — página de alteração de tipo): AmbienteReq completo
     // do ambiente atual, com nomes técnicos (lib/ambientes/mappers).
     initial?: AmbienteInput
+    // Ação de cancelamento do fluxo (páginas de cadastro e alteração de tipo).
+    // Fica no rodapé, junto à navegação entre etapas.
+    onCancel?: () => void
 }
 
-export function FormAmbiente({onSubmit, initial}: Props) {
+export function FormAmbiente({onSubmit, initial, onCancel}: Props) {
     const [etapa, setEtapa] = useState(0)
     const [submitting, setSubmitting] = useState(false)
 
@@ -147,12 +150,14 @@ export function FormAmbiente({onSubmit, initial}: Props) {
             )}
 
             <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                {/* Ordem mobile: Próximo/Salvar → Voltar → Cancelar.
+                    Desktop: Voltar → Próximo/Salvar, com Cancelar à direita. */}
                 {etapa > 0 && (
                     <Button
                         type="button"
                         variant="outline"
                         onClick={voltar}
-                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                        className="order-2 min-h-11 w-full md:order-1 md:min-h-0 md:w-auto"
                     >
                         Voltar
                     </Button>
@@ -161,7 +166,7 @@ export function FormAmbiente({onSubmit, initial}: Props) {
                     <Button
                         type="button"
                         onClick={proximo}
-                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                        className="order-1 min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
                     >
                         Próximo
                     </Button>
@@ -170,9 +175,19 @@ export function FormAmbiente({onSubmit, initial}: Props) {
                     <Button
                         type="submit"
                         disabled={submitting}
-                        className="min-h-11 w-full md:min-h-0 md:w-auto"
+                        className="order-1 min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
                     >
                         {submitting ? 'Salvando…' : 'Salvar'}
+                    </Button>
+                )}
+                {onCancel && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onCancel}
+                        className="order-3 min-h-11 w-full md:order-3 md:ml-auto md:min-h-0 md:w-auto"
+                    >
+                        Cancelar
                     </Button>
                 )}
             </div>

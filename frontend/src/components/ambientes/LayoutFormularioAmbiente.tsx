@@ -3,8 +3,6 @@ import type {ReactNode} from 'react'
 interface LayoutFormularioAmbienteProps {
     titulo: string
     descricao?: ReactNode
-    /** Ação opcional no topo (ex.: Cancelar), alinhada ao título. */
-    acao?: ReactNode
     children: ReactNode
 }
 
@@ -16,19 +14,15 @@ interface LayoutFormularioAmbienteProps {
 export function LayoutFormularioAmbiente({
     titulo,
     descricao,
-    acao,
     children,
 }: LayoutFormularioAmbienteProps) {
     return (
         <div className="mx-auto w-full max-w-2xl space-y-4">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="space-y-1">
-                    <h1 className="text-2xl font-bold">{titulo}</h1>
-                    {descricao && (
-                        <p className="text-sm text-muted-foreground">{descricao}</p>
-                    )}
-                </div>
-                {acao}
+            <div className="space-y-1">
+                <h1 className="text-2xl font-bold">{titulo}</h1>
+                {descricao && (
+                    <p className="text-sm text-muted-foreground">{descricao}</p>
+                )}
             </div>
             {children}
         </div>
