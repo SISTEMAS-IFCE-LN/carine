@@ -1,6 +1,7 @@
 import {useNavigate} from 'react-router'
 import {useQueryClient} from '@tanstack/react-query'
 import {FormAmbiente} from '@/components/ambientes/FormAmbiente'
+import {LayoutFormularioAmbiente} from '@/components/ambientes/LayoutFormularioAmbiente'
 import {criarAmbiente} from '@/lib/api/api-naopublicados'
 import type {AmbienteInput} from '@/types/ambientes/request'
 import {useAsyncAction} from '@/hooks/useAsyncAction'
@@ -33,9 +34,8 @@ export function NovoAmbientePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-4">
-            <h1 className="text-2xl font-bold">Novo Ambiente</h1>
+        <LayoutFormularioAmbiente titulo="Novo Ambiente">
             <FormAmbiente onSubmit={onSubmit}/>
-        </div>
+        </LayoutFormularioAmbiente>
     )
 }
