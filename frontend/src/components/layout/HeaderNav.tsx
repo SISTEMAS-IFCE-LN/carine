@@ -49,15 +49,17 @@ export function HeaderNav() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-10 px-2 hover:bg-transparent"
-          aria-label="Abrir menu de navegação"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            className="min-h-11 min-w-11 md:min-h-0 md:min-w-0"
+            aria-label="Abrir menu de navegação"
+          />
+        }
+      >
+        <Menu className="h-5 w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         {ambientesItems.length > 0 && (

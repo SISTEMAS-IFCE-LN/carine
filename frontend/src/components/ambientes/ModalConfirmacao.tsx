@@ -44,10 +44,19 @@ export function ModalConfirmacao({
                     {description && <DialogDescription>{description}</DialogDescription>}
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button
+                        variant="outline"
+                        className="min-h-11 md:min-h-0"
+                        onClick={() => onOpenChange(false)}
+                    >
                         Cancelar
                     </Button>
-                    <Button variant={variant} onClick={confirmar} disabled={executando}>
+                    <Button
+                        variant={variant}
+                        onClick={confirmar}
+                        disabled={executando}
+                        className="min-h-11 md:min-h-0"
+                    >
                         {executando ? 'Executando…' : confirmLabel}
                     </Button>
                 </DialogFooter>

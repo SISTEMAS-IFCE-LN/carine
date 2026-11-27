@@ -132,7 +132,7 @@ export function UsuariosPage() {
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground">Itens por página:</span>
                             <Select value={String(size)} onValueChange={handleSizeChange}>
-                                <SelectTrigger className="w-[70px]" aria-label="Itens por página">
+                                <SelectTrigger className="min-h-11 w-[70px] md:min-h-0" aria-label="Itens por página">
                                     <SelectValue/>
                                 </SelectTrigger>
                                 <SelectContent>
@@ -145,6 +145,7 @@ export function UsuariosPage() {
                             </Select>
                         </div>
                         <Button variant="outline" size="sm" disabled={!data.dadosPaginacao.hasPrevious}
+                                className="min-h-11 md:min-h-0"
                                 onClick={() => handlePageChange(page - 1)}>
                             Anterior
                         </Button>
@@ -153,6 +154,7 @@ export function UsuariosPage() {
                             variant="outline"
                             size="sm"
                             disabled={!data.dadosPaginacao.hasNext}
+                            className="min-h-11 md:min-h-0"
                             onClick={() => handlePageChange(page + 1)}
                         >
                             Próximo

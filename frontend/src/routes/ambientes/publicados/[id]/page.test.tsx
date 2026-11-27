@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { MemoryRouter, Routes, Route } from 'react-router'
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PublicadoDetalhePage } from './page'
 import type { AmbienteDetalhe } from '@/types/ambientes/response'
@@ -93,13 +93,23 @@ function createQueryClient() {
   })
 }
 
-function renderPage(initialEntries: string[] = ['/ambientes/publicados/1'], client?: QueryClient) {
+function ListaProbe() {
+  const { search } = useLocation()
+  return (
+    <div>
+      <span>lista</span>
+      <span data-testid="lista-search">{search}</span>
+    </div>
+  )
+}
+
+function renderPage(initialEntries: string[] = ['/ambientes/publicados/1'], initialIndex?: number, client?: QueryClient) {
   return render(
     <QueryClientProvider client={client ?? createQueryClient()}>
-      <MemoryRouter initialEntries={initialEntries}>
+      <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
         <Routes>
           <Route path="/ambientes/publicados/:id" element={<PublicadoDetalhePage />} />
-          <Route path="/ambientes/publicados" element={<div>lista</div>} />
+          <Route path="/ambientes/publicados" element={<ListaProbe />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -174,6 +184,16 @@ describe('PublicadoDetalhePage', () => {
     expect(await screen.findByText('lista')).toBeInTheDocument()
   })
 
+  it('Voltar preserva os filtros da listagem anterior', async () => {
+    vi.mocked(fetchDetalhePublicados).mockResolvedValueOnce(makeAmbiente(StatusAmbiente.PUBLICADO))
+    renderPage(['/ambientes/publicados?blocoId=1', '/ambientes/publicados/1'], 1)
+    await waitFor(() => {
+      expect(screen.getByText('Voltar')).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByText('Voltar'))
+    expect(await screen.findByTestId('lista-search')).toHaveTextContent('?blocoId=1')
+  })
+
   describe('ação Privar (UC03-FE)', () => {
     it('não renderiza o botão Privar para usuário sem perfil VALIDADOR', async () => {
       mockAuth(userColaborador)
@@ -206,7 +226,7 @@ describe('PublicadoDetalhePage', () => {
       vi.mocked(privarAmbiente).mockResolvedValue(undefined)
       const queryClient = createQueryClient()
       const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-      renderPage(undefined, queryClient)
+      renderPage(undefined, undefined, queryClient)
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Privar' })).toBeEnabled()
       })

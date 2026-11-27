@@ -10,14 +10,26 @@ const { mockNavigate, captured } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
   captured: {
     submit: null as ((values: AmbienteInput) => Promise<void>) | null,
+    cancel: null as (() => void) | null,
   },
 }))
 
+const mockVoltar = vi.hoisted(() => vi.fn())
+
 vi.mock('react-router', () => ({ useNavigate: () => mockNavigate }))
 
+vi.mock('@/hooks/useVoltar', () => ({ useVoltar: () => mockVoltar }))
+
 vi.mock('@/components/ambientes/FormAmbiente', () => ({
-  FormAmbiente: ({ onSubmit }: { onSubmit: (values: AmbienteInput) => Promise<void> }) => {
+  FormAmbiente: ({
+    onSubmit,
+    onCancel,
+  }: {
+    onSubmit: (values: AmbienteInput) => Promise<void>
+    onCancel?: () => void
+  }) => {
     captured.submit = onSubmit
+    captured.cancel = onCancel ?? null
     return <div data-testid="form-ambiente-mock" />
   },
 }))
@@ -73,6 +85,15 @@ describe('NovoAmbientePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     captured.submit = null
+    captured.cancel = null
+  })
+
+  it('oferece Cancelar no rodapé do formulário e retorna à listagem anterior', () => {
+    renderPage()
+
+    expect(captured.cancel).not.toBeNull()
+    act(() => captured.cancel!())
+    expect(mockVoltar).toHaveBeenCalledOnce()
   })
 
   it('cria o ambiente, invalida as referências e navega para o detalhe', async () => {
@@ -88,10 +109,12 @@ describe('NovoAmbientePage', () => {
 
     await waitFor(() => expect(mockCriarAmbiente).toHaveBeenCalledWith(AMBIENTE_VALIDO))
     expect(toast.success).toHaveBeenCalledWith('Ambiente criado.')
+    // A listagem deve refletir o novo registro ao voltar do detalhe.
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['ambientes', 'nao-publicados'] })
     // O find-or-create pode criar campus/unidade/bloco → invalida o prefixo inteiro.
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['referencias'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY })
-    expect(mockNavigate).toHaveBeenCalledWith('/ambientes/nao-publicados/42')
+    expect(mockNavigate).toHaveBeenCalledWith('/ambientes/nao-publicados/42', { replace: true })
   })
 
   it('exibe mensagem do backend e não navega em erro de criação', async () => {

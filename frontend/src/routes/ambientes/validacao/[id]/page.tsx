@@ -11,10 +11,12 @@ import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
 import {Role} from '@/types/usuarios/user'
 import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
+import {useVoltar} from '@/hooks/useVoltar'
 
 export function ValidacaoDetalhePage() {
     const {id} = useParams<{ id: string }>()
     const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.VALIDACAO)
     const queryClient = useQueryClient()
     const [modalOpen, setModalOpen] = useState<null | 'publicar' | 'privar'>(null)
 
@@ -63,7 +65,7 @@ export function ValidacaoDetalhePage() {
             {/* Ações críticas (UC03-FE) no topo, à direita do "Voltar"
                 (arquitetura §15.11) — sem select, apenas botões diretos. */}
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <Button variant="outline" onClick={() => navigate(PAGES_ROUTES.VALIDACAO)}>
+                <Button variant="outline" onClick={voltar}>
                     Voltar
                 </Button>
                 <div className="flex gap-2">

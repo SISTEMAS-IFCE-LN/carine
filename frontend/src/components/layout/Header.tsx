@@ -1,13 +1,14 @@
 import {Link} from 'react-router'
 import {HeaderNav} from '@/components/layout/HeaderNav'
+import {UserMenu} from '@/components/layout/UserMenu'
 import {useAuth} from '@/hooks/useAuth'
-import {Button, buttonVariants} from '@/components/ui/button'
+import {buttonVariants} from '@/components/ui/button'
 import {PAGES_ROUTES} from '@/constants/routes'
 import {SYSTEM_DESCRIPTION, SYSTEM_FULL_NAME, SYSTEM_NAME} from '@/constants/branding'
 import {cn} from '@/lib/utils/cn'
 
 export function Header() {
-    const {user, logout} = useAuth()
+    const {user} = useAuth()
 
     return (
         <header className="border-b border-border bg-background">
@@ -31,20 +32,14 @@ export function Header() {
                     </div>
                     <div className="flex items-center gap-4">
                         {user ? (
-                            <>
-                                <span className="text-sm hidden md:block">
-                                    <span className="font-medium">{user.nome}</span>
-                                    <br/>
-                                    <span className="text-muted-foreground text-xs">{user.email}</span>
-                                </span>
-                                <Button variant="outline" size="sm" onClick={() => logout()}>
-                                    Sair
-                                </Button>
-                            </>
+                            <UserMenu/>
                         ) : (
                             <Link
                                 to={PAGES_ROUTES.LOGIN}
-                                className={cn(buttonVariants({variant: 'default', size: 'sm'}))}
+                                className={cn(
+                                    buttonVariants({variant: 'default', size: 'sm'}),
+                                    'min-h-11 md:min-h-0',
+                                )}
                             >
                                 Login
                             </Link>

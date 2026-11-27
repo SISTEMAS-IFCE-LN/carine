@@ -152,6 +152,24 @@ Total atual: **366 testes, 0 falhas, 0 erros** (`common-module` 17, `security-mo
 
 Os testes usam H2 in-memory com `create-drop`; eles não executam as migrations Flyway. A validação das migrations é feita contra PostgreSQL 17, separadamente.
 
+#### Frontend
+
+Em `frontend/`:
+
+```bash
+npm test        # Vitest (unitários/componentes)
+npm run lint    # ESLint
+npm run build   # tsc --noEmit + vite build
+```
+
+Smoke E2E com Playwright (Chromium instalado uma vez via `npx playwright install chromium`):
+
+```bash
+npm run test:e2e
+```
+
+O `playwright.config.ts` sobe dois servidores Vite — `5173` com `VITE_FAKE_AUTH=true` (fluxos autenticados) e `5174` sem fake auth (tela de login) — e executa os projetos `desktop` (1280×800), `mobile-se` (375×667), `mobile-12` (390×844) e `ipad` (768×1024). Os specs mockam as rotas públicas com `page.route`, sem depender de backend ou seed. As portas `5173`/`5174` precisam estar livres: o Playwright não reutiliza um `npm run dev` em execução (ele poderia estar com `VITE_FAKE_AUTH=false` via `.env.local` e derrubar os smokes autenticados).
+
 ### 3.3. Iniciar a aplicação
 
 Os scripts `run-windows.bat` e `run-linux.sh` já fazem o `cd` correto para o diretório `apis/`, carregam as variáveis do `.env` e invocam o `mvnw` com os parâmetros corretos — inclusive o profile Maven `-Pprod` quando `PROFILE_ACTIVE=prod`.
@@ -459,7 +477,7 @@ Configuração de conexão (preenchida automaticamente):
 
 ### 6.4. Atualização do design system do frontend
 
-- Atualização manual: `npm install @base-ui/react@^X.Y.Z` e regressão (`npm run audit`, `npm test`, `npm run lint`, `npm run build`).
+- Atualização manual: `npm install @base-ui/react@^X.Y.Z` e regressão (`npm run audit`, `npm test`, `npm run lint`, `npm run build`, `npm run test:e2e`).
 - Não há automação de CI nem CLI/gerador de componentes: os wrappers ficam em `src/components/ui/` (convenções no README local).
 
 ### 6.5. Adicionar uma migration

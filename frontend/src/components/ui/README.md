@@ -20,6 +20,6 @@ Estes componentes são **código do projeto** — não são um pacote externo ne
 ## Atualizações
 
 - `@base-ui/react` é atualizado manualmente: `npm install @base-ui/react@^X.Y.Z`.
-- Antes de mesclar, rode: `npm test`, `npm run lint`, `npm run build` e `npm run audit`.
+- Antes de mesclar, rode: `npm test`, `npm run lint`, `npm run build`, `npm run test:e2e` e `npm run audit`.
 - Não há CLI nem sincronização de arquivos: correções de comportamento/acessibilidade chegam pela dependência.
 - `ui-theme.css` é código interno (derivado de shadcn/ui, MIT); ajustes são feitos diretamente nele, sem espelhar upstream.

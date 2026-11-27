@@ -29,7 +29,6 @@ vi.mock('@/lib/api/api-naopublicados', () => ({
     incluirEsquadrias: vi.fn(),
     atualizarEsquadrias: vi.fn(),
     atualizarInfoAdicional: vi.fn(),
-    alterarTipo: vi.fn(),
 }))
 
 vi.mock('sonner', () => ({
@@ -57,7 +56,6 @@ vi.mock('@/hooks/useAuth', () => ({
 }))
 
 import {
-    alterarTipo,
     atualizarDadosBasicos,
     atualizarEsquadrias,
     atualizarGeometrias,
@@ -140,6 +138,7 @@ function renderPage(initialEntries: string[] = ['/ambientes/nao-publicados/7'], 
             <MemoryRouter initialEntries={initialEntries}>
                 <Routes>
                     <Route path="/ambientes/nao-publicados" element={<div>lista</div>}/>
+                    <Route path="/ambientes/nao-publicados/:id/alterar-tipo" element={<div>alterar-tipo</div>}/>
                     <Route path="/ambientes/nao-publicados/8" element={<div>detalhe-duplicado</div>}/>
                     <Route path="/ambientes/nao-publicados/:id" element={<NaoPublicadoDetalhePage/>}/>
                 </Routes>
@@ -349,19 +348,6 @@ describe('NaoPublicadoDetalhePage', () => {
         })
     })
 
-    // O texto da etapa do wizard é dividido entre nós de texto e um <strong>
-    // — compara o textContent do wrapper (ver FormAmbiente.test.tsx).
-    function buscarEtapa(n: number, nome: string) {
-        const alvo = `Etapa ${n} de 5: ${nome}`
-        return screen.queryByText((_, el) => el?.tagName === 'DIV' && el.textContent === alvo)
-    }
-
-    async function avancarEtapa(n: number, nome: string) {
-        const dialogo = within(screen.getByRole('dialog'))
-        fireEvent.click(dialogo.getByRole('button', {name: 'Próximo'}))
-        await waitFor(() => expect(buscarEtapa(n, nome)).not.toBeNull())
-    }
-
     describe('editar dados básicos via ModalEditarDadosBasicos (UC07-FE)', () => {
         it('abre pré-preenchido, salva e invalida o detalhe', async () => {
             vi.mocked(fetchAmbienteNaoPublicado).mockResolvedValue(AMBIENTE)
@@ -548,59 +534,14 @@ describe('NaoPublicadoDetalhePage', () => {
         })
     })
 
-    describe('alterar tipo via ModalAlterarTipo (UC16-FE)', () => {
-        it('abre o wizard pré-preenchido, submete o AmbienteReq completo e navega para o novo id', async () => {
+    describe('alterar tipo (UC16-FE)', () => {
+        it('navega para a página dedicada de alteração de tipo', async () => {
             vi.mocked(fetchAmbienteNaoPublicado).mockResolvedValue(AMBIENTE_COMPLETO)
-            vi.mocked(alterarTipo).mockResolvedValueOnce({...AMBIENTE_COMPLETO, id: 8})
-            const queryClient = createQueryClient()
-            const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-            renderPage(undefined, queryClient)
+            renderPage()
 
             await abrirAcao('Alterar Tipo')
 
-            const dialogo = within(screen.getByRole('dialog'))
-            expect(dialogo.getByText(/cria um novo ambiente e remove o antigo/)).toBeInTheDocument()
-            expect(dialogo.getByLabelText('Nome')).toHaveValue('Sala 101')
-
-            await avancarEtapa(2, 'Geometrias')
-            await avancarEtapa(3, 'Pés-direitos')
-            await avancarEtapa(4, 'Esquadrias')
-            await avancarEtapa(5, 'Informação Adicional')
-            fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', {name: 'Salvar'}))
-
-            await waitFor(() => {
-                expect(alterarTipo).toHaveBeenCalledWith(7, {
-                    nome: 'Sala 101',
-                    tipo: 'SALA_AULA',
-                    capacidade: 30,
-                    localizacao: {
-                        campus: {id: 1, nome: null},
-                        unidade: {id: 1, nome: null},
-                        bloco: {id: 1, nome: null},
-                        andar: 2,
-                    },
-                    geometrias: [{tipo: 'RETANGULAR', base: 4, altura: 3, repeticao: 2}],
-                    pesDireitos: [3],
-                    esquadrias: [
-                        {
-                            tipo: 'PORTA',
-                            material: 'ALUMINIO',
-                            geometria: {base: 0.9, altura: 2.1, repeticao: 1},
-                            alturaPeitoril: 0,
-                            informacaoAdicional: '',
-                        },
-                    ],
-                    informacaoAdicional: '',
-                })
-            })
-            const {toast} = await import('sonner')
-            expect(toast.success).toHaveBeenCalledWith('Tipo alterado.')
-            // UC16: ambiente antigo deixa de existir → invalida a LISTA e navega
-            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['ambientes', 'nao-publicados']})
-            // UC16 pode criar campus/unidade/bloco novos
-            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: ['referencias']})
-            expect(invalidateSpy).toHaveBeenCalledWith({queryKey: REFERENCIAS_PUBLICADAS_QUERY_KEY})
-            expect(await screen.findByText('detalhe-duplicado')).toBeInTheDocument()
+            expect(await screen.findByText('alterar-tipo')).toBeInTheDocument()
         })
     })
 })

@@ -69,6 +69,57 @@ describe('FormAmbiente', () => {
     expect(buscarEtapa(1, 'Dados Básicos')).not.toBeNull()
   })
 
+  it('empilha os botões de navegação no mobile e aplica alvo de toque', () => {
+    render(<FormAmbiente onSubmit={onSubmit} onCancel={vi.fn()} />)
+
+    const proximo = screen.getByRole('button', { name: 'Próximo' })
+    expect(proximo).toHaveClass(
+      'min-h-11',
+      'w-full',
+      'md:order-2',
+      'md:min-h-0',
+      'md:w-auto',
+    )
+    expect(proximo.parentElement).toHaveClass('flex-col', 'md:flex-row', 'md:items-center')
+
+    const cancelar = screen.getByRole('button', { name: 'Cancelar' })
+    expect(cancelar).toHaveClass(
+      'min-h-11',
+      'w-full',
+      'md:ml-auto',
+      'md:min-h-0',
+      'md:w-auto',
+    )
+    expect(
+      proximo.compareDocumentPosition(cancelar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('na última etapa, ordena Salvar → Voltar → Cancelar no mobile e chama onCancel', async () => {
+    const onCancel = vi.fn()
+    render(<FormAmbiente onSubmit={onSubmit} onCancel={onCancel} />)
+    await ateAInfoAdicional()
+
+    const salvar = screen.getByRole('button', { name: 'Salvar' })
+    const voltar = screen.getByRole('button', { name: 'Voltar' })
+    const cancelar = screen.getByRole('button', { name: 'Cancelar' })
+
+    expect(salvar).toHaveClass('md:order-2')
+    expect(voltar).toHaveClass('md:order-1')
+    expect(cancelar).toHaveClass('md:ml-auto')
+
+    // Ordem de foco/acessibilidade acompanha a ordem visual mobile.
+    expect(
+      salvar.compareDocumentPosition(voltar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      voltar.compareDocumentPosition(cancelar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+
+    fireEvent.click(cancelar)
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
   it('não avança com a etapa atual inválida', async () => {
     render(<FormAmbiente onSubmit={onSubmit} />)
     fireEvent.click(screen.getByRole('button', { name: 'Próximo' }))

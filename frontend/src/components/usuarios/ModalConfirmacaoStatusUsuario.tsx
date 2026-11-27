@@ -32,8 +32,19 @@ export function ModalConfirmacaoStatusUsuario({open, usuario, acao, onConfirmar,
                     </DialogTitle>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                    <Button variant={acao === 'desativar' ? 'destructive' : 'default'} onClick={confirmar} disabled={executando}>
+                    <Button
+                        variant="outline"
+                        className="min-h-11 md:min-h-0"
+                        onClick={() => onOpenChange(false)}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant={acao === 'desativar' ? 'destructive' : 'default'}
+                        onClick={confirmar}
+                        disabled={executando}
+                        className="min-h-11 md:min-h-0"
+                    >
                         {executando ? 'Executando…' : 'Confirmar'}
                     </Button>
                 </DialogFooter>

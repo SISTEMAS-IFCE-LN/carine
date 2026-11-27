@@ -142,6 +142,24 @@ describe('NaoPublicadosPage', () => {
         expect(fetchNaoPublicados).toHaveBeenCalled()
     })
 
+    it('Criar Novo vira botão circular com "+" no mobile e mantém o texto no desktop', async () => {
+        vi.mocked(fetchNaoPublicados).mockResolvedValue(PAGINA)
+        renderPage()
+
+        const botao = await screen.findByRole('button', {name: 'Criar novo ambiente'})
+        expect(botao).toHaveClass(
+            'size-11',
+            'rounded-full',
+            'p-0',
+            'md:h-8',
+            'md:w-auto',
+            'md:rounded-lg',
+            'md:px-2.5',
+        )
+        expect(within(botao).getByText('Criar Novo')).toHaveClass('hidden', 'md:inline')
+        expect(botao.querySelector('svg')).toHaveClass('md:hidden')
+    })
+
     it('o link do nome navega para o detalhe via detalheBasePath', async () => {
         vi.mocked(fetchNaoPublicados).mockResolvedValue(PAGINA)
         const user = userEvent.setup()

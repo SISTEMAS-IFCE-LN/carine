@@ -1,6 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
 import {useEffect, useMemo} from 'react'
-import {useNavigate, useLocation} from 'react-router'
 import {fetchPublicados} from '@/lib/api/api-publicados'
 import {type AmbientesQuery, paraAmbientesQuery} from '@/types/ambientes/query'
 import {PesquisaBarAmbientes} from '@/components/ambientes/PesquisaBarAmbientes'
@@ -15,20 +14,12 @@ import {toast} from 'sonner'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
 import {useAuth} from '@/hooks/useAuth'
+import {useVoltar} from '@/hooks/useVoltar'
 
 export function PublicadosPage() {
     const {user} = useAuth()
-    const navigate = useNavigate()
-    const location = useLocation()
     const autenticado = user !== null
-
-    function voltar() {
-        if (location.key !== 'default') {
-            navigate(-1)
-        } else {
-            navigate(PAGES_ROUTES.HOME)
-        }
-    }
+    const voltar = useVoltar(PAGES_ROUTES.HOME)
 
     const {
         page,

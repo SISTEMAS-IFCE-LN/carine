@@ -19,7 +19,7 @@ describe('LoginPage', () => {
             .toBeInTheDocument()
         expect(
             screen.getByRole('button', {name: /entrar com google/i}),
-        ).toBeInTheDocument()
+        ).toHaveClass('min-h-11', 'md:min-h-0')
     })
 
     it.each([

@@ -70,6 +70,13 @@ describe('ModalFormulario (shell)', () => {
         expect(screen.getByLabelText('Nome')).toHaveValue('Maria')
     })
 
+    it('aplica alvo de toque de 44px nos botões do footer no mobile', () => {
+        renderShell()
+        for (const nome of ['Cancelar', 'Salvar']) {
+            expect(screen.getByRole('button', {name: nome})).toHaveClass('min-h-11', 'md:min-h-0')
+        }
+    })
+
     it('submit válido: entrega valores parseados, toasta, chama onSalvou com o retorno e fecha', async () => {
         const {onSubmit, onSalvou, onOpenChange} = renderShell()
 

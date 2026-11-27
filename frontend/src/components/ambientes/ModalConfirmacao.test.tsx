@@ -198,4 +198,18 @@ describe('ModalConfirmacao', () => {
     // O botão aplica classes como 'text-destructive' e 'bg-destructive/10' para variant destructive
     expect(button.className).toMatch(/destructive/)
   })
+
+  it('aplica alvo de toque de 44px no mobile e altura nativa no desktop', () => {
+    render(
+      <ModalConfirmacao
+        open={true}
+        title="Confirmar ação"
+        onConfirm={mockOnConfirm}
+        onOpenChange={mockOnOpenChange}
+      />
+    )
+    for (const nome of ['Cancelar', 'Confirmar']) {
+      expect(screen.getByRole('button', {name: nome})).toHaveClass('min-h-11', 'md:min-h-0')
+    }
+  })
 })

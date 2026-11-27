@@ -13,6 +13,7 @@ import {PaginacaoFooter} from '@/components/ambientes/PaginacaoFooter'
 import {ModalConfirmacao} from '@/components/ambientes/ModalConfirmacao'
 import {PermissionButton} from '@/components/auth/PermissionButton'
 import {Role} from '@/types/usuarios/user'
+import {PlusIcon} from 'lucide-react'
 import {useAmbientesSearchParams} from '@/hooks/useAmbientesSearchParams'
 import {useSelecaoAmbientes} from '@/hooks/useSelecaoAmbientes'
 import {toast} from 'sonner'
@@ -74,11 +75,16 @@ export function NaoPublicadosPage() {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
                 <h1 className="text-2xl font-bold">Gestão de Ambientes</h1>
-                <PermissionButton requiredRoles={[Role.GESTOR_SISTEMA]}
-                                  onClick={() => navigate('/ambientes/nao-publicados/novo')}>
-                    Criar Novo
+                <PermissionButton
+                    requiredRoles={[Role.GESTOR_SISTEMA]}
+                    onClick={() => navigate('/ambientes/nao-publicados/novo')}
+                    aria-label="Criar novo ambiente"
+                    className="size-11 rounded-full p-0 md:h-8 md:w-auto md:rounded-lg md:px-2.5"
+                >
+                    <PlusIcon className="size-5 md:hidden" aria-hidden="true"/>
+                    <span className="hidden md:inline">Criar Novo</span>
                 </PermissionButton>
             </div>
             <PesquisaBarAmbientes

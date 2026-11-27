@@ -57,6 +57,7 @@ Protegidas:
 - `/ambientes/nao-publicados` — lista de ambientes não publicados (UC04-FE).
 - `/ambientes/nao-publicados/novo` — criação de novo ambiente não publicado (UC06-FE).
 - `/ambientes/nao-publicados/{id}` — detalhes de um ambiente não publicado (UC05-FE).
+- `/ambientes/nao-publicados/{id}/alterar-tipo` — alteração de tipo e dados (UC16-FE).
 - `/ambientes/publicados/{id}` — detalhes de um ambiente publicado (UC19-FE).
 - `/usuarios` — lista de usuários (UC22-FE).
 
@@ -148,6 +149,7 @@ Protegidas:
     6. Exibir erros inline para cada etapa conforme validações.
     7. Botão `Salvar` para submeter o formulário completo. (requisição POST para `/api/ambientes/nao-publicados`, com `localizacao` aninhada `{campus, unidade, bloco, andar}`; cada nível envia exatamente um de `id` ou `nome`, conforme UC06 do backend).
     8. Desabilitar botão `Salvar` e mostrar estado de loading durante a submissão.
+    9. Botão `Cancelar` no rodapé do formulário retorna à página anterior (histórico; em entrada direta, à listagem).
 - Validações client-side:
   - Campos obrigatórios (dados básicos, pelo menos uma geometria, pelo menos uma porta nas esquadrias).
   - Informação adicional do ambiente: opcional; quando preenchida, máx. 255 caracteres (espelha `@Size(max = 255)` de `AmbienteReq.kt`).
@@ -310,15 +312,16 @@ Protegidas:
 
 ### UC16-FE: Alterar Tipo e Dados de Ambientes Não Publicados
 
-- Modal: acionado pela ação correspondente no componente `AcoesAmbiente` (select de ações no topo) da página de detalhes (rota `/ambientes/nao-publicados/{id}`).
+- Página: rota `/ambientes/nao-publicados/{id}/alterar-tipo`, acionada pela ação correspondente no componente `AcoesAmbiente` (select de ações no topo) da página de detalhes (rota `/ambientes/nao-publicados/{id}`). Usa o mesmo layout do cadastro (`FormAmbiente` + `LayoutFormularioAmbiente`).
 - Pré-condições: Usuário logado com role `gestor` e ambiente com `status = NAO_PUBLICADO`.
 - Fluxo principal (UI):
-  1. Usuário fornece novo `tipo` e dados complementares no formulário exibido, incluindo a localização em cascata com cadastro nos três níveis, conforme UC06-FE.
+  1. Usuário fornece novo `tipo` e dados complementares no formulário exibido na própria página, incluindo a localização em cascata com cadastro nos três níveis, conforme UC06-FE.
   2. O usuário clica em salvar e os dados são submetidos via requisição POST para `/api/ambientes/nao-publicados/{id}` para criar novo ambiente do tipo especificado.
   3. Caso a operação seja bem-sucedida o usuário é redirecionado para `DetalheAmbiente` do novo registro.
+  4. `Cancelar` retorna ao detalhe original sem submeter alterações.
 - Estados e erros:
-  1. Alertar que operação criará um novo registro e removerá o antigo; exigir confirmação explícita.
-  2. Em erro, manter o usuário na tela com mensagens do backend.
+  1. Alertar na página que a operação criará um novo registro e removerá o antigo; exigir confirmação explícita.
+  2. Em erro, manter o usuário na página com mensagens do backend.
 - Critérios de aceitação:
   - Novo ambiente criado com os dados esperados; ambiente antigo removido conforme contrato do backend.
 

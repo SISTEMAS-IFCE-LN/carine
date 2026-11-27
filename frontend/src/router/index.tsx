@@ -21,6 +21,7 @@ import {
     NaoPublicadosPage,
     NovoAmbientePage,
     NaoPublicadoDetalhePage,
+    AlterarTipoAmbientePage,
     ValidacaoPage,
     ValidacaoDetalhePage,
     UsuariosPage,
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
                         children: [
                             {index: true, element: <Suspense fallback={<Loading/>}><NaoPublicadosPage/></Suspense>},
                             {path: 'novo', element: <Suspense fallback={<Loading/>}><NovoAmbientePage/></Suspense>},
+                            {
+                                path: ':id/alterar-tipo',
+                                element: <Suspense fallback={<Loading/>}><AlterarTipoAmbientePage/></Suspense>,
+                            },
                             {path: ':id', element: <Suspense fallback={<Loading/>}><NaoPublicadoDetalhePage/></Suspense>},
                         ],
                     },

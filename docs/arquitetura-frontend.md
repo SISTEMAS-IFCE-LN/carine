@@ -250,7 +250,7 @@ frontend/
 │   │   │                              # CampoReferencia (select de referência campus/unidade/bloco com
 │   │   │                              # `permitirCadastro`/`somenteCadastro`), CampoEnum, CampoNumerico, BotaoRemover, ErroCampo,
 │   │   │                              # ModalGeometrias, ModalPesDireitos, ModalEsquadrias (genéricos de lista),
-│   │   │                              # ModalEditarDadosBasicos, ModalInfoAdicional, ModalAlterarTipo,
+│   │   │                              # ModalEditarDadosBasicos, ModalInfoAdicional, LayoutFormularioAmbiente,
 │   │   │                              # ModalDuplicar, ModalConfirmacao, AcoesLote, AcoesAmbiente, PaginacaoFooter
 │   │   ├── usuarios/                 # TabelaUsuarios, ModalEditarPerfis, ModalConfirmacaoStatusUsuario
 │   │   └── common/
@@ -406,6 +406,7 @@ export const ROUTE_PERMISSIONS: Record<string, Role[]> = {
   // Gestor
   '/ambientes/nao-publicados':    [Role.GESTOR_SISTEMA],
   '/ambientes/nao-publicados/novo': [Role.GESTOR_SISTEMA],
+  '/ambientes/nao-publicados/:id/alterar-tipo': [Role.GESTOR_SISTEMA],
   '/ambientes/nao-publicados/:id': [Role.GESTOR_SISTEMA],
 
   // Colaborador (mínimo universal — todo autenticado tem este perfil)
@@ -915,6 +916,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Suspense fallback={<Loading />}><NaoPublicadosPage /></Suspense> },
               { path: 'novo', element: <Suspense fallback={<Loading />}><NovoAmbientePage /></Suspense> },
+              { path: ':id/alterar-tipo', element: <Suspense fallback={<Loading />}><AlterarTipoAmbientePage /></Suspense> },
               { path: ':id', element: <Suspense fallback={<Loading />}><NaoPublicadoDetalhePage /></Suspense> },
             ],
           },
@@ -1455,13 +1457,14 @@ export function UserMenu() {
 ### 15.8. `FormAmbiente` (UC06-FE) — multistep responsivo
 
 - `<Stepper>` local; em mobile colapsa para "Etapa X de Y" + label da etapa atual (sem números grandes).
-- Botões `Voltar`/`Próximo`/`Salvar`/`Cancelar` em `w-full md:w-auto`.
+- Botões `Voltar`/`Próximo`/`Salvar`/`Cancelar` em `w-full md:w-auto`. No mobile a ordem vertical é `Próximo`/`Salvar` → `Voltar` → `Cancelar`; em `≥md` a linha segue `Voltar` → `Próximo`/`Salvar`, com `Cancelar` alinhado à direita.
 - Campos numéricos com `inputMode="numeric"` ou `"decimal"` (abre teclado correto no mobile).
 - Listas editáveis (geometrias, pés-direitos, esquadrias): cada item é um card empilhado, com botão "remover" (`lucide-react` `Trash2` ícone) à direita; novos itens adicionados ao final com animação ease-in.
 - 5ª etapa "Informação Adicional" (opcional): `<Textarea>` com `maxLength=255` e contador de caracteres; o campo pode ser deixado vazio (o `trigger()` da etapa passa) e preenchido depois via UC14-FE.
 - Validação por etapa (Zod schema recortado) para evitar avançar com dados inválidos — UX melhor que validar apenas ao final.
+- O mesmo `FormAmbiente` é usado em duas páginas com o `LayoutFormularioAmbiente` compartilhado: cadastro (`/ambientes/nao-publicados/novo`, UC06-FE) e alteração de tipo (`/ambientes/nao-publicados/{id}/alterar-tipo`, UC16-FE) — sem duplicar o wizard nem apertá-lo em um modal.
 
-### 15.9. `<ResponsiveModal>` — modais de edição UC07–UC17
+### 15.9. `<ResponsiveModal>` — modais de edição (UC07–UC14 e UC17)
 
 Wrapper que renderiza `Dialog` (desktop) ou `Drawer` (mobile) conforme viewport:
 
@@ -1551,11 +1554,11 @@ Nota: `DialogContent` (`src/components/ui/dialog.tsx`) carrega uma guarda global
 
 Padrão responsivo documentado em https://base-ui.com/react/components/drawer.
 
-Os modais de edição são construídos sobre `ModalFormulario` (shell: `Dialog` + React Hook Form + `zodResolver` + `useAsyncAction`), com **montagem condicional** na página de detalhe — os `defaultValues` são relidos a cada abertura, sem efeito de reset (regra `react-hooks/set-state-in-effect`). O genérico `V` do shell é o **output** do schema Zod: `handleSubmit` entrega os valores parseados/transformados (trim, defaults) ao `onSubmit`, cujo retorno chega ao `onSalvou` (`R = number` em UC16/UC17 para navegar ao novo registro; `void` nos demais). Os genéricos de lista (`ModalGeometrias`, `ModalPesDireitos`, `ModalEsquadrias`) recebem `modo`, `titulo`, `inicial` e `onSubmit` da página por UC; as conversões rótulo → nome técnico ficam centralizadas em `lib/ambientes/mappers.ts`. Campos numéricos usam `step="0.01"` nas medidas decimais (espelha `@Digits(integer=7, fraction=2)`) — sem o step, a constraint validation nativa do browser bloqueia o submit antes da validação Zod.
+Os modais de edição são construídos sobre `ModalFormulario` (shell: `Dialog` + React Hook Form + `zodResolver` + `useAsyncAction`), com **montagem condicional** na página de detalhe — os `defaultValues` são relidos a cada abertura, sem efeito de reset (regra `react-hooks/set-state-in-effect`). O genérico `V` do shell é o **output** do schema Zod: `handleSubmit` entrega os valores parseados/transformados (trim, defaults) ao `onSubmit`, cujo retorno chega ao `onSalvou` (`R = number` na UC17 para navegar ao novo registro; `void` nos demais). Os genéricos de lista (`ModalGeometrias`, `ModalPesDireitos`, `ModalEsquadrias`) recebem `modo`, `titulo`, `inicial` e `onSubmit` da página por UC; as conversões rótulo → nome técnico ficam centralizadas em `lib/ambientes/mappers.ts`. Campos numéricos usam `step="0.01"` nas medidas decimais (espelha `@Digits(integer=7, fraction=2)`) — sem o step, a constraint validation nativa do browser bloqueia o submit antes da validação Zod.
 
 **Aplicação**:
 - `ModalConfirmacao`, `ModalEditarPerfis`, `ModalConfirmacaoStatusUsuario`: mantêm `Dialog` em todos viewports — curtos, sem listas editáveis.
-- Modais UC07–UC14 e UC17 (dados básicos, inclusão/edição de geometrias, pés-direitos, esquadrias, informação adicional, duplicação): usam `<ResponsiveModal>` **via o shell `ModalFormulario`** — a troca é feita em um único ponto. `ModalAlterarTipo` (UC16) usa `<ResponsiveModal>` diretamente (envolve `FormAmbiente`).
+- Modais UC07–UC14 e UC17 (dados básicos, inclusão/edição de geometrias, pés-direitos, esquadrias, informação adicional, duplicação): usam `<ResponsiveModal>` **via o shell `ModalFormulario`** — a troca é feita em um único ponto. A UC16 deixou de ser modal: usa a página dedicada `/ambientes/nao-publicados/{id}/alterar-tipo`, que reutiliza `FormAmbiente` com o mesmo `LayoutFormularioAmbiente` do cadastro (`/novo`).
 - Em listas longas dentro de `Drawer`, configurar `snapPoints` para limitar altura e permitir drag-to-expand.
 
 ### 15.10. `PesquisaBarAmbientes`

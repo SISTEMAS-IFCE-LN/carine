@@ -12,10 +12,12 @@ import {PermissionButton} from '@/components/auth/PermissionButton'
 import {Role} from '@/types/usuarios/user'
 import {toast} from 'sonner'
 import {invalidarReferenciasPublicadas} from '@/hooks/useReferenciasPublicadas'
+import {useVoltar} from '@/hooks/useVoltar'
 
 export function PublicadoDetalhePage() {
     const {id} = useParams<{ id: string }>()
     const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.PUBLICADOS)
     const queryClient = useQueryClient()
     const [modalOpen, setModalOpen] = useState(false)
 
@@ -61,7 +63,7 @@ export function PublicadoDetalhePage() {
             {/* Ação crítica (UC03-FE) no topo, à direita do "Voltar"
                 (arquitetura §15.11) — sem select, apenas botão direto. */}
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <Button variant="outline" onClick={() => navigate(PAGES_ROUTES.PUBLICADOS)}>
+                <Button variant="outline" onClick={voltar}>
                     Voltar
                 </Button>
                 <div className="flex gap-2">

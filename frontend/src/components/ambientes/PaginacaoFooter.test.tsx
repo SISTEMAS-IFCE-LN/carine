@@ -19,8 +19,8 @@ function renderFooter(overrides: Partial<PaginacaoFooterProps> = {}) {
         onSizeChange: vi.fn(),
         ...overrides,
     }
-    render(<PaginacaoFooter {...props} />)
-    return props
+    const {container} = render(<PaginacaoFooter {...props} />)
+    return {...props, container}
 }
 
 describe('PaginacaoFooter', () => {
@@ -49,5 +49,26 @@ describe('PaginacaoFooter', () => {
         await user.click(screen.getByLabelText('Itens por página'))
         await user.click(await screen.findByRole('option', { name: '50' }))
         expect(props.onSizeChange).toHaveBeenCalledWith('50', expect.anything())
+    })
+
+    it('empilha no mobile e volta à linha compacta em ≥md', () => {
+        const {container} = renderFooter()
+        expect(container.firstElementChild).toHaveClass(
+            'flex-col',
+            'md:flex-row',
+            'md:items-center',
+            'md:justify-between',
+        )
+
+        const anterior = screen.getByRole('button', { name: 'Anterior' })
+        const proximo = screen.getByRole('button', { name: 'Próximo' })
+        for (const botao of [anterior, proximo]) {
+            expect(botao).toHaveClass('min-h-11', 'w-full', 'md:min-h-0', 'md:w-auto')
+        }
+
+        expect(screen.getByLabelText('Itens por página')).toHaveClass(
+            'min-h-11',
+            'md:min-h-0',
+        )
     })
 })

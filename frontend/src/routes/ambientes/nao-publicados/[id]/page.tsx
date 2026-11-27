@@ -1,4 +1,5 @@
 import {useNavigate, useParams} from 'react-router'
+import {useVoltar} from '@/hooks/useVoltar'
 import {useQuery, useQueryClient} from '@tanstack/react-query'
 import {useState} from 'react'
 import {
@@ -21,7 +22,6 @@ import {ModalGeometrias} from '@/components/ambientes/ModalGeometrias'
 import {ModalPesDireitos} from '@/components/ambientes/ModalPesDireitos'
 import {ModalEsquadrias} from '@/components/ambientes/ModalEsquadrias'
 import {ModalInfoAdicional} from '@/components/ambientes/ModalInfoAdicional'
-import {ModalAlterarTipo} from '@/components/ambientes/ModalAlterarTipo'
 import {AcoesAmbiente} from '@/components/ambientes/AcoesAmbiente'
 import type {AcaoAmbiente} from '@/components/ambientes/AcoesAmbiente'
 import {PermissionButton} from '@/components/auth/PermissionButton'
@@ -44,11 +44,11 @@ type ModalEstado =
     | 'incluir-esquadrias'
     | 'editar-esquadrias'
     | 'info-adicional'
-    | 'alterar-tipo'
 
 export function NaoPublicadoDetalhePage() {
     const {id} = useParams()
     const navigate = useNavigate()
+    const voltar = useVoltar(PAGES_ROUTES.NAO_PUBLICADOS)
     const queryCliente = useQueryClient()
     const [modal, setModal] = useState<ModalEstado>(null)
 
@@ -75,17 +75,11 @@ export function NaoPublicadoDetalhePage() {
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
         void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
         invalidarReferenciasPublicadas(queryCliente)
-        navigate(`/ambientes/nao-publicados/${novoId}`)
+        navigate(`/ambientes/nao-publicados/${novoId}`, {replace: true})
     }
 
-    // UC16-FE: POST /{id} cria um NOVO ambiente e remove o antigo — invalidar a
-    // LISTA e navegar para o registro novo (casos-uso-frontend.md UC16, passo 3).
-    function aoAlterarTipo(novoId: number) {
-        void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
-        void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
-        invalidarReferenciasPublicadas(queryCliente)
-        navigate(`/ambientes/nao-publicados/${novoId}`)
-    }
+    // UC16-FE: POST /{id} cria um NOVO ambiente e remove o antigo — a página
+    // dedicada (`[id]/alterar-tipo`) invalida a LISTA e navega para o novo id.
 
     // UC07-FE: editar dados básicos altera a localização (find-or-create de
     // campus/unidade/bloco) → invalida o detalhe E as referências dos selects.
@@ -104,10 +98,10 @@ export function NaoPublicadoDetalhePage() {
             // A exclusão pode remover bloco/unidade/campus órfãos (RN-1.19).
             void queryCliente.invalidateQueries({ queryKey: ['referencias'] })
             invalidarReferenciasPublicadas(queryCliente)
-            navigate(PAGES_ROUTES.NAO_PUBLICADOS)
+            navigate(PAGES_ROUTES.NAO_PUBLICADOS, {replace: true})
         } else if (modal === 'enviar-validacao') {
             await enviarParaValidacao([ambiente.id])
-            navigate(PAGES_ROUTES.NAO_PUBLICADOS)
+            navigate(PAGES_ROUTES.NAO_PUBLICADOS, {replace: true})
         }
         toast.success('Operação concluída.')
         void queryCliente.invalidateQueries({ queryKey: ['ambientes', 'nao-publicados'] })
@@ -115,6 +109,8 @@ export function NaoPublicadoDetalhePage() {
 
     // Ações não-críticas (UC07–UC14, UC16, UC17) como opções do AcoesAmbiente;
     // a permissão de cada uma é checada pelo componente via canDo(actionKey).
+    // UC16-FE: o wizard completo exige o mesmo layout da página de cadastro —
+    // navega para a página dedicada (o modal ficava apertado e duplicava o fluxo).
     const acoes: AcaoAmbiente[] = [
         {value: 'Editar Dados Básicos', actionKey: 'ambiente:editar', onRun: () => setModal('editar-dados-basicos')},
         {value: 'Incluir Geometrias', actionKey: 'ambiente:editar', onRun: () => setModal('incluir-geometrias')},
@@ -124,7 +120,14 @@ export function NaoPublicadoDetalhePage() {
         {value: 'Incluir Esquadrias', actionKey: 'ambiente:editar', onRun: () => setModal('incluir-esquadrias')},
         {value: 'Editar Esquadrias', actionKey: 'ambiente:editar', onRun: () => setModal('editar-esquadrias')},
         {value: 'Info Adicional', actionKey: 'ambiente:editar', onRun: () => setModal('info-adicional')},
-        {value: 'Alterar Tipo', actionKey: 'ambiente:alterar-tipo', onRun: () => setModal('alterar-tipo')},
+        {
+            value: 'Alterar Tipo',
+            actionKey: 'ambiente:alterar-tipo',
+            onRun: () => {
+                if (!ambiente) return
+                navigate(`/ambientes/nao-publicados/${ambiente.id}/alterar-tipo`, {replace: true})
+            },
+        },
         {value: 'Duplicar', actionKey: 'ambiente:duplicar', onRun: () => setModal('duplicar')},
     ]
 
@@ -142,7 +145,7 @@ export function NaoPublicadoDetalhePage() {
 
     return (
         <div className="space-y-4">
-            <Button variant="outline" onClick={() => navigate(PAGES_ROUTES.NAO_PUBLICADOS)}>Voltar</Button>
+            <Button variant="outline" onClick={voltar}>Voltar</Button>
             {/* Barra de ações no topo (arquitetura §15.11): select de ações
                 não-críticas à esquerda + críticas (UC15/UC18) como botões diretos. */}
             <AcoesAmbiente
@@ -160,8 +163,8 @@ export function NaoPublicadoDetalhePage() {
             />
             <DetalheAmbiente ambiente={ambiente}/>
 
-            {/* Confirmações UC15/UC18 (UC17 Duplicar e UC16 Alterar Tipo têm modais
-                próprios — o usuário define dados antes de confirmar) */}
+            {/* Confirmações UC15/UC18 (UC17 Duplicar tem modal próprio; UC16
+                Alterar Tipo usa página dedicada) */}
             <ModalConfirmacao
                 open={modal === 'deletar' || modal === 'enviar-validacao'}
                 title={modal === 'deletar' ? 'Deletar ambiente?' : 'Enviar para validação?'}
@@ -172,8 +175,8 @@ export function NaoPublicadoDetalhePage() {
                 confirmLabel={modal === 'deletar' ? 'Deletar' : 'Enviar'}
             />
 
-            {/* Modais UC07–UC17: montagem condicional — os defaultValues são relidos
-                a cada abertura, sem efeito de reset (react-hooks/set-state-in-effect) */}
+            {/* Modais UC07–UC14 e UC17: montagem condicional — os defaultValues
+                são relidos a cada abertura, sem efeito de reset (react-hooks/set-state-in-effect) */}
             {modal === 'duplicar' && (
                 <ModalDuplicar
                     open
@@ -262,14 +265,6 @@ export function NaoPublicadoDetalhePage() {
                     ambiente={ambiente}
                     onOpenChange={(o) => !o && setModal(null)}
                     onSalvou={invalidarDetalhe}
-                />
-            )}
-            {modal === 'alterar-tipo' && (
-                <ModalAlterarTipo
-                    open
-                    ambiente={ambiente}
-                    onOpenChange={(o) => !o && setModal(null)}
-                    onSalvou={aoAlterarTipo}
                 />
             )}
         </div>

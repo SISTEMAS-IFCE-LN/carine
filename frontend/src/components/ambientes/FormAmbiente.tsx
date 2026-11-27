@@ -78,12 +78,15 @@ const DEFAULT_AMBIENTE_INPUT: AmbienteFormValues = {
 
 interface Props {
     onSubmit: (data: AmbienteInput) => Promise<void>
-    // Pré-preenchimento do wizard (UC16 ModalAlterarTipo): AmbienteReq completo
+    // Pré-preenchimento do wizard (UC16 — página de alteração de tipo): AmbienteReq completo
     // do ambiente atual, com nomes técnicos (lib/ambientes/mappers).
     initial?: AmbienteInput
+    // Ação de cancelamento do fluxo (páginas de cadastro e alteração de tipo).
+    // Fica no rodapé, junto à navegação entre etapas.
+    onCancel?: () => void
 }
 
-export function FormAmbiente({onSubmit, initial}: Props) {
+export function FormAmbiente({onSubmit, initial, onCancel}: Props) {
     const [etapa, setEtapa] = useState(0)
     const [submitting, setSubmitting] = useState(false)
 
@@ -146,20 +149,45 @@ export function FormAmbiente({onSubmit, initial}: Props) {
                 </div>
             )}
 
-            <div className="flex flex-wrap gap-2">
-                {etapa > 0 && (
-                    <Button type="button" variant="outline" onClick={voltar}>
-                        Voltar
-                    </Button>
-                )}
+            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                {/* DOM = ordem mobile (e ordem de foco): Próximo/Salvar → Voltar → Cancelar.
+                    Em ≥md, apenas Voltar/Próximo são reordenados; Cancelar fica à direita. */}
                 {etapa < ETAPAS.length - 1 && (
-                    <Button type="button" onClick={proximo}>
+                    <Button
+                        type="button"
+                        onClick={proximo}
+                        className="min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
+                    >
                         Próximo
                     </Button>
                 )}
                 {etapa === ETAPAS.length - 1 && (
-                    <Button type="submit" disabled={submitting}>
+                    <Button
+                        type="submit"
+                        disabled={submitting}
+                        className="min-h-11 w-full md:order-2 md:min-h-0 md:w-auto"
+                    >
                         {submitting ? 'Salvando…' : 'Salvar'}
+                    </Button>
+                )}
+                {etapa > 0 && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={voltar}
+                        className="min-h-11 w-full md:order-1 md:min-h-0 md:w-auto"
+                    >
+                        Voltar
+                    </Button>
+                )}
+                {onCancel && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onCancel}
+                        className="min-h-11 w-full md:ml-auto md:min-h-0 md:w-auto"
+                    >
+                        Cancelar
                     </Button>
                 )}
             </div>
