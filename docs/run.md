@@ -168,7 +168,7 @@ Smoke E2E com Playwright (Chromium instalado uma vez via `npx playwright install
 npm run test:e2e
 ```
 
-O `playwright.config.ts` sobe dois servidores Vite — `5173` com `VITE_FAKE_AUTH=true` (fluxos autenticados) e `5174` sem fake auth (tela de login) — e executa os projetos `desktop` (1280×800), `mobile-se` (375×667), `mobile-12` (390×844) e `ipad` (768×1024). Os specs mockam as rotas públicas com `page.route`, sem depender de backend ou seed.
+O `playwright.config.ts` sobe dois servidores Vite — `5173` com `VITE_FAKE_AUTH=true` (fluxos autenticados) e `5174` sem fake auth (tela de login) — e executa os projetos `desktop` (1280×800), `mobile-se` (375×667), `mobile-12` (390×844) e `ipad` (768×1024). Os specs mockam as rotas públicas com `page.route`, sem depender de backend ou seed. As portas `5173`/`5174` precisam estar livres: o Playwright não reutiliza um `npm run dev` em execução (ele poderia estar com `VITE_FAKE_AUTH=false` via `.env.local` e derrubar os smokes autenticados).
 
 ### 3.3. Iniciar a aplicação
 
