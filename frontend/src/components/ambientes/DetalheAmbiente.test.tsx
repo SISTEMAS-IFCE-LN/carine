@@ -170,7 +170,10 @@ describe('DetalheAmbiente — mobile (<md)', () => {
   it('renderiza as quatro seções como acordeões', () => {
     render(<DetalheAmbiente ambiente={mockAmbiente} />)
 
-    expect(screen.getByRole('button', { name: 'Informações' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Informações' })).toHaveClass(
+      'min-h-11',
+      'md:min-h-0',
+    )
     expect(screen.getByRole('button', { name: 'Pés-direitos' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dimensões' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Esquadrias' })).toBeInTheDocument()

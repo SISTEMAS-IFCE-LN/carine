@@ -34,7 +34,7 @@ export function LoginPage() {
                     </p>
                 )}
                 <Button
-                    className="w-full"
+                    className="min-h-11 w-full md:min-h-0"
                     size="lg"
                     onClick={handleGoogleLogin}
                 >

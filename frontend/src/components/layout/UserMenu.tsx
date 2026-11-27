@@ -48,7 +48,7 @@ export function UserMenu() {
                     </Avatar>
                 </SheetTrigger>
                 <SheetContent side="right" className="data-[side=right]:w-[280px]">
-                    <SheetHeader>
+                    <SheetHeader className="pr-14">
                         <SheetTitle>{user.nome}</SheetTitle>
                     </SheetHeader>
                     <div className="space-y-4 px-4">

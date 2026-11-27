@@ -64,6 +64,7 @@ describe('Header — anônimo', () => {
         const loginLink = screen.getByText('Login')
         expect(loginLink).toBeInTheDocument()
         expect(loginLink.closest('a')).toHaveAttribute('href', '/login')
+        expect(loginLink.closest('a')).toHaveClass('min-h-11', 'md:min-h-0')
     })
 })
 

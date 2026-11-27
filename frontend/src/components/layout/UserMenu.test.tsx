@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from '@testing-library/react'
+import {fireEvent, render, screen, within} from '@testing-library/react'
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {UserMenu} from './UserMenu'
 import {Role} from '@/types/usuarios/user'
@@ -43,10 +43,13 @@ describe('UserMenu', () => {
 
         fireEvent.click(screen.getAllByLabelText('Abrir perfil')[0])
 
-        expect(await screen.findByText('user@ifce.edu.br')).toBeInTheDocument()
-        expect(screen.getByText('Colaborador')).toBeInTheDocument()
-        expect(screen.getByText('Validador')).toBeInTheDocument()
-        expect(screen.getByRole('button', {name: 'Sair'})).toBeInTheDocument()
+        const dialog = await screen.findByRole('dialog', {name: 'Usuário Teste'})
+        expect(dialog).toBeInTheDocument()
+        expect(within(dialog).getByText('user@ifce.edu.br')).toBeInTheDocument()
+        expect(within(dialog).getByText('Colaborador')).toBeInTheDocument()
+        expect(within(dialog).getByText('Validador')).toBeInTheDocument()
+        expect(within(dialog).getByRole('button', {name: 'Sair'})).toBeInTheDocument()
+        expect(within(dialog).getByRole('button', {name: 'Fechar'})).toHaveClass('size-11')
     })
 
     it('chama logout ao clicar em Sair no Sheet mobile', async () => {

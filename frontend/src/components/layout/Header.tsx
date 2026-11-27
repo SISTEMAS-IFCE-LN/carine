@@ -36,7 +36,10 @@ export function Header() {
                         ) : (
                             <Link
                                 to={PAGES_ROUTES.LOGIN}
-                                className={cn(buttonVariants({variant: 'default', size: 'sm'}))}
+                                className={cn(
+                                    buttonVariants({variant: 'default', size: 'sm'}),
+                                    'min-h-11 md:min-h-0',
+                                )}
                             >
                                 Login
                             </Link>
